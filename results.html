@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Results by Weight Class - All Schools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .nav-links a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .weight-class-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .weight-class-header {
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .weight-class-header h2 {
+            color: #667eea;
+            font-size: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background: #667eea;
+            color: white;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        th.rank { width: 60px; text-align: center; }
+        th.name { width: 20%; }
+        th.school { width: 20%; }
+        th.stat { width: 10%; text-align: center; }
+
+        tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr.three-rivers {
+            background: #fff9e6;
+            font-weight: bold;
+        }
+
+        tbody tr.three-rivers:hover {
+            background: #fff3d6;
+        }
+
+        td {
+            padding: 12px;
+        }
+
+        td.rank {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        td.stat {
+            text-align: center;
+        }
+
+        .medal {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Final Results by Weight Class</h1>
+            <p>All Schools - Men's Varsity Competition</p>
+        </header>
+
+        <div class="nav-links">
+            <a href="index.html">Three Rivers Athletes</a>
+            <a href="results.html">All Schools Results</a>
+        </div>
+
+        <div id="resultsContainer"></div>
+    </div>
+
+    <script>
+        const results = {
+            "114": [
+                {rank:1,name:"Jack Metz",school:"Brighton",bodyWeight:114,squat:175,bench:120,deadlift:300,total:545},
+                {rank:2,name:"Brody Montcalm",school:"Three Rivers",bodyWeight:108.6,squat:165,bench:120,deadlift:235,total:510}
+            ],
+            "123": [
+                {rank:1,name:"Ezekiel Britton",school:"Three Rivers",bodyWeight:117,squat:255,bench:185,deadlift:410,total:805},
+                {rank:2,name:"Connor Morrison",school:"Ionia",bodyWeight:122,squat:240,bench:145,deadlift:365,total:750},
+                {rank:3,name:"Jensen Prach",school:"Hartland",bodyWeight:121.6,squat:200,bench:135,deadlift:270,total:600},
+                {rank:4,name:"Cohen Hearns",school:"Bedford",bodyWeight:118.8,squat:225,bench:140,deadlift:250,total:595}
+            ],
+            "132": [
+                {rank:1,name:"Isaias Martines",school:"Bedford",bodyWeight:131.8,squat:315,bench:210,deadlift:320,total:845},
+                {rank:2,name:"Payton Todd",school:"Northwest",bodyWeight:131.2,squat:265,bench:150,deadlift:285,total:665},
+                {rank:3,name:"Gabe Hamilton",school:"Ionia",bodyWeight:128.8,squat:225,bench:125,deadlift:235,total:560}
+            ],
+            "145": [
+                {rank:1,name:"Cesar Rodriguez Delgado",school:"Three Rivers",bodyWeight:135.8,squat:300,bench:165,deadlift:405,total:860},
+                {rank:2,name:"Gavon McCoy",school:"Napoleon",bodyWeight:139.8,squat:275,bench:160,deadlift:405,total:840},
+                {rank:3,name:"Andrew Paton",school:"Ionia",bodyWeight:145,squat:295,bench:165,deadlift:370,total:830},
+                {rank:4,name:"Keegan Gray",school:"Onsted",bodyWeight:142.8,squat:295,bench:175,deadlift:350,total:820},
+                {rank:5,name:"Cameron Hayden",school:"Edwardsburg",bodyWeight:142.8,squat:315,bench:190,deadlift:345,total:810},
+                {rank:6,name:"Kaden Bioty",school:"Northwest",bodyWeight:135.4,squat:305,bench:175,deadlift:365,total:805},
+                {rank:7,name:"Giovanni Desi",school:"Three Rivers",bodyWeight:142,squat:300,bench:170,deadlift:350,total:795},
+                {rank:8,name:"Parker Hearns",school:"Bedford",bodyWeight:142.6,squat:275,bench:185,deadlift:300,total:760},
+                {rank:9,name:"Alvin Chen",school:"Northwest",bodyWeight:141.8,squat:280,bench:165,deadlift:305,total:745},
+                {rank:10,name:"Seth Peiffer",school:"Ionia",bodyWeight:133.8,squat:215,bench:155,deadlift:355,total:725}
+            ],
+            "155": [
+                {rank:1,name:"Cameron Lange",school:"St. Johns",bodyWeight:150.8,squat:360,bench:295,deadlift:415,total:1035},
+                {rank:2,name:"Dane Ostland",school:"Schoolcraft",bodyWeight:152.2,squat:325,bench:245,deadlift:440,total:1000},
+                {rank:3,name:"Vinny Crippen",school:"Ionia",bodyWeight:154.4,squat:375,bench:225,deadlift:395,total:980},
+                {rank:4,name:"Nicholas Allen",school:"Three Rivers",bodyWeight:153.8,squat:315,bench:205,deadlift:455,total:950},
+                {rank:5,name:"Becket Boyes",school:"Schoolcraft",bodyWeight:151.6,squat:315,bench:230,deadlift:380,total:910},
+                {rank:6,name:"Eero LaCross",school:"Brighton",bodyWeight:153.2,squat:235,bench:170,deadlift:340,total:745},
+                {rank:7,name:"Sean Hamel",school:"Northwest",bodyWeight:151.4,squat:175,bench:155,deadlift:270,total:595},
+                {rank:8,name:"Tom Coleman",school:"Hartland",bodyWeight:152.2,squat:185,bench:125,deadlift:230,total:530}
+            ],
+            "165": [
+                {rank:1,name:"Jayce Dotson",school:"Napoleon",bodyWeight:163.2,squat:405,bench:230,deadlift:455,total:1040},
+                {rank:2,name:"Canady Marzett",school:"Three Rivers",bodyWeight:163.8,squat:340,bench:245,deadlift:440,total:1025},
+                {rank:3,name:"Braden Carpenter",school:"Three Rivers",bodyWeight:163.8,squat:345,bench:245,deadlift:385,total:975},
+                {rank:4,name:"Todd Wadsworth",school:"Three Rivers",bodyWeight:162,squat:305,bench:200,deadlift:405,total:890},
+                {rank:5,name:"Frederico de Godoy Barreto",school:"Three Rivers",bodyWeight:164.8,squat:315,bench:170,deadlift:385,total:855},
+                {rank:6,name:"Tristin Chartrand",school:"Springport",bodyWeight:162.4,squat:315,bench:190,deadlift:360,total:840},
+                {rank:7,name:"Carter Fuller",school:"Three Rivers",bodyWeight:164.6,squat:265,bench:195,deadlift:365,total:825},
+                {rank:8,name:"Cameron Halsey",school:"Northwest",bodyWeight:158.8,squat:300,bench:180,deadlift:350,total:780},
+                {rank:9,name:"Matthew Montcalm",school:"Three Rivers",bodyWeight:157.4,squat:235,bench:165,deadlift:300,total:700}
+            ],
+            "181": [
+                {rank:1,name:"Hunter Koenig",school:"Three Rivers",bodyWeight:180,squat:445,bench:295,deadlift:540,total:1280},
+                {rank:2,name:"Jaden Purdiman",school:"Three Rivers",bodyWeight:177,squat:380,bench:290,deadlift:455,total:1125},
+                {rank:3,name:"Kaleb Nishazawa",school:"Schoolcraft",bodyWeight:174.8,squat:405,bench:235,deadlift:405,total:1025},
+                {rank:4,name:"Evan Bullard",school:"Bedford",bodyWeight:173.4,squat:385,bench:215,deadlift:425,total:1015},
+                {rank:5,name:"Braydon Horsefall",school:"Northwest",bodyWeight:176.8,squat:350,bench:210,deadlift:410,total:940},
+                {rank:6,name:"Trevor Castillo",school:"Ionia",bodyWeight:181,squat:280,bench:155,deadlift:335,total:770}
+            ],
+            "194": [
+                {rank:1,name:"Josh Walker",school:"Mesick",bodyWeight:191.6,squat:405,bench:265,deadlift:500,total:1170},
+                {rank:2,name:"Brycen Pifer",school:"Adrian",bodyWeight:184.2,squat:425,bench:285,deadlift:465,total:1165},
+                {rank:3,name:"Caleb Kinney",school:"Bedford",bodyWeight:191.6,squat:430,bench:275,deadlift:485,total:1165},
+                {rank:4,name:"Carson Bowley",school:"Three Rivers",bodyWeight:192,squat:420,bench:255,deadlift:475,total:1135},
+                {rank:5,name:"Kasey Eichorn",school:"Adrian",bodyWeight:185.4,squat:415,bench:255,deadlift:425,total:1095},
+                {rank:6,name:"Dillon Adams",school:"Ionia",bodyWeight:190.4,squat:420,bench:215,deadlift:435,total:1050},
+                {rank:7,name:"Grant Sholander",school:"Paw Paw",bodyWeight:186.8,squat:405,bench:275,deadlift:405,total:1045},
+                {rank:8,name:"Lincoln Grieve",school:"Brighton",bodyWeight:182,squat:365,bench:205,deadlift:410,total:960},
+                {rank:9,name:"Donovan Willis",school:"South Lyon East",bodyWeight:187,squat:300,bench:225,deadlift:400,total:925},
+                {rank:10,name:"Blake Wizinsky",school:"Brighton",bodyWeight:191,squat:315,bench:225,deadlift:455,total:905}
+            ],
+            "207": [
+                {rank:1,name:"Xander Kenyon",school:"Three Rivers",bodyWeight:197.6,squat:375,bench:275,deadlift:500,total:1150},
+                {rank:2,name:"Josiah Dear",school:"Three Rivers",bodyWeight:197.4,squat:405,bench:255,deadlift:425,total:1055},
+                {rank:3,name:"Cruz Gomez",school:"Bedford",bodyWeight:197.8,squat:345,bench:180,deadlift:370,total:855},
+                {rank:4,name:"Tyler Tervo",school:"Ionia",bodyWeight:204.2,squat:305,bench:175,deadlift:395,total:855},
+                {rank:5,name:"Garret Robinson",school:"Ionia",bodyWeight:194.4,squat:250,bench:150,deadlift:350,total:740}
+            ],
+            "220": [
+                {rank:1,name:"Ryan Pejakovich",school:"Climax-Scotts",bodyWeight:219.2,squat:530,bench:340,deadlift:530,total:1400},
+                {rank:2,name:"Sawyer Pienta",school:"Bedford",bodyWeight:217.6,squat:445,bench:265,deadlift:455,total:1165},
+                {rank:3,name:"Waylon Napier",school:"Bedford",bodyWeight:213,squat:405,bench:260,deadlift:475,total:1095},
+                {rank:4,name:"Carter Bertke-Cavill",school:"Grass Lake",bodyWeight:218.2,squat:380,bench:230,deadlift:495,total:1095},
+                {rank:5,name:"Bryce Hund",school:"South Lyon East",bodyWeight:213,squat:405,bench:240,deadlift:475,total:1090},
+                {rank:6,name:"Brady Englehart",school:"Edwardsburg",bodyWeight:219.6,squat:400,bench:260,deadlift:450,total:1075},
+                {rank:7,name:"Logan Krisher",school:"Edwardsburg",bodyWeight:213.2,squat:400,bench:225,deadlift:445,total:1060},
+                {rank:8,name:"Zach Mahan",school:"Paw Paw",bodyWeight:211,squat:355,bench:175,deadlift:425,total:935}
+            ],
+            "242": [
+                {rank:1,name:"Brett Brothers",school:"Manchester",bodyWeight:239.6,squat:575,bench:280,deadlift:530,total:1365},
+                {rank:2,name:"Joe Mertes",school:"Brighton",bodyWeight:220.6,squat:410,bench:265,deadlift:415,total:1090},
+                {rank:3,name:"Shaun Mills",school:"Laingsburg",bodyWeight:240,squat:420,bench:220,deadlift:425,total:1055},
+                {rank:4,name:"Luis E. Rodriguez Delgado",school:"Three Rivers",bodyWeight:224.6,squat:405,bench:255,deadlift:440,total:1030},
+                {rank:5,name:"Blake Czubaj",school:"Hartland",bodyWeight:231.2,squat:365,bench:260,deadlift:435,total:1020},
+                {rank:6,name:"Kyle Phelps",school:"AA Huron",bodyWeight:238.6,squat:375,bench:235,deadlift:425,total:965},
+                {rank:7,name:"Paxton Melle",school:"Ionia",bodyWeight:235.6,squat:355,bench:195,deadlift:405,total:910},
+                {rank:8,name:"Chase Hunt",school:"Three Rivers",bodyWeight:241.8,squat:320,bench:215,deadlift:395,total:890},
+                {rank:9,name:"David Oliver",school:"Galesburg Augusta",bodyWeight:229,squat:315,bench:175,deadlift:335,total:755},
+                {rank:10,name:"Matthew Ballard",school:"Three Rivers",bodyWeight:237,squat:275,bench:135,deadlift:365,total:745}
+            ],
+            "275": [
+                {rank:1,name:"Liam Haines",school:"Schoolcraft",bodyWeight:243.6,squat:495,bench:325,deadlift:545,total:1365},
+                {rank:2,name:"Jacob Clemens",school:"Battle Creek Central",bodyWeight:257.6,squat:455,bench:315,deadlift:445,total:1215},
+                {rank:3,name:"Yandel Hernandez",school:"Adrian",bodyWeight:243.8,squat:435,bench:295,deadlift:475,total:1195},
+                {rank:4,name:"Trevor Gay",school:"Battle Creek Pennfield",bodyWeight:269.2,squat:430,bench:255,deadlift:485,total:1170},
+                {rank:5,name:"Luke Bidwell",school:"Edwardsburg",bodyWeight:253.2,squat:405,bench:230,deadlift:500,total:1100},
+                {rank:6,name:"James Berry",school:"Sturgis",bodyWeight:263.4,squat:395,bench:245,deadlift:470,total:1070},
+                {rank:7,name:"Sam Sander",school:"Bedford",bodyWeight:272,squat:380,bench:245,deadlift:450,total:1070},
+                {rank:8,name:"Daniel Beachey",school:"Three Rivers",bodyWeight:272.2,squat:405,bench:245,deadlift:415,total:1065},
+                {rank:9,name:"Luke Andrews",school:"Northwest",bodyWeight:273,squat:315,bench:240,deadlift:350,total:890}
+            ],
+            "SHW": [
+                {rank:1,name:"Gage Echols",school:"Northwest",bodyWeight:303.4,squat:505,bench:315,deadlift:525,total:1270},
+                {rank:2,name:"Kale Ernest",school:"Bedford",bodyWeight:310.2,squat:410,bench:315,deadlift:450,total:1135},
+                {rank:3,name:"Bennett Vandenbrink",school:"Three Rivers",bodyWeight:343.4,squat:405,bench:245,deadlift:520,total:1095},
+                {rank:4,name:"Ean Henry",school:"Ionia",bodyWeight:304.4,squat:455,bench:185,deadlift:435,total:1015},
+                {rank:5,name:"Parker Winslow",school:"Bedford",bodyWeight:282.6,squat:345,bench:255,deadlift:410,total:1000},
+                {rank:6,name:"Chad Nowicki",school:"Brighton",bodyWeight:310.4,squat:255,bench:160,deadlift:405,total:795},
+                {rank:7,name:"Burton Vandenbrink",school:"Three Rivers",bodyWeight:298.6,squat:305,bench:120,deadlift:295,total:715}
+            ]
+        };
+
+        function renderResults() {
+            const container = document.getElementById('resultsContainer');
+            const weightClasses = ["114", "123", "132", "145", "155", "165", "181", "194", "207", "220", "242", "275", "SHW"];
+
+            weightClasses.forEach(wc => {
+                if (!results[wc]) return;
+
+                const section = document.createElement('div');
+                section.className = 'weight-class-section';
+
+                let html = `
+                    <div class="weight-class-header">
+                        <h2>${wc} lbs Weight Class</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="rank">Rank</th>
+                                <th class="name">Name</th>
+                                <th class="school">School</th>
+                                <th class="stat">Body Wt</th>
+                                <th class="stat">Squat</th>
+                                <th class="stat">Bench</th>
+                                <th class="stat">Deadlift</th>
+                                <th class="stat">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                results[wc].forEach(athlete => {
+                    const isThreeRivers = athlete.school.toLowerCase().includes('three rivers');
+                    const rowClass = isThreeRivers ? 'three-rivers' : '';
+
+                    let medalHTML = '';
+                    if (athlete.rank === 1) medalHTML = '<span class="medal">🥇</span>';
+                    else if (athlete.rank === 2) medalHTML = '<span class="medal">🥈</span>';
+                    else if (athlete.rank === 3) medalHTML = '<span class="medal">🥉</span>';
+
+                    html += `
+                        <tr class="${rowClass}">
+                            <td class="rank">${medalHTML}${athlete.rank}</td>
+                            <td>${athlete.name}</td>
+                            <td>${athlete.school}</td>
+                            <td class="stat">${athlete.bodyWeight}</td>
+                            <td class="stat">${athlete.squat}</td>
+                            <td class="stat">${athlete.bench}</td>
+                            <td class="stat">${athlete.deadlift}</td>
+                            <td class="stat"><strong>${athlete.total}</strong></td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                section.innerHTML = html;
+                container.appendChild(section);
+            });
+        }
+
+        renderResults();
+    </script>
+</body>
+</html>

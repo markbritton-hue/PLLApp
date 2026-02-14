@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three Rivers Varsity Weightlifting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .weight-class-section {
+            margin-bottom: 50px;
+        }
+
+        .weight-class-header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .weight-class-header h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .athlete-count {
+            font-size: 1rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .athlete-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .athlete-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .athlete-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .designation {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-top: 2px;
+        }
+
+        .lifts-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .lifts-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .lifts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .lift-item {
+            text-align: center;
+            padding: 8px;
+            background: #e8eaf6;
+            border-radius: 6px;
+        }
+
+        .lift-name {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .lift-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .total-section {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .total-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .total-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏋️ Three Rivers Varsity Weightlifting</h1>
+            <p>Competition Results - 30 Athletes (All Platforms 1-8)</p>
+        </header>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+            <a href="index.html" style="display: inline-block; background: white; color: #667eea; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">Three Rivers Athletes</a>
+            <a href="results.html" style="display: inline-block; background: white; color: #667eea; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">All Schools Results</a>
+        </div>
+
+        <div id="weightClassContainer"></div>
+    </div>
+
+    <script>
+        const athleteData = [
+            // Platform 1
+            {
+                name: "Cooper Roggelien",
+                weightClass: "114",
+                designation: "JV",
+                bodyWeight: 110.6,
+                squat: 190,
+                bench: 100,
+                deadlift: 230,
+                currentTotal: 520
+            },
+            {
+                name: "Brody Montcalm",
+                weightClass: "114",
+                designation: "V",
+                bodyWeight: 108.6,
+                squat: 155,
+                bench: 120,
+                deadlift: 235,
+                currentTotal: 510
+            },
+            {
+                name: "Ezekiel Britton",
+                weightClass: "123",
+                designation: "V",
+                bodyWeight: 117,
+                squat: 255,
+                bench: 175,
+                deadlift: 375,
+                currentTotal: 805
+            },
+            // Platform 2
+            {
+                name: "Cesar Rodriguez Delgado",
+                weightClass: "145",
+                designation: "V",
+                bodyWeight: 135.8,
+                squat: 290,
+                bench: 165,
+                deadlift: 350,
+                currentTotal: 805
+            },
+            {
+                name: "Giovanni Desi",
+                weightClass: "145",
+                designation: "V",
+                bodyWeight: 142,
+                squat: 275,
+                bench: 170,
+                deadlift: 280,
+                currentTotal: 725
+            },
+            {
+                name: "Nicholas Allen",
+                weightClass: "155",
+                designation: "V",
+                bodyWeight: 153.8,
+                squat: 300,
+                bench: 195,
+                deadlift: 385,
+                currentTotal: 880
+            },
+            // Platform 3
+            {
+                name: "Zachary Carr",
+                weightClass: "145",
+                designation: "JV",
+                bodyWeight: 144.8,
+                squat: 245,
+                bench: 165,
+                deadlift: 315,
+                currentTotal: 725
+            },
+            {
+                name: "Jaxon Fuller",
+                weightClass: "155",
+                designation: "JV",
+                bodyWeight: 152.2,
+                squat: 225,
+                bench: 175,
+                deadlift: 360,
+                currentTotal: 760
+            },
+            // Platform 4
+            {
+                name: "Matthew Montcalm",
+                weightClass: "165",
+                designation: "V",
+                bodyWeight: 157.4,
+                squat: 235,
+                bench: 165,
+                deadlift: 275,
+                currentTotal: 675
+            },
+            {
+                name: "Carter Fuller",
+                weightClass: "165",
+                designation: "V",
+                bodyWeight: 164.6,
+                squat: 265,
+                bench: 195,
+                deadlift: 315,
+                currentTotal: 775
+            },
+            {
+                name: "Frederico de Godoy Barreto",
+                weightClass: "165",
+                designation: "V",
+                bodyWeight: 164.8,
+                squat: 315,
+                bench: 155,
+                deadlift: 365,
+                currentTotal: 835
+            },
+            {
+                name: "Braden Carpenter",
+                weightClass: "165",
+                designation: "V",
+                bodyWeight: 163.8,
+                squat: 345,
+                bench: 245,
+                deadlift: 385,
+                currentTotal: 975
+            },
+            {
+                name: "Todd Wadsworth",
+                weightClass: "165",
+                designation: "V",
+                bodyWeight: 162,
+                squat: 300,
+                bench: 185,
+                deadlift: 385,
+                currentTotal: 870
+            },
+            {
+                name: "Tyler Rubio",
+                weightClass: "181",
+                designation: "V",
+                bodyWeight: 168.6,
+                squat: 330,
+                bench: 225,
+                deadlift: 385,
+                currentTotal: 940
+            },
+            {
+                name: "Canady Marzett",
+                weightClass: "165",
+                designation: "V",
+                bodyWeight: 163.8,
+                squat: 340,
+                bench: 245,
+                deadlift: 390,
+                currentTotal: 975
+            },
+            {
+                name: "Jaden Purdiman",
+                weightClass: "181",
+                designation: "V",
+                bodyWeight: 177,
+                squat: 380,
+                bench: 290,
+                deadlift: 425,
+                currentTotal: 1095
+            },
+            {
+                name: "Hunter Koenig",
+                weightClass: "181",
+                designation: "V",
+                bodyWeight: 180,
+                squat: 445,
+                bench: 295,
+                deadlift: 515,
+                currentTotal: 1255
+            },
+            // Platform 5
+            {
+                name: "Aidan Martin",
+                weightClass: "194",
+                designation: "V",
+                bodyWeight: 192.2,
+                squat: 290,
+                bench: 185,
+                deadlift: 405,
+                currentTotal: 880
+            },
+            {
+                name: "Carson Bowley",
+                weightClass: "194",
+                designation: "V",
+                bodyWeight: 192,
+                squat: 405,
+                bench: 255,
+                deadlift: 450,
+                currentTotal: 1110
+            },
+            {
+                name: "Brayton Young",
+                weightClass: "194",
+                designation: "V",
+                bodyWeight: 0,
+                squat: 0,
+                bench: 0,
+                deadlift: 0,
+                currentTotal: 0
+            },
+            // Platform 6
+            {
+                name: "Josiah Dear",
+                weightClass: "207",
+                designation: "V",
+                bodyWeight: 197.4,
+                squat: 375,
+                bench: 255,
+                deadlift: 385,
+                currentTotal: 1015
+            },
+            {
+                name: "Xander Kenyon",
+                weightClass: "207",
+                designation: "V",
+                bodyWeight: 197.6,
+                squat: 375,
+                bench: 275,
+                deadlift: 475,
+                currentTotal: 1125
+            },
+            // Platform 7
+            {
+                name: "Matthew Ballard",
+                weightClass: "242",
+                designation: "V",
+                bodyWeight: 237,
+                squat: 275,
+                bench: 105,
+                deadlift: 365,
+                currentTotal: 745
+            },
+            {
+                name: "Chase Hunt",
+                weightClass: "242",
+                designation: "V",
+                bodyWeight: 241.8,
+                squat: 320,
+                bench: 175,
+                deadlift: 395,
+                currentTotal: 890
+            },
+            {
+                name: "Luis E. Rodriguez Delgado",
+                weightClass: "242",
+                designation: "V",
+                bodyWeight: 224.6,
+                squat: 380,
+                bench: 230,
+                deadlift: 420,
+                currentTotal: 1030
+            },
+            {
+                name: "Daniel Beachey",
+                weightClass: "275",
+                designation: "V",
+                bodyWeight: 272.2,
+                squat: 405,
+                bench: 245,
+                deadlift: 415,
+                currentTotal: 1065
+            },
+            // Platform 8
+            {
+                name: "Harper James",
+                weightClass: "275",
+                designation: "JV",
+                bodyWeight: 266.4,
+                squat: 315,
+                bench: 200,
+                deadlift: 385,
+                currentTotal: 900
+            },
+            {
+                name: "Jarome Booker",
+                weightClass: "275",
+                designation: "JV",
+                bodyWeight: 0,
+                squat: 0,
+                bench: 0,
+                deadlift: 0,
+                currentTotal: 0
+            },
+            {
+                name: "Burton Vandenbrink",
+                weightClass: "SHW",
+                designation: "V",
+                bodyWeight: 298.6,
+                squat: 305,
+                bench: 115,
+                deadlift: 295,
+                currentTotal: 715
+            },
+            {
+                name: "Bennett Vandenbrink",
+                weightClass: "SHW",
+                designation: "V",
+                bodyWeight: 343.4,
+                squat: 350,
+                bench: 245,
+                deadlift: 500,
+                currentTotal: 1095
+            }
+        ];
+
+        function renderAthletes() {
+            // Group athletes by weight class
+            const groupedData = athleteData.reduce((acc, athlete) => {
+                if (!acc[athlete.weightClass]) {
+                    acc[athlete.weightClass] = [];
+                }
+                acc[athlete.weightClass].push(athlete);
+                return acc;
+            }, {});
+
+            // Sort weight classes
+            const weightClassOrder = ["114", "123", "132", "145", "155", "165", "181", "194", "207", "220", "242", "275", "SHW"];
+            const container = document.getElementById('weightClassContainer');
+            container.innerHTML = '';
+
+            weightClassOrder.forEach(weightClass => {
+                if (!groupedData[weightClass]) return;
+
+                const athletesInClass = groupedData[weightClass];
+
+                const section = document.createElement('div');
+                section.className = 'weight-class-section';
+
+                const headerHTML = `
+                    <div class="weight-class-header">
+                        <h2>${weightClass} lbs <span class="athlete-count">(${athletesInClass.length} athlete${athletesInClass.length > 1 ? 's' : ''})</span></h2>
+                    </div>
+                `;
+
+                const cardsHTML = athletesInClass.map(athlete => `
+                    <div class="athlete-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="athlete-name">${athlete.name}</div>
+                                <div class="designation">${athlete.designation}</div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">Body Weight</div>
+                                <div class="stat-value">${athlete.bodyWeight} lbs</div>
+                            </div>
+                        </div>
+
+                        <div class="lifts-section">
+                            <div class="lifts-title">Individual Lifts</div>
+                            <div class="lifts-grid">
+                                <div class="lift-item">
+                                    <div class="lift-name">Squat</div>
+                                    <div class="lift-value">${athlete.squat}</div>
+                                </div>
+                                <div class="lift-item">
+                                    <div class="lift-name">Bench</div>
+                                    <div class="lift-value">${athlete.bench}</div>
+                                </div>
+                                <div class="lift-item">
+                                    <div class="lift-name">Deadlift</div>
+                                    <div class="lift-value">${athlete.deadlift}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="total-section">
+                            <div class="total-label">Current Total</div>
+                            <div class="total-value">${athlete.currentTotal} lbs</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                section.innerHTML = headerHTML + `<div class="cards-grid">${cardsHTML}</div>`;
+                container.appendChild(section);
+            });
+        }
+
+        // Load immediately
+        renderAthletes();
+    </script>
+</body>
+</html>
