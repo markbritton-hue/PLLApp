@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three Rivers Varsity Team Stats</title>
+    <title>Three Rivers Varsity Team Standings</title>
     <style>
         * {
             margin: 0;
@@ -196,13 +196,13 @@
     <div class="container">
         <header>
             <img src="https://threerivers-cdn.fxbrt.com/downloads/logos-assets/trcs_powercat.png" alt="Three Rivers Schools" class="logo">
-            <h1>📊 Three Rivers Varsity Team Stats</h1>
+            <h1>📊 Three Rivers Varsity Team Standings</h1>
             <p>Team Performance Overview</p>
         </header>
 
         <div class="nav-buttons">
             <a href="index.html">Individual Athletes</a>
-            <a href="team.html">Team Stats</a>
+            <a href="team.html">Team Standings</a>
             <a href="results.html">All Schools Results</a>
         </div>
 
@@ -212,7 +212,7 @@
                 <input type="text" id="sheetUrl" placeholder="Paste Mens Varsity Team Sheet URL here...">
                 <button onclick="loadTeamData()">Load Data</button>
             </div>
-            <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL for the Team Stats sheet</p>
+            <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL for the Team Standings sheet</p>
             <div id="loadingStatus"></div>
             <div id="autoRefreshStatus">🔄 Auto-refresh enabled (every 10 seconds)</div>
         </div>
@@ -388,7 +388,7 @@
             }
 
             // Display the data as a table
-            let tableHTML = '<div class="team-table"><h3>Team Statistics</h3><table>';
+            let tableHTML = '<div class="team-table"><h3>Team Standings</h3><table>';
 
             // Add header row
             tableHTML += '<thead><tr>';
