@@ -367,10 +367,13 @@
         <div class="load-section">
             <h3>Load Team Data</h3>
             <div class="input-group">
-                <input type="text" id="sheetUrl" placeholder="Paste Mens Varsity Team Sheet URL here...">
+                <input type="text" id="sheetUrl" placeholder="Paste Mens Varsity Team Results sheet URL here...">
                 <button onclick="loadTeamData()">Load Data</button>
             </div>
-            <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL for the Team Standings sheet</p>
+            <p style="margin-top: 10px; color: #666; font-size: 12px;">
+                ⚠️ <strong>Important:</strong> Paste the URL for the <strong>"Mens Varsity Team Results"</strong> sheet tab.
+                Rankings will be based on the <strong>Total</strong> column.
+            </p>
             <div id="loadingStatus"></div>
             <div id="autoRefreshStatus">🔄 Auto-refresh enabled (every 10 seconds)</div>
         </div>
@@ -517,7 +520,7 @@
 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
-                statusDiv.textContent = `✓ Team data loaded successfully! (Last updated: ${timeStr})`;
+                statusDiv.innerHTML = `✓ Loaded <strong>Mens Varsity Team Results</strong> (Last updated: ${timeStr})`;
                 statusDiv.style.color = '#4caf50';
 
                 if (preserveScroll && scrollPosition > 0) {
@@ -554,27 +557,54 @@
             let pointCols = [];
 
             // Look for headers in first few rows
-            for (let i = 0; i < Math.min(5, csvData.length); i++) {
+            for (let i = 0; i < Math.min(10, csvData.length); i++) {
                 const row = csvData[i];
+
+                // Check if this row looks like a header
+                const hasTeamHeader = row.some(cell => {
+                    const c = cell.toLowerCase().trim();
+                    return c === 'team' || c === 'school' || c === 'place';
+                });
+
+                if (!hasTeamHeader) continue;
+
+                // Found potential header row, identify columns
                 for (let j = 0; j < row.length; j++) {
                     const cell = row[j].toLowerCase().trim();
-                    if (cell.includes('team') || cell.includes('school') || cell === 'place') teamCol = j;
-                    // Look for Total column (prioritize exact match)
-                    if (cell === 'total' || (cell.includes('total') && !cell.includes('points'))) {
-                        totalCol = j;
+
+                    // Team/School column
+                    if (cell === 'team' || cell === 'school' || cell === 'place') {
+                        teamCol = j;
                     }
-                    // Track columns that look like point columns (numbers or weight classes)
-                    if (cell.match(/^\d+$/) || (cell.includes('point') && !cell.includes('total'))) {
+
+                    // Total column - be very specific
+                    if (cell === 'total') {
+                        totalCol = j;
+                        console.log('Found Total column at index:', j, 'in row:', i);
+                    }
+
+                    // Point columns (weight classes like 114, 123, etc.)
+                    if (cell.match(/^\d{3}$/) || (cell.includes('point') && cell !== 'total')) {
                         pointCols.push(j);
                     }
                 }
-                if (teamCol !== -1) {
+
+                if (teamCol !== -1 && totalCol !== -1) {
                     headerRow = i;
+                    console.log('Header row identified at row:', i);
                     break;
                 }
             }
 
             console.log('Detected columns - Team:', teamCol, 'Total:', totalCol, 'Points cols:', pointCols);
+
+            // Validation
+            if (teamCol === -1 || totalCol === -1) {
+                const statusDiv = document.getElementById('loadingStatus');
+                statusDiv.innerHTML = `⚠️ Warning: Could not find Team (${teamCol}) or Total (${totalCol}) column.
+                    Make sure you're loading the "Mens Varsity Team Results" sheet.`;
+                statusDiv.style.color = '#ff9800';
+            }
 
             // Extract and sort teams by Total column
             const startRow = headerRow !== -1 ? headerRow + 1 : 1;
