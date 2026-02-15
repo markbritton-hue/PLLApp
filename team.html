@@ -52,7 +52,7 @@
             margin-bottom: 30px;
         }
 
-        .nav-buttons button, .nav-buttons a {
+        .nav-buttons a {
             display: inline-block;
             background: white;
             color: #667eea;
@@ -61,8 +61,13 @@
             border-radius: 5px;
             border: 2px solid #667eea;
             font-weight: bold;
-            cursor: pointer;
             text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .nav-buttons a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .load-section {
@@ -196,8 +201,8 @@
         </header>
 
         <div class="nav-buttons">
-            <button onclick="location.reload()">Team Stats</button>
             <a href="index.html">Individual Athletes</a>
+            <a href="team.html">Team Stats</a>
             <a href="results.html">All Schools Results</a>
         </div>
 
