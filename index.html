@@ -231,6 +231,7 @@
             </div>
             <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL and click "Load Data" to display Three Rivers athletes</p>
             <div id="loadingStatus" style="margin-top: 10px; color: #667eea; font-weight: bold;"></div>
+            <div id="debugInfo" style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; display: none;"></div>
         </div>
 
         <div id="weightClassContainer"></div>
@@ -636,6 +637,7 @@
         async function loadSheetData() {
             const urlInput = document.getElementById('sheetUrl');
             const statusDiv = document.getElementById('loadingStatus');
+            const debugDiv = document.getElementById('debugInfo');
             const url = urlInput.value.trim();
 
             if (!url) {
@@ -646,6 +648,8 @@
 
             statusDiv.textContent = 'Loading data...';
             statusDiv.style.color = '#667eea';
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML = 'Fetching data from Google Sheets...<br>';
 
             try {
                 const parsed = parseSheetUrl(url);
@@ -665,8 +669,17 @@
 
                 const csvText = await response.text();
                 console.log('CSV Data received, length:', csvText.length);
+                debugDiv.innerHTML += `✓ Received ${csvText.length} characters<br>`;
+
                 const csvData = parseCSV(csvText);
                 console.log('Parsed rows:', csvData.length);
+                debugDiv.innerHTML += `✓ Parsed ${csvData.length} rows<br>`;
+
+                // Show first few rows for debugging
+                debugDiv.innerHTML += '<br><strong>First 3 rows of data:</strong><br>';
+                for (let i = 0; i < Math.min(3, csvData.length); i++) {
+                    debugDiv.innerHTML += `Row ${i}: ${csvData[i].slice(0, 5).join(' | ')}<br>`;
+                }
 
                 // Find Three Rivers athletes
                 const athletes = [];
@@ -699,6 +712,11 @@
                 console.log('Columns - Name:', nameCol, 'School:', schoolCol, 'Weight Class:', weightClassCol);
                 console.log('Columns - Squat:', squatCol, 'Bench:', benchCol, 'Deadlift:', deadliftCol, 'Total:', totalCol);
 
+                debugDiv.innerHTML += `<br><strong>Column Detection:</strong><br>`;
+                debugDiv.innerHTML += `Header Row: ${headerRow}<br>`;
+                debugDiv.innerHTML += `Name: ${nameCol}, School: ${schoolCol}, Weight Class: ${weightClassCol}<br>`;
+                debugDiv.innerHTML += `Squat: ${squatCol}, Bench: ${benchCol}, Deadlift: ${deadliftCol}, Total: ${totalCol}<br>`;
+
                 // Process data rows
                 let threeRiversCount = 0;
                 for (let i = headerRow + 1; i < csvData.length; i++) {
@@ -708,8 +726,12 @@
                     const school = schoolCol !== -1 ? row[schoolCol] : '';
 
                     // Debug: log schools found
-                    if (i < headerRow + 5) {
+                    if (i === headerRow + 1) {
+                        debugDiv.innerHTML += `<br><strong>Sample schools found:</strong><br>`;
+                    }
+                    if (i < headerRow + 6) {
                         console.log('Row', i, 'School:', school);
+                        debugDiv.innerHTML += `Row ${i}: "${school}"<br>`;
                     }
 
                     // Check if this is a Three Rivers athlete (case-insensitive)
@@ -754,15 +776,19 @@
                 console.log('Three Rivers athletes found:', threeRiversCount);
                 console.log('Athletes with valid data:', athletes.length);
 
+                debugDiv.innerHTML += `<br><strong>Results:</strong><br>`;
+                debugDiv.innerHTML += `Three Rivers entries found: ${threeRiversCount}<br>`;
+                debugDiv.innerHTML += `Athletes with valid totals: ${athletes.length}<br>`;
+
                 if (athletes.length === 0) {
-                    let errorMsg = 'No Three Rivers athletes found in the sheet. ';
+                    let errorMsg = 'No Three Rivers athletes found. ';
                     if (headerRow === -1) {
                         errorMsg += 'Could not find header row. ';
                     }
                     if (schoolCol === -1) {
                         errorMsg += 'Could not find School column. ';
                     }
-                    errorMsg += 'Check browser console for details.';
+                    errorMsg += 'See debug info above.';
                     throw new Error(errorMsg);
                 }
 
