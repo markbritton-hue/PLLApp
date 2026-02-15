@@ -804,8 +804,15 @@
                     // Check if this is a Three Rivers athlete (case-insensitive)
                     if (school.toLowerCase().includes('three rivers') || school.toLowerCase().includes('threerivers')) {
                         threeRiversCount++;
+                        console.log(`Row ${i}: Three Rivers athlete found`);
+                        console.log(`  School column value: "${school}"`);
+                        console.log(`  Full row data:`, row.slice(0, 10));
+
                         const name = nameCol !== -1 ? row[nameCol] : '';
+                        console.log(`  Name column (${nameCol}): "${name}"`);
+
                         const weightClass = weightClassCol !== -1 ? row[weightClassCol] : '';
+                        console.log(`  Weight class column (${weightClassCol}): "${weightClass}"`);
 
                         // Body weight from detected column
                         const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 :
@@ -867,10 +874,15 @@
 
                 console.log('Three Rivers athletes found:', threeRiversCount);
                 console.log('Athletes with valid data:', athletes.length);
+                console.log('Athletes list:', athletes.map(a => a.name).join(', '));
 
                 debugDiv.innerHTML += `<br><strong>Results:</strong><br>`;
                 debugDiv.innerHTML += `Three Rivers entries found: ${threeRiversCount}<br>`;
-                debugDiv.innerHTML += `Athletes with valid totals: ${athletes.length}<br>`;
+                debugDiv.innerHTML += `Athletes added to cards: ${athletes.length}<br>`;
+                if (threeRiversCount > athletes.length) {
+                    debugDiv.innerHTML += `<strong style="color: orange;">⚠ ${threeRiversCount - athletes.length} rows skipped (no name or other issue)</strong><br>`;
+                }
+                debugDiv.innerHTML += `<br><strong>Athletes loaded:</strong><br>${athletes.map(a => `${a.name} (${a.weightClass})`).join(', ')}<br>`;
 
                 if (athletes.length === 0) {
                     let errorMsg = 'No Three Rivers athletes found. ';
