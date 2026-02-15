@@ -828,30 +828,40 @@
                         let wcNum = '';
                         let designation = 'V';
 
-                        // Try to get from weight class column first
-                        if (weightClass) {
+                        // First, try column 0 (first column often has weight class)
+                        if (row[0] && row[0].trim()) {
+                            const numMatch = row[0].match(/\d+/);
+                            if (numMatch) {
+                                wcNum = numMatch[0];
+                            } else if (row[0].toUpperCase().includes('SHW')) {
+                                wcNum = 'SHW';
+                            }
+                        }
+
+                        // If not found, try the detected weight class column
+                        if (!wcNum && weightClass) {
                             const numMatch = weightClass.match(/\d+/);
                             wcNum = numMatch ? numMatch[0] : '';
-                            designation = weightClass.includes('JV') ? 'JV' : 'V';
+                            if (weightClass.toUpperCase().includes('SHW')) wcNum = 'SHW';
                         }
 
-                        // If weight class column didn't have the number, try column 1
-                        if (!wcNum && row[1]) {
-                            const numMatch = row[1].match(/\d+/);
+                        // If still not found, try column 3 (might have "114 V" format)
+                        if (!wcNum && row[3]) {
+                            const numMatch = row[3].match(/\d+/);
                             wcNum = numMatch ? numMatch[0] : '';
+                            if (row[3].toUpperCase().includes('SHW')) wcNum = 'SHW';
                         }
 
-                        // Check for designation in column 2 (JV/V/W column)
-                        if (row[2]) {
-                            designation = row[2].includes('JV') ? 'JV' : 'V';
-                        }
-
-                        // Handle SHW
-                        if (weightClass.toUpperCase().includes('SHW') || (row[1] && row[1].toUpperCase().includes('SHW'))) {
-                            wcNum = 'SHW';
+                        // Get designation from column 4 or column 3
+                        if (row[4]) {
+                            designation = row[4].includes('JV') || row[4].includes('W') ? row[4].trim() : 'V';
+                        } else if (row[3] && row[3].includes('JV')) {
+                            designation = 'JV';
                         }
 
                         if (!wcNum) wcNum = '0';
+
+                        console.log(`  Extracted weight class: ${wcNum}, designation: ${designation}`);
 
                         // Include athlete if they have a name (even with total = 0)
                         if (name && name.trim().length > 0) {
