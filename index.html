@@ -215,7 +215,7 @@
         <header>
             <img src="https://threerivers-cdn.fxbrt.com/downloads/logos-assets/trcs_powercat.png" alt="Three Rivers Schools" class="logo">
             <h1>🏋️ Three Rivers Varsity Weightlifting</h1>
-            <p>Competition Results - 26 Athletes (All Platforms 1-8)</p>
+            <p>Load a Google Sheet to view competition results</p>
         </header>
 
         <div style="text-align: center; margin-bottom: 30px;">
@@ -238,6 +238,10 @@
     </div>
 
     <script>
+        let athleteData = [];
+
+        // Old default data removed - now loads only from Google Sheets
+        /*
         let athleteData = [
             // Platform 1
             {
@@ -508,6 +512,7 @@
                 currentTotal: 1095
             }
         ];
+        */
 
         function renderAthletes() {
             console.log('renderAthletes called with', athleteData.length, 'athletes');
@@ -591,8 +596,8 @@
             console.log('Rendering complete. Total cards rendered:', athleteData.length);
         }
 
-        // Load immediately with default data
-        renderAthletes();
+        // Don't render on page load - wait for user to load a Google Sheet
+        // renderAthletes();
 
         // Function to extract spreadsheet ID and gid from URL
         function parseSheetUrl(url) {
