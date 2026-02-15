@@ -510,6 +510,8 @@
         ];
 
         function renderAthletes() {
+            console.log('renderAthletes called with', athleteData.length, 'athletes');
+
             // Group athletes by weight class
             const groupedData = athleteData.reduce((acc, athlete) => {
                 if (!acc[athlete.weightClass]) {
@@ -519,10 +521,13 @@
                 return acc;
             }, {});
 
+            console.log('Grouped into weight classes:', Object.keys(groupedData));
+
             // Sort weight classes
             const weightClassOrder = ["114", "123", "132", "145", "155", "165", "181", "194", "207", "220", "242", "275", "SHW"];
             const container = document.getElementById('weightClassContainer');
             container.innerHTML = '';
+            console.log('Container cleared, rendering cards...');
 
             weightClassOrder.forEach(weightClass => {
                 if (!groupedData[weightClass]) return;
@@ -582,6 +587,8 @@
                 section.innerHTML = headerHTML + `<div class="cards-grid">${cardsHTML}</div>`;
                 container.appendChild(section);
             });
+
+            console.log('Rendering complete. Total cards rendered:', athleteData.length);
         }
 
         // Load immediately with default data
@@ -870,13 +877,19 @@
 
                 // Update the global athleteData and re-render
                 athleteData = athletes;
+                console.log('Updated athleteData, now rendering...');
                 renderAthletes();
 
                 statusDiv.textContent = `✓ Loaded ${athletes.length} Three Rivers athletes successfully!`;
                 statusDiv.style.color = '#4caf50';
 
+                debugDiv.innerHTML += `<br><strong style="color: #4caf50;">✓ Cards updated with ${athletes.length} athletes!</strong><br>`;
+
                 // Update header count
                 document.querySelector('header p').textContent = `Competition Results - ${athletes.length} Athletes`;
+
+                // Scroll to the cards
+                document.getElementById('weightClassContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             } catch (error) {
                 statusDiv.textContent = `Error: ${error.message}`;
