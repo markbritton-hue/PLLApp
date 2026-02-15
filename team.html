@@ -147,35 +147,82 @@
         .team-table {
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
             overflow-x: auto;
         }
 
         .team-table h3 {
             color: #667eea;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-align: center;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.95rem;
         }
 
         th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 14px 16px;
+            text-align: center;
+            border: 1px solid #ddd;
         }
 
         th {
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td:first-child, th:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background: #e8eaf6;
+            transition: background 0.2s;
+        }
+
+        .total-column {
+            background: #e8f5e9 !important;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2e7d32;
+        }
+
+        .points-column {
+            font-weight: 600;
             color: #333;
         }
 
-        tr:hover {
-            background: #f9f9f9;
+        .three-rivers-row {
+            background: #fff9c4 !important;
+            border-left: 4px solid #fbc02d;
+            border-right: 4px solid #fbc02d;
+        }
+
+        .three-rivers-row td {
+            font-weight: bold;
+        }
+
+        .rank-column {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #667eea;
         }
 
         #loadingStatus {
@@ -389,16 +436,20 @@
 
             // Find the header row and identify columns
             let headerRow = -1;
-            let teamCol = -1, pointsCol = -1, totalCol = -1;
+            let teamCol = -1, totalCol = -1;
+            let pointCols = [];
 
             // Look for headers in first few rows
             for (let i = 0; i < Math.min(5, csvData.length); i++) {
                 const row = csvData[i];
                 for (let j = 0; j < row.length; j++) {
                     const cell = row[j].toLowerCase().trim();
-                    if (cell.includes('team') || cell.includes('school')) teamCol = j;
-                    if (cell.includes('point') && !cell.includes('total')) pointsCol = j;
-                    if (cell.includes('total')) totalCol = j;
+                    if (cell.includes('team') || cell.includes('school') || cell === 'place') teamCol = j;
+                    if (cell.includes('total') && !cell.includes('points')) totalCol = j;
+                    // Track columns that look like point columns (numbers or weight classes)
+                    if (cell.match(/^\d+$/) || cell.includes('point')) {
+                        pointCols.push(j);
+                    }
                 }
                 if (teamCol !== -1) {
                     headerRow = i;
@@ -406,40 +457,53 @@
                 }
             }
 
-            // Build standings table focused on points
+            // Build standings table
             let tableHTML = '<div class="team-table"><h3>Mens Varsity Team Standings</h3><table>';
             tableHTML += '<thead><tr>';
 
-            // Use detected headers or default
+            // Add headers
             if (headerRow !== -1) {
-                csvData[headerRow].forEach(header => {
-                    tableHTML += `<th>${header}</th>`;
+                csvData[headerRow].forEach((header, idx) => {
+                    tableHTML += `<th>${header || ''}</th>`;
                 });
             }
             tableHTML += '</tr></thead><tbody>';
 
-            // Add data rows (skip header row)
+            // Add data rows (skip header row and empty rows)
             const startRow = headerRow !== -1 ? headerRow + 1 : 1;
             for (let i = startRow; i < csvData.length; i++) {
-                // Skip empty rows
-                if (csvData[i].some(cell => cell.trim())) {
-                    // Highlight rows with "three rivers" (case insensitive)
-                    const isThreeRivers = csvData[i].some(cell =>
-                        cell.toLowerCase().includes('three rivers')
-                    );
+                const row = csvData[i];
 
-                    tableHTML += isThreeRivers ? '<tr style="background-color: #fff9c4; font-weight: bold;">' : '<tr>';
+                // Skip completely empty rows
+                if (!row.some(cell => cell && cell.trim())) continue;
 
-                    csvData[i].forEach((cell, idx) => {
-                        // Highlight total points column
-                        if (totalCol !== -1 && idx === totalCol) {
-                            tableHTML += `<td style="font-weight: bold; color: #667eea; font-size: 1.1rem;">${cell}</td>`;
-                        } else {
-                            tableHTML += `<td>${cell}</td>`;
-                        }
-                    });
-                    tableHTML += '</tr>';
-                }
+                // Check if this is Three Rivers
+                const isThreeRivers = row.some(cell =>
+                    cell && cell.toLowerCase().includes('three rivers')
+                );
+
+                tableHTML += isThreeRivers ? '<tr class="three-rivers-row">' : '<tr>';
+
+                row.forEach((cell, idx) => {
+                    let cellClass = '';
+
+                    // Style total column
+                    if (totalCol !== -1 && idx === totalCol) {
+                        cellClass = 'total-column';
+                    }
+                    // Style points columns
+                    else if (pointCols.includes(idx) && cell && !isNaN(cell)) {
+                        cellClass = 'points-column';
+                    }
+                    // Style rank/place column
+                    else if (idx === 0 && !isNaN(cell)) {
+                        cellClass = 'rank-column';
+                    }
+
+                    tableHTML += `<td class="${cellClass}">${cell || ''}</td>`;
+                });
+
+                tableHTML += '</tr>';
             }
 
             tableHTML += '</tbody></table></div>';
