@@ -559,9 +559,12 @@
                 for (let j = 0; j < row.length; j++) {
                     const cell = row[j].toLowerCase().trim();
                     if (cell.includes('team') || cell.includes('school') || cell === 'place') teamCol = j;
-                    if (cell.includes('total') && !cell.includes('points')) totalCol = j;
+                    // Look for Total column (prioritize exact match)
+                    if (cell === 'total' || (cell.includes('total') && !cell.includes('points'))) {
+                        totalCol = j;
+                    }
                     // Track columns that look like point columns (numbers or weight classes)
-                    if (cell.match(/^\d+$/) || cell.includes('point')) {
+                    if (cell.match(/^\d+$/) || (cell.includes('point') && !cell.includes('total'))) {
                         pointCols.push(j);
                     }
                 }
@@ -571,9 +574,37 @@
                 }
             }
 
+            console.log('Detected columns - Team:', teamCol, 'Total:', totalCol, 'Points cols:', pointCols);
+
+            // Extract and sort teams by Total column
+            const startRow = headerRow !== -1 ? headerRow + 1 : 1;
+            let teamsData = [];
+
+            for (let i = startRow; i < csvData.length; i++) {
+                const row = csvData[i];
+                // Skip completely empty rows
+                if (!row.some(cell => cell && cell.trim())) continue;
+
+                const totalPoints = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
+
+                teamsData.push({
+                    row: row,
+                    total: totalPoints,
+                    isThreeRivers: row.some(cell => cell && cell.toLowerCase().includes('three rivers'))
+                });
+            }
+
+            // Sort by total points (descending)
+            teamsData.sort((a, b) => b.total - a.total);
+
+            console.log('Teams sorted by total:', teamsData.map(t => ({name: t.row[teamCol], total: t.total})));
+
             // Build standings table
-            let tableHTML = '<div class="team-table"><h3>Mens Varsity Team Standings</h3><table>';
+            let tableHTML = '<div class="team-table"><h3>Mens Varsity Team Standings (Sorted by Total Points)</h3><table>';
             tableHTML += '<thead><tr>';
+
+            // Add rank column
+            tableHTML += '<th>Rank</th>';
 
             // Add headers
             if (headerRow !== -1) {
@@ -583,20 +614,15 @@
             }
             tableHTML += '</tr></thead><tbody>';
 
-            // Add data rows (skip header row and empty rows)
-            const startRow = headerRow !== -1 ? headerRow + 1 : 1;
-            for (let i = startRow; i < csvData.length; i++) {
-                const row = csvData[i];
-
-                // Skip completely empty rows
-                if (!row.some(cell => cell && cell.trim())) continue;
-
-                // Check if this is Three Rivers
-                const isThreeRivers = row.some(cell =>
-                    cell && cell.toLowerCase().includes('three rivers')
-                );
+            // Add sorted data rows
+            teamsData.forEach((teamData, rank) => {
+                const row = teamData.row;
+                const isThreeRivers = teamData.isThreeRivers;
 
                 tableHTML += isThreeRivers ? '<tr class="three-rivers-row">' : '<tr>';
+
+                // Add rank
+                tableHTML += `<td class="rank-column">${rank + 1}</td>`;
 
                 row.forEach((cell, idx) => {
                     let cellClass = '';
@@ -609,16 +635,12 @@
                     else if (pointCols.includes(idx) && cell && !isNaN(cell)) {
                         cellClass = 'points-column';
                     }
-                    // Style rank/place column
-                    else if (idx === 0 && !isNaN(cell)) {
-                        cellClass = 'rank-column';
-                    }
 
                     tableHTML += `<td class="${cellClass}">${cell || ''}</td>`;
                 });
 
                 tableHTML += '</tr>';
-            }
+            });
 
             tableHTML += '</tbody></table></div>';
             tableContainer.innerHTML = tableHTML;
