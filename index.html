@@ -565,19 +565,63 @@
                         </div>
 
                         <div class="lifts-section">
-                            <div class="lifts-title">Individual Lifts</div>
-                            <div class="lifts-grid">
-                                <div class="lift-item">
-                                    <div class="lift-name">Squat</div>
-                                    <div class="lift-value">${athlete.squat}</div>
+                            <div class="lifts-title">Squat</div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;">
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">1st</div>
+                                    <div style="font-weight: bold;">${athlete.squatAttempts[0] || '-'}</div>
                                 </div>
-                                <div class="lift-item">
-                                    <div class="lift-name">Bench</div>
-                                    <div class="lift-value">${athlete.bench}</div>
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">2nd</div>
+                                    <div style="font-weight: bold;">${athlete.squatAttempts[1] || '-'}</div>
                                 </div>
-                                <div class="lift-item">
-                                    <div class="lift-name">Deadlift</div>
-                                    <div class="lift-value">${athlete.deadlift}</div>
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">3rd</div>
+                                    <div style="font-weight: bold;">${athlete.squatAttempts[2] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #667eea; color: white; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="opacity: 0.9; font-size: 0.7rem;">Total</div>
+                                    <div style="font-weight: bold; font-size: 1.1rem;">${athlete.squat}</div>
+                                </div>
+                            </div>
+
+                            <div class="lifts-title">Bench Press</div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;">
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">1st</div>
+                                    <div style="font-weight: bold;">${athlete.benchAttempts[0] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">2nd</div>
+                                    <div style="font-weight: bold;">${athlete.benchAttempts[1] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">3rd</div>
+                                    <div style="font-weight: bold;">${athlete.benchAttempts[2] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #667eea; color: white; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="opacity: 0.9; font-size: 0.7rem;">Total</div>
+                                    <div style="font-weight: bold; font-size: 1.1rem;">${athlete.bench}</div>
+                                </div>
+                            </div>
+
+                            <div class="lifts-title">Deadlift</div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">1st</div>
+                                    <div style="font-weight: bold;">${athlete.deadliftAttempts[0] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">2nd</div>
+                                    <div style="font-weight: bold;">${athlete.deadliftAttempts[1] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="color: #666; font-size: 0.7rem;">3rd</div>
+                                    <div style="font-weight: bold;">${athlete.deadliftAttempts[2] || '-'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 5px; background: #667eea; color: white; border-radius: 4px; font-size: 0.85rem;">
+                                    <div style="opacity: 0.9; font-size: 0.7rem;">Total</div>
+                                    <div style="font-weight: bold; font-size: 1.1rem;">${athlete.deadlift}</div>
                                 </div>
                             </div>
                         </div>
@@ -840,10 +884,29 @@
                         const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 :
                                           (nameCol !== -1 ? parseFloat(row[nameCol - 1]) || 0 : 0);
 
-                        // Use detected total columns
+                        // Extract attempt data and totals
+                        // Attempts are in columns before the total (total - 3, total - 2, total - 1)
+                        const squatAttempts = squatCol !== -1 ? [
+                            row[squatCol - 3] || '',
+                            row[squatCol - 2] || '',
+                            row[squatCol - 1] || ''
+                        ] : ['', '', ''];
                         const squat = squatCol !== -1 ? parseFloat(row[squatCol]) || 0 : 0;
+
+                        const benchAttempts = benchCol !== -1 ? [
+                            row[benchCol - 3] || '',
+                            row[benchCol - 2] || '',
+                            row[benchCol - 1] || ''
+                        ] : ['', '', ''];
                         const bench = benchCol !== -1 ? parseFloat(row[benchCol]) || 0 : 0;
+
+                        const deadliftAttempts = deadliftCol !== -1 ? [
+                            row[deadliftCol - 3] || '',
+                            row[deadliftCol - 2] || '',
+                            row[deadliftCol - 1] || ''
+                        ] : ['', '', ''];
                         const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol]) || 0 : 0;
+
                         const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
 
                         // Extract weight class number and designation
@@ -893,8 +956,11 @@
                                 weightClass: wcNum,
                                 designation: designation,
                                 bodyWeight: bodyWeight,
+                                squatAttempts: squatAttempts,
                                 squat: squat,
+                                benchAttempts: benchAttempts,
                                 bench: bench,
+                                deadliftAttempts: deadliftAttempts,
                                 deadlift: deadlift,
                                 currentTotal: total
                             });
