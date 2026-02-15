@@ -670,7 +670,14 @@
 
                 const csvText = await response.text();
                 console.log('CSV Data received, length:', csvText.length);
+                console.log('First 500 chars:', csvText.substring(0, 500));
+                console.log('Line break check - has \\n:', csvText.includes('\n'));
+                console.log('Line break check - has \\r\\n:', csvText.includes('\r\n'));
+                console.log('Line break check - has \\r:', csvText.includes('\r'));
+
                 debugDiv.innerHTML += `✓ Received ${csvText.length} characters<br>`;
+                debugDiv.innerHTML += `<br><strong>Raw CSV preview (first 300 chars):</strong><br>`;
+                debugDiv.innerHTML += `<pre style="white-space: pre-wrap; word-break: break-all;">${csvText.substring(0, 300).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br>`;
 
                 const csvData = parseCSV(csvText);
                 console.log('Parsed rows:', csvData.length);
