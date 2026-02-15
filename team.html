@@ -370,8 +370,13 @@
                 <input type="text" id="sheetUrl" placeholder="Paste Mens Varsity Team Results sheet URL here...">
                 <button onclick="loadTeamData()">Load Data</button>
             </div>
+            <div style="margin-top: 10px;">
+                <button onclick="loadMensVarsityTeamResults()" style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    📊 Load Mens Varsity Team Results (gid=847893000)
+                </button>
+            </div>
             <p style="margin-top: 10px; color: #666; font-size: 12px;">
-                ⚠️ <strong>Important:</strong> Paste the URL for the <strong>"Mens Varsity Team Results"</strong> sheet tab.
+                ⚠️ <strong>Important:</strong> Use the button above or paste the URL for the <strong>"Mens Varsity Team Results"</strong> sheet tab.
                 Rankings will be based on the <strong>Total</strong> column.
             </p>
             <div id="loadingStatus"></div>
@@ -385,6 +390,14 @@
 
     <script>
         let autoRefreshInterval = null;
+
+        // Quick load function for Mens Varsity Team Results
+        function loadMensVarsityTeamResults() {
+            const mensVarsityUrl = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?gid=847893000#gid=847893000';
+            document.getElementById('sheetUrl').value = mensVarsityUrl;
+            console.log('Loading Mens Varsity Team Results sheet (gid=847893000)');
+            loadTeamData();
+        }
 
         // On page load, check for saved URL and auto-load
         window.addEventListener('DOMContentLoaded', function() {
