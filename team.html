@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three Rivers Varsity Team Standings</title>
+    <title>Mens Varsity Team Standings</title>
     <style>
         * {
             margin: 0;
@@ -196,8 +196,8 @@
     <div class="container">
         <header>
             <img src="https://threerivers-cdn.fxbrt.com/downloads/logos-assets/trcs_powercat.png" alt="Three Rivers Schools" class="logo">
-            <h1>📊 Three Rivers Varsity Team Standings</h1>
-            <p>Team Performance Overview</p>
+            <h1>🏆 Mens Varsity Team Standings</h1>
+            <p>Team Rankings by Total Points</p>
         </header>
 
         <div class="nav-buttons">
@@ -387,22 +387,56 @@
                 return;
             }
 
-            // Display the data as a table
-            let tableHTML = '<div class="team-table"><h3>Team Standings</h3><table>';
+            // Find the header row and identify columns
+            let headerRow = -1;
+            let teamCol = -1, pointsCol = -1, totalCol = -1;
 
-            // Add header row
+            // Look for headers in first few rows
+            for (let i = 0; i < Math.min(5, csvData.length); i++) {
+                const row = csvData[i];
+                for (let j = 0; j < row.length; j++) {
+                    const cell = row[j].toLowerCase().trim();
+                    if (cell.includes('team') || cell.includes('school')) teamCol = j;
+                    if (cell.includes('point') && !cell.includes('total')) pointsCol = j;
+                    if (cell.includes('total')) totalCol = j;
+                }
+                if (teamCol !== -1) {
+                    headerRow = i;
+                    break;
+                }
+            }
+
+            // Build standings table focused on points
+            let tableHTML = '<div class="team-table"><h3>Mens Varsity Team Standings</h3><table>';
             tableHTML += '<thead><tr>';
-            csvData[0].forEach(header => {
-                tableHTML += `<th>${header}</th>`;
-            });
+
+            // Use detected headers or default
+            if (headerRow !== -1) {
+                csvData[headerRow].forEach(header => {
+                    tableHTML += `<th>${header}</th>`;
+                });
+            }
             tableHTML += '</tr></thead><tbody>';
 
-            // Add data rows
-            for (let i = 1; i < csvData.length; i++) {
+            // Add data rows (skip header row)
+            const startRow = headerRow !== -1 ? headerRow + 1 : 1;
+            for (let i = startRow; i < csvData.length; i++) {
+                // Skip empty rows
                 if (csvData[i].some(cell => cell.trim())) {
-                    tableHTML += '<tr>';
-                    csvData[i].forEach(cell => {
-                        tableHTML += `<td>${cell}</td>`;
+                    // Highlight rows with "three rivers" (case insensitive)
+                    const isThreeRivers = csvData[i].some(cell =>
+                        cell.toLowerCase().includes('three rivers')
+                    );
+
+                    tableHTML += isThreeRivers ? '<tr style="background-color: #fff9c4; font-weight: bold;">' : '<tr>';
+
+                    csvData[i].forEach((cell, idx) => {
+                        // Highlight total points column
+                        if (totalCol !== -1 && idx === totalCol) {
+                            tableHTML += `<td style="font-weight: bold; color: #667eea; font-size: 1.1rem;">${cell}</td>`;
+                        } else {
+                            tableHTML += `<td>${cell}</td>`;
+                        }
                     });
                     tableHTML += '</tr>';
                 }
