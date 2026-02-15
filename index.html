@@ -600,7 +600,7 @@
             return null;
         }
 
-        // Function to parse CSV text
+        // Function to parse CSV text (handles quoted fields with commas)
         function parseCSV(text) {
             const lines = text.split('\n');
             const result = [];
@@ -609,8 +609,23 @@
                 const line = lines[i].trim();
                 if (!line) continue;
 
-                // Simple CSV parsing (handles basic cases)
-                const values = line.split(',').map(val => val.trim().replace(/^"|"$/g, ''));
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
                 result.push(values);
             }
 
@@ -649,7 +664,9 @@
                 }
 
                 const csvText = await response.text();
+                console.log('CSV Data received, length:', csvText.length);
                 const csvData = parseCSV(csvText);
+                console.log('Parsed rows:', csvData.length);
 
                 // Find Three Rivers athletes
                 const athletes = [];
@@ -666,11 +683,11 @@
                         if (cell.includes('name') && !cell.includes('school')) nameCol = j;
                         if (cell.includes('school')) schoolCol = j;
                         if (cell.includes('class') || cell.includes('wt')) weightClassCol = j;
-                        if (cell.includes('body') && cell.includes('weight')) bodyWeightCol = j;
-                        if (cell.includes('squat') && !cell.includes('bench')) squatCol = j;
+                        if (cell.includes('body') || (cell.includes('bw') && !cell.includes('wt'))) bodyWeightCol = j;
+                        if (cell.includes('squat')) squatCol = j;
                         if (cell.includes('bench')) benchCol = j;
                         if (cell.includes('dead')) deadliftCol = j;
-                        if (cell.includes('total')) totalCol = j;
+                        if (cell.includes('total') && !cell.includes('body')) totalCol = j;
                     }
                     if (nameCol !== -1 && schoolCol !== -1) {
                         headerRow = i;
@@ -678,15 +695,26 @@
                     }
                 }
 
+                console.log('Header row:', headerRow);
+                console.log('Columns - Name:', nameCol, 'School:', schoolCol, 'Weight Class:', weightClassCol);
+                console.log('Columns - Squat:', squatCol, 'Bench:', benchCol, 'Deadlift:', deadliftCol, 'Total:', totalCol);
+
                 // Process data rows
+                let threeRiversCount = 0;
                 for (let i = headerRow + 1; i < csvData.length; i++) {
                     const row = csvData[i];
                     if (row.length < 3) continue;
 
                     const school = schoolCol !== -1 ? row[schoolCol] : '';
 
+                    // Debug: log schools found
+                    if (i < headerRow + 5) {
+                        console.log('Row', i, 'School:', school);
+                    }
+
                     // Check if this is a Three Rivers athlete (case-insensitive)
-                    if (school.toLowerCase().includes('three rivers')) {
+                    if (school.toLowerCase().includes('three rivers') || school.toLowerCase().includes('threerivers')) {
+                        threeRiversCount++;
                         const name = nameCol !== -1 ? row[nameCol] : '';
                         const weightClass = weightClassCol !== -1 ? row[weightClassCol] : '';
                         const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0;
@@ -723,8 +751,19 @@
                     }
                 }
 
+                console.log('Three Rivers athletes found:', threeRiversCount);
+                console.log('Athletes with valid data:', athletes.length);
+
                 if (athletes.length === 0) {
-                    throw new Error('No Three Rivers athletes found in the sheet');
+                    let errorMsg = 'No Three Rivers athletes found in the sheet. ';
+                    if (headerRow === -1) {
+                        errorMsg += 'Could not find header row. ';
+                    }
+                    if (schoolCol === -1) {
+                        errorMsg += 'Could not find School column. ';
+                    }
+                    errorMsg += 'Check browser console for details.';
+                    throw new Error(errorMsg);
                 }
 
                 // Update the global athleteData and re-render
