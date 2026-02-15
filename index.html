@@ -846,7 +846,9 @@
 
                         if (!wcNum) wcNum = '0';
 
-                        if (name && total > 0) {
+                        // Include athlete if they have a name (even with total = 0)
+                        if (name && name.trim().length > 0) {
+                            console.log(`Adding athlete: ${name}, Total: ${total}`);
                             athletes.push({
                                 name: name,
                                 weightClass: wcNum,
@@ -857,6 +859,8 @@
                                 deadlift: deadlift,
                                 currentTotal: total
                             });
+                        } else {
+                            console.log(`Skipping row - no name found. School: ${school}, Total: ${total}`);
                         }
                     }
                 }
