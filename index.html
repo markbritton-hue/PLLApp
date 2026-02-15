@@ -662,19 +662,28 @@
 
                 // Try direct fetch first, fallback to CORS proxy if needed
                 let response;
+                let usedProxy = false;
+
                 try {
                     debugDiv.innerHTML += 'Trying direct fetch...<br>';
                     response = await fetch(csvUrl);
                     debugDiv.innerHTML += `Direct fetch status: ${response.status}<br>`;
+
+                    // If direct fetch fails, try CORS proxy
+                    if (!response.ok) {
+                        throw new Error('Direct fetch returned error status');
+                    }
                 } catch (directError) {
                     debugDiv.innerHTML += `Direct fetch failed, using CORS proxy...<br>`;
+                    usedProxy = true;
                     // Use CORS proxy as fallback
                     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
                     response = await fetch(proxyUrl);
-                }
+                    debugDiv.innerHTML += `Proxy fetch status: ${response.status}<br>`;
 
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch data via proxy: ${response.status} ${response.statusText}`);
+                    }
                 }
 
                 const csvText = await response.text();
