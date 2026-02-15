@@ -655,8 +655,11 @@
             try {
                 const parsed = parseSheetUrl(url);
                 if (!parsed) {
-                    throw new Error('Invalid Google Sheet URL');
+                    throw new Error('Invalid Google Sheet URL. Make sure it contains /d/ followed by the spreadsheet ID.');
                 }
+
+                debugDiv.innerHTML += `Spreadsheet ID: ${parsed.spreadsheetId}<br>`;
+                debugDiv.innerHTML += `Sheet GID: ${parsed.gid}<br><br>`;
 
                 const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
 
@@ -682,9 +685,15 @@
                     debugDiv.innerHTML += `Proxy fetch status: ${response.status}<br>`;
 
                     if (!response.ok) {
-                        throw new Error(`Failed to fetch data via proxy: ${response.status} ${response.statusText}`);
+                        let errorMsg = `Failed to fetch data via proxy: ${response.status}. `;
+                        if (response.status === 400) {
+                            errorMsg += 'Make sure the Google Sheet is set to "Anyone with the link can view" in Share settings.';
+                        }
+                        throw new Error(errorMsg);
                     }
                 }
+
+                debugDiv.innerHTML += `✓ Data fetched successfully using ${usedProxy ? 'CORS proxy' : 'direct fetch'}<br>`;
 
                 const csvText = await response.text();
                 console.log('CSV Data received, length:', csvText.length);
