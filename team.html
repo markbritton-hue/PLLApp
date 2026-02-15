@@ -696,8 +696,17 @@
             const dashboard = document.getElementById('dashboard');
 
             if (headerRow === -1 || teamCol === -1 || totalCol === -1) {
-                return; // Can't build dashboard without required columns
+                console.log('Dashboard not built - missing columns:', { headerRow, teamCol, totalCol });
+                dashboard.innerHTML = `
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: #856404; margin-bottom: 10px;">⚠️ Dashboard Not Available</h3>
+                        <p style="color: #856404;">Click the green "📊 Load Mens Varsity Team Results" button above to see the leaderboard.</p>
+                    </div>
+                `;
+                return;
             }
+
+            console.log('Building dashboard with', { headerRow, teamCol, totalCol });
 
             // Extract team data
             const teams = [];
@@ -722,9 +731,13 @@
             // Sort by points descending
             teams.sort((a, b) => b.points - a.points);
 
+            console.log('Teams for dashboard (top 5):', teams.slice(0, 5).map(t => ({ name: t.name, points: t.points })));
+
             // Find Three Rivers
             const threeRiversTeam = teams.find(t => t.isThreeRivers);
             const threeRiversRank = teams.findIndex(t => t.isThreeRivers) + 1;
+
+            console.log('Three Rivers:', { rank: threeRiversRank, points: threeRiversTeam?.points || 'Not found' });
 
             let dashboardHTML = '<div class="dashboard">';
             dashboardHTML += '<h2>🏆 Leaderboard</h2>';
