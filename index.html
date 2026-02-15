@@ -728,9 +728,9 @@
                     const row = csvData[i];
                     for (let j = 0; j < row.length; j++) {
                         const cell = row[j].toLowerCase();
-                        if (cell.includes('name') && !cell.includes('school')) nameCol = j;
+                        if ((cell.includes('name') || cell.includes('lifter')) && !cell.includes('school')) nameCol = j;
                         if (cell.includes('school')) schoolCol = j;
-                        if (cell.includes('class') || cell.includes('wt')) weightClassCol = j;
+                        if (cell.includes('class') || cell.includes('wt') || cell.includes('weight')) weightClassCol = j;
                         if (cell.includes('body') || (cell.includes('bw') && !cell.includes('wt'))) bodyWeightCol = j;
                         if (cell.includes('squat')) squatCol = j;
                         if (cell.includes('bench')) benchCol = j;
@@ -774,24 +774,31 @@
                         threeRiversCount++;
                         const name = nameCol !== -1 ? row[nameCol] : '';
                         const weightClass = weightClassCol !== -1 ? row[weightClassCol] : '';
-                        const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0;
-                        const squat = squatCol !== -1 ? parseFloat(row[squatCol]) || 0 : 0;
-                        const bench = benchCol !== -1 ? parseFloat(row[benchCol]) || 0 : 0;
-                        const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol]) || 0 : 0;
+
+                        // Body weight is in the Weight column (one before Lifter)
+                        const bodyWeight = nameCol !== -1 ? parseFloat(row[nameCol - 1]) || 0 : 0;
+
+                        // Best lifts are 3 columns after the first attempt column
+                        const squat = squatCol !== -1 ? parseFloat(row[squatCol + 3]) || 0 : 0;
+                        const bench = benchCol !== -1 ? parseFloat(row[benchCol + 3]) || 0 : 0;
+                        const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol + 3]) || 0 : 0;
                         const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
 
                         // Extract weight class number and designation
-                        let wcNum = weightClass.match(/\d+/);
-                        let designation = weightClass.includes('JV') ? 'JV' : 'V';
+                        // Weight class is in first column, designation is in column 4
+                        let wcNum = row[0] || '';
+                        let designation = row[4] || 'V';
 
-                        // Handle SHW
-                        if (weightClass.toUpperCase().includes('SHW')) {
+                        // Handle SHW or extract numbers
+                        if (wcNum.toUpperCase().includes('SHW')) {
                             wcNum = 'SHW';
-                        } else if (wcNum) {
-                            wcNum = wcNum[0];
                         } else {
-                            wcNum = '0';
+                            const numMatch = wcNum.match(/\d+/);
+                            wcNum = numMatch ? numMatch[0] : weightClass.match(/\d+/)?.[0] || '0';
                         }
+
+                        // Designation should be JV or V
+                        designation = designation.includes('JV') ? 'JV' : 'V';
 
                         if (name && total > 0) {
                             athletes.push({
