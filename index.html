@@ -564,6 +564,10 @@
                                 <div class="stat-label">Body Weight</div>
                                 <div class="stat-value">${athlete.bodyWeight} lbs</div>
                             </div>
+                            <div class="stat-item">
+                                <div class="stat-label">lb per lb</div>
+                                <div class="stat-value">${athlete.lbPerLb}</div>
+                            </div>
                         </div>
 
                         <div class="lifts-section">
@@ -795,7 +799,7 @@
                 // Try to find header row and column indices
                 let headerRow = -1;
                 let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
-                let squatCol = -1, benchCol = -1, deadliftCol = -1, totalCol = -1;
+                let squatCol = -1, benchCol = -1, deadliftCol = -1, totalCol = -1, lbPerLbCol = -1;
 
                 // First pass - find basic columns from first header row
                 for (let i = 0; i < Math.min(10, csvData.length); i++) {
@@ -842,6 +846,11 @@
                         // Find overall total column
                         if (cell === 'total' || (cell.includes('total') && !cell.includes('squat') && !cell.includes('bench') && !cell.includes('dead'))) {
                             if (totalCol === -1) totalCol = j;
+                        }
+
+                        // Find lb per lb column
+                        if (cell.includes('lb per lb') || cell.includes('lb/lb')) {
+                            lbPerLbCol = j;
                         }
                     }
                 }
@@ -904,6 +913,10 @@
 
                         const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
 
+                        // Get lb per lb ratio
+                        const lbPerLb = lbPerLbCol !== -1 ? parseFloat(row[lbPerLbCol]) || 0 :
+                                       (bodyWeight > 0 ? (total / bodyWeight).toFixed(3) : 0);
+
                         // Extract weight class number and designation
                         let wcNum = '';
                         let designation = 'V';
@@ -951,6 +964,7 @@
                                 weightClass: wcNum,
                                 designation: designation,
                                 bodyWeight: bodyWeight,
+                                lbPerLb: lbPerLb,
                                 squatAttempts: squatAttempts,
                                 squat: squat,
                                 benchAttempts: benchAttempts,
