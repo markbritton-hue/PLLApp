@@ -776,14 +776,26 @@
                     const row = csvData[i];
                     for (let j = 0; j < row.length; j++) {
                         const cell = row[j].toLowerCase().trim();
+
+                        // Look for "Squat Total", "Bench Total", etc.
                         if (cell.includes('squat') && cell.includes('total')) squatCol = j;
                         if (cell.includes('bench') && cell.includes('total')) benchCol = j;
                         if (cell.includes('dead') && cell.includes('total')) deadliftCol = j;
+
+                        // Also look for just "Squat", "Bench", "Dead Lift" (Mens Varsity format)
+                        // The total will be 3 columns after the label
+                        if (cell === 'squat' && squatCol === -1) squatCol = j + 3;
+                        if (cell === 'bench' && benchCol === -1) benchCol = j + 3;
+                        if ((cell === 'dead lift' || cell === 'deadlift' || cell.startsWith('dead')) && deadliftCol === -1) deadliftCol = j + 3;
+
+                        // Find overall total column
                         if (cell === 'total' || (cell.includes('total') && !cell.includes('squat') && !cell.includes('bench') && !cell.includes('dead'))) {
                             if (totalCol === -1) totalCol = j;
                         }
                     }
                 }
+
+                console.log('After detection - Squat:', squatCol, 'Bench:', benchCol, 'Deadlift:', deadliftCol, 'Total:', totalCol);
 
                 console.log('Header row:', headerRow);
                 console.log('Columns - Name:', nameCol, 'School:', schoolCol, 'Weight Class:', weightClassCol);
