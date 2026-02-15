@@ -724,22 +724,42 @@
                 let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
                 let squatCol = -1, benchCol = -1, deadliftCol = -1, totalCol = -1;
 
+                // First pass - find basic columns from first header row
+                for (let i = 0; i < Math.min(10, csvData.length); i++) {
+                    const row = csvData[i];
+                    let foundName = false, foundSchool = false;
+
+                    for (let j = 0; j < row.length; j++) {
+                        const cell = row[j].toLowerCase().trim();
+
+                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) {
+                            nameCol = j;
+                            foundName = true;
+                        }
+                        if (cell === 'school' && schoolCol === -1) {
+                            schoolCol = j;
+                            foundSchool = true;
+                        }
+                        if ((cell === 'class' || cell === 'weight class') && weightClassCol === -1) weightClassCol = j;
+                        if ((cell === 'weight' || cell === 'body weight') && bodyWeightCol === -1) bodyWeightCol = j;
+                    }
+
+                    if (foundName && foundSchool && headerRow === -1) {
+                        headerRow = i;
+                    }
+                }
+
+                // Second pass - find total columns (might be in a different row)
                 for (let i = 0; i < Math.min(10, csvData.length); i++) {
                     const row = csvData[i];
                     for (let j = 0; j < row.length; j++) {
-                        const cell = row[j].toLowerCase();
-                        if ((cell.includes('name') || cell.includes('lifter')) && !cell.includes('school')) nameCol = j;
-                        if (cell.includes('school')) schoolCol = j;
-                        if (cell.includes('class') || cell.includes('wt') || cell.includes('weight')) weightClassCol = j;
-                        if (cell.includes('body') || (cell.includes('bw') && !cell.includes('wt'))) bodyWeightCol = j;
-                        if (cell.includes('squat')) squatCol = j;
-                        if (cell.includes('bench')) benchCol = j;
-                        if (cell.includes('dead')) deadliftCol = j;
-                        if (cell.includes('total') && !cell.includes('body')) totalCol = j;
-                    }
-                    if (nameCol !== -1 && schoolCol !== -1) {
-                        headerRow = i;
-                        break;
+                        const cell = row[j].toLowerCase().trim();
+                        if (cell.includes('squat') && cell.includes('total')) squatCol = j;
+                        if (cell.includes('bench') && cell.includes('total')) benchCol = j;
+                        if (cell.includes('dead') && cell.includes('total')) deadliftCol = j;
+                        if (cell === 'total' || (cell.includes('total') && !cell.includes('squat') && !cell.includes('bench') && !cell.includes('dead'))) {
+                            if (totalCol === -1) totalCol = j;
+                        }
                     }
                 }
 
@@ -775,30 +795,44 @@
                         const name = nameCol !== -1 ? row[nameCol] : '';
                         const weightClass = weightClassCol !== -1 ? row[weightClassCol] : '';
 
-                        // Body weight is in the Weight column (one before Lifter)
-                        const bodyWeight = nameCol !== -1 ? parseFloat(row[nameCol - 1]) || 0 : 0;
+                        // Body weight from detected column
+                        const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 :
+                                          (nameCol !== -1 ? parseFloat(row[nameCol - 1]) || 0 : 0);
 
-                        // Best lifts are 3 columns after the first attempt column
-                        const squat = squatCol !== -1 ? parseFloat(row[squatCol + 3]) || 0 : 0;
-                        const bench = benchCol !== -1 ? parseFloat(row[benchCol + 3]) || 0 : 0;
-                        const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol + 3]) || 0 : 0;
+                        // Use detected total columns
+                        const squat = squatCol !== -1 ? parseFloat(row[squatCol]) || 0 : 0;
+                        const bench = benchCol !== -1 ? parseFloat(row[benchCol]) || 0 : 0;
+                        const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol]) || 0 : 0;
                         const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
 
                         // Extract weight class number and designation
-                        // Weight class is in first column, designation is in column 4
-                        let wcNum = row[0] || '';
-                        let designation = row[4] || 'V';
+                        let wcNum = '';
+                        let designation = 'V';
 
-                        // Handle SHW or extract numbers
-                        if (wcNum.toUpperCase().includes('SHW')) {
-                            wcNum = 'SHW';
-                        } else {
-                            const numMatch = wcNum.match(/\d+/);
-                            wcNum = numMatch ? numMatch[0] : weightClass.match(/\d+/)?.[0] || '0';
+                        // Try to get from weight class column first
+                        if (weightClass) {
+                            const numMatch = weightClass.match(/\d+/);
+                            wcNum = numMatch ? numMatch[0] : '';
+                            designation = weightClass.includes('JV') ? 'JV' : 'V';
                         }
 
-                        // Designation should be JV or V
-                        designation = designation.includes('JV') ? 'JV' : 'V';
+                        // If weight class column didn't have the number, try column 1
+                        if (!wcNum && row[1]) {
+                            const numMatch = row[1].match(/\d+/);
+                            wcNum = numMatch ? numMatch[0] : '';
+                        }
+
+                        // Check for designation in column 2 (JV/V/W column)
+                        if (row[2]) {
+                            designation = row[2].includes('JV') ? 'JV' : 'V';
+                        }
+
+                        // Handle SHW
+                        if (weightClass.toUpperCase().includes('SHW') || (row[1] && row[1].toUpperCase().includes('SHW'))) {
+                            wcNum = 'SHW';
+                        }
+
+                        if (!wcNum) wcNum = '0';
 
                         if (name && total > 0) {
                             athletes.push({
