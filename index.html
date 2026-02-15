@@ -603,7 +603,8 @@
 
         // Function to parse CSV text (handles quoted fields with commas)
         function parseCSV(text) {
-            const lines = text.split('\n');
+            // Handle different line break types (\r\n, \n, \r)
+            const lines = text.split(/\r\n|\n|\r/);
             const result = [];
 
             for (let i = 0; i < lines.length; i++) {
