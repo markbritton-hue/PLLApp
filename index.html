@@ -223,11 +223,21 @@
             <a href="results.html" style="display: inline-block; background: white; color: #667eea; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold;">All Schools Results</a>
         </div>
 
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #667eea; margin-bottom: 15px;">Load Competition Data</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="sheetUrl" placeholder="Paste Google Sheet URL here..." style="flex: 1; min-width: 300px; padding: 10px; border: 2px solid #667eea; border-radius: 5px; font-size: 14px;">
+                <button onclick="loadSheetData()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 30px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px;">Load Data</button>
+            </div>
+            <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL and click "Load Data" to display Three Rivers athletes</p>
+            <div id="loadingStatus" style="margin-top: 10px; color: #667eea; font-weight: bold;"></div>
+        </div>
+
         <div id="weightClassContainer"></div>
     </div>
 
     <script>
-        const athleteData = [
+        let athleteData = [
             // Platform 1
             {
                 name: "Cooper Roggelien",
@@ -573,8 +583,166 @@
             });
         }
 
-        // Load immediately
+        // Load immediately with default data
         renderAthletes();
+
+        // Function to extract spreadsheet ID and gid from URL
+        function parseSheetUrl(url) {
+            const spreadsheetIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            const gidMatch = url.match(/[#&]gid=([0-9]+)/);
+
+            if (spreadsheetIdMatch) {
+                return {
+                    spreadsheetId: spreadsheetIdMatch[1],
+                    gid: gidMatch ? gidMatch[1] : '0'
+                };
+            }
+            return null;
+        }
+
+        // Function to parse CSV text
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // Simple CSV parsing (handles basic cases)
+                const values = line.split(',').map(val => val.trim().replace(/^"|"$/g, ''));
+                result.push(values);
+            }
+
+            return result;
+        }
+
+        // Function to load data from Google Sheet
+        async function loadSheetData() {
+            const urlInput = document.getElementById('sheetUrl');
+            const statusDiv = document.getElementById('loadingStatus');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                statusDiv.textContent = 'Please enter a Google Sheet URL';
+                statusDiv.style.color = '#d32f2f';
+                return;
+            }
+
+            statusDiv.textContent = 'Loading data...';
+            statusDiv.style.color = '#667eea';
+
+            try {
+                const parsed = parseSheetUrl(url);
+                if (!parsed) {
+                    throw new Error('Invalid Google Sheet URL');
+                }
+
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
+
+                // Use CORS proxy to fetch the data
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
+
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data from Google Sheet');
+                }
+
+                const csvText = await response.text();
+                const csvData = parseCSV(csvText);
+
+                // Find Three Rivers athletes
+                const athletes = [];
+
+                // Try to find header row and column indices
+                let headerRow = -1;
+                let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
+                let squatCol = -1, benchCol = -1, deadliftCol = -1, totalCol = -1;
+
+                for (let i = 0; i < Math.min(10, csvData.length); i++) {
+                    const row = csvData[i];
+                    for (let j = 0; j < row.length; j++) {
+                        const cell = row[j].toLowerCase();
+                        if (cell.includes('name') && !cell.includes('school')) nameCol = j;
+                        if (cell.includes('school')) schoolCol = j;
+                        if (cell.includes('class') || cell.includes('wt')) weightClassCol = j;
+                        if (cell.includes('body') && cell.includes('weight')) bodyWeightCol = j;
+                        if (cell.includes('squat') && !cell.includes('bench')) squatCol = j;
+                        if (cell.includes('bench')) benchCol = j;
+                        if (cell.includes('dead')) deadliftCol = j;
+                        if (cell.includes('total')) totalCol = j;
+                    }
+                    if (nameCol !== -1 && schoolCol !== -1) {
+                        headerRow = i;
+                        break;
+                    }
+                }
+
+                // Process data rows
+                for (let i = headerRow + 1; i < csvData.length; i++) {
+                    const row = csvData[i];
+                    if (row.length < 3) continue;
+
+                    const school = schoolCol !== -1 ? row[schoolCol] : '';
+
+                    // Check if this is a Three Rivers athlete (case-insensitive)
+                    if (school.toLowerCase().includes('three rivers')) {
+                        const name = nameCol !== -1 ? row[nameCol] : '';
+                        const weightClass = weightClassCol !== -1 ? row[weightClassCol] : '';
+                        const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0;
+                        const squat = squatCol !== -1 ? parseFloat(row[squatCol]) || 0 : 0;
+                        const bench = benchCol !== -1 ? parseFloat(row[benchCol]) || 0 : 0;
+                        const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol]) || 0 : 0;
+                        const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
+
+                        // Extract weight class number and designation
+                        let wcNum = weightClass.match(/\d+/);
+                        let designation = weightClass.includes('JV') ? 'JV' : 'V';
+
+                        // Handle SHW
+                        if (weightClass.toUpperCase().includes('SHW')) {
+                            wcNum = 'SHW';
+                        } else if (wcNum) {
+                            wcNum = wcNum[0];
+                        } else {
+                            wcNum = '0';
+                        }
+
+                        if (name && total > 0) {
+                            athletes.push({
+                                name: name,
+                                weightClass: wcNum,
+                                designation: designation,
+                                bodyWeight: bodyWeight,
+                                squat: squat,
+                                bench: bench,
+                                deadlift: deadlift,
+                                currentTotal: total
+                            });
+                        }
+                    }
+                }
+
+                if (athletes.length === 0) {
+                    throw new Error('No Three Rivers athletes found in the sheet');
+                }
+
+                // Update the global athleteData and re-render
+                athleteData = athletes;
+                renderAthletes();
+
+                statusDiv.textContent = `✓ Loaded ${athletes.length} Three Rivers athletes successfully!`;
+                statusDiv.style.color = '#4caf50';
+
+                // Update header count
+                document.querySelector('header p').textContent = `Competition Results - ${athletes.length} Athletes`;
+
+            } catch (error) {
+                statusDiv.textContent = `Error: ${error.message}`;
+                statusDiv.style.color = '#d32f2f';
+                console.error('Error loading sheet:', error);
+            }
+        }
     </script>
 </body>
 </html>
