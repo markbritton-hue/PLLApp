@@ -570,8 +570,10 @@
             let pointCols = [];
 
             // Look for headers in first few rows
+            console.log('Searching for headers in first 10 rows...');
             for (let i = 0; i < Math.min(10, csvData.length); i++) {
                 const row = csvData[i];
+                console.log(`Row ${i} headers:`, row.slice(0, 25)); // Show first 25 columns
 
                 // Check if this row looks like a header
                 const hasTeamHeader = row.some(cell => {
@@ -579,7 +581,12 @@
                     return c === 'team' || c === 'school' || c === 'place';
                 });
 
-                if (!hasTeamHeader) continue;
+                if (!hasTeamHeader) {
+                    console.log(`Row ${i} - No team/school/place header found, skipping`);
+                    continue;
+                }
+
+                console.log(`Row ${i} - Potential header row found, analyzing columns...`);
 
                 // Found potential header row, identify columns
                 for (let j = 0; j < row.length; j++) {
@@ -588,12 +595,13 @@
                     // Team/School column
                     if (cell === 'team' || cell === 'school' || cell === 'place') {
                         teamCol = j;
+                        console.log(`Found Team/School column at index ${j}: "${row[j]}"`);
                     }
 
                     // Total column - be very specific
                     if (cell === 'total') {
                         totalCol = j;
-                        console.log('Found Total column at index:', j, 'in row:', i);
+                        console.log(`Found Total column at index ${j}: "${row[j]}"`);
                     }
 
                     // Point columns (weight classes like 114, 123, etc.)
@@ -604,8 +612,10 @@
 
                 if (teamCol !== -1 && totalCol !== -1) {
                     headerRow = i;
-                    console.log('Header row identified at row:', i);
+                    console.log(`✓ Header row identified at row ${i} - Team col: ${teamCol}, Total col: ${totalCol}`);
                     break;
+                } else {
+                    console.log(`Row ${i} - Missing required columns (Team: ${teamCol}, Total: ${totalCol}), continuing search...`);
                 }
             }
 
