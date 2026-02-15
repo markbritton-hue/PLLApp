@@ -231,6 +231,9 @@
             </div>
             <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL and click "Load Data" to display Three Rivers athletes</p>
             <div id="loadingStatus" style="margin-top: 10px; color: #667eea; font-weight: bold;"></div>
+            <div id="autoRefreshStatus" style="margin-top: 5px; color: #4caf50; font-size: 12px; display: none;">
+                🔄 Auto-refresh enabled (every 10 seconds)
+            </div>
         </div>
 
         <div id="weightClassContainer"></div>
@@ -639,6 +642,9 @@
             console.log('Rendering complete. Total cards rendered:', athleteData.length);
         }
 
+        // Auto-refresh interval (10 seconds)
+        let autoRefreshInterval = null;
+
         // On page load, check for saved URL and auto-load
         window.addEventListener('DOMContentLoaded', function() {
             const savedUrl = localStorage.getItem('trplSheetUrl');
@@ -646,6 +652,18 @@
                 document.getElementById('sheetUrl').value = savedUrl;
                 console.log('Auto-loading saved sheet URL...');
                 loadSheetData();
+
+                // Start auto-refresh every 10 seconds
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                }
+                autoRefreshInterval = setInterval(function() {
+                    console.log('Auto-refreshing data...');
+                    loadSheetData();
+                }, 10000); // 10 seconds
+
+                console.log('Auto-refresh enabled (every 10 seconds)');
+                document.getElementById('autoRefreshStatus').style.display = 'block';
             }
         });
 
@@ -710,6 +728,16 @@
 
             // Save URL to localStorage
             localStorage.setItem('trplSheetUrl', url);
+
+            // Start auto-refresh if not already running
+            if (!autoRefreshInterval) {
+                autoRefreshInterval = setInterval(function() {
+                    console.log('Auto-refreshing data...');
+                    loadSheetData();
+                }, 10000); // 10 seconds
+                console.log('Auto-refresh enabled (every 10 seconds)');
+                document.getElementById('autoRefreshStatus').style.display = 'block';
+            }
 
             statusDiv.textContent = 'Loading data...';
             statusDiv.style.color = '#667eea';
@@ -961,7 +989,9 @@
                 console.log('Updated athleteData, now rendering...');
                 renderAthletes();
 
-                statusDiv.textContent = `✓ Loaded ${athletes.length} Three Rivers athletes successfully!`;
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                statusDiv.textContent = `✓ Loaded ${athletes.length} Three Rivers athletes successfully! (Last updated: ${timeStr})`;
                 statusDiv.style.color = '#4caf50';
 
                 // Update header count
