@@ -231,7 +231,6 @@
             </div>
             <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL and click "Load Data" to display Three Rivers athletes</p>
             <div id="loadingStatus" style="margin-top: 10px; color: #667eea; font-weight: bold;"></div>
-            <div id="debugInfo" style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; display: none;"></div>
         </div>
 
         <div id="weightClassContainer"></div>
@@ -701,7 +700,6 @@
         async function loadSheetData() {
             const urlInput = document.getElementById('sheetUrl');
             const statusDiv = document.getElementById('loadingStatus');
-            const debugDiv = document.getElementById('debugInfo');
             const url = urlInput.value.trim();
 
             if (!url) {
@@ -715,8 +713,6 @@
 
             statusDiv.textContent = 'Loading data...';
             statusDiv.style.color = '#667eea';
-            debugDiv.style.display = 'block';
-            debugDiv.innerHTML = 'Fetching data from Google Sheets...<br>';
 
             try {
                 const parsed = parseSheetUrl(url);
@@ -724,8 +720,6 @@
                     throw new Error('Invalid Google Sheet URL. Make sure it contains /d/ followed by the spreadsheet ID.');
                 }
 
-                debugDiv.innerHTML += `Spreadsheet ID: ${parsed.spreadsheetId}<br>`;
-                debugDiv.innerHTML += `Sheet GID: ${parsed.gid}<br><br>`;
 
                 const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
 
@@ -734,21 +728,17 @@
                 let usedProxy = false;
 
                 try {
-                    debugDiv.innerHTML += 'Trying direct fetch...<br>';
                     response = await fetch(csvUrl);
-                    debugDiv.innerHTML += `Direct fetch status: ${response.status}<br>`;
 
                     // If direct fetch fails, try CORS proxy
                     if (!response.ok) {
                         throw new Error('Direct fetch returned error status');
                     }
                 } catch (directError) {
-                    debugDiv.innerHTML += `Direct fetch failed, using CORS proxy...<br>`;
                     usedProxy = true;
                     // Use CORS proxy as fallback
                     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
                     response = await fetch(proxyUrl);
-                    debugDiv.innerHTML += `Proxy fetch status: ${response.status}<br>`;
 
                     if (!response.ok) {
                         let errorMsg = `Failed to fetch data via proxy: ${response.status}. `;
@@ -759,7 +749,6 @@
                     }
                 }
 
-                debugDiv.innerHTML += `✓ Data fetched successfully using ${usedProxy ? 'CORS proxy' : 'direct fetch'}<br>`;
 
                 const csvText = await response.text();
                 console.log('CSV Data received, length:', csvText.length);
@@ -768,19 +757,9 @@
                 console.log('Line break check - has \\r\\n:', csvText.includes('\r\n'));
                 console.log('Line break check - has \\r:', csvText.includes('\r'));
 
-                debugDiv.innerHTML += `✓ Received ${csvText.length} characters<br>`;
-                debugDiv.innerHTML += `<br><strong>Raw CSV preview (first 300 chars):</strong><br>`;
-                debugDiv.innerHTML += `<pre style="white-space: pre-wrap; word-break: break-all;">${csvText.substring(0, 300).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><br>`;
 
                 const csvData = parseCSV(csvText);
                 console.log('Parsed rows:', csvData.length);
-                debugDiv.innerHTML += `✓ Parsed ${csvData.length} rows<br>`;
-
-                // Show first few rows for debugging
-                debugDiv.innerHTML += '<br><strong>First 3 rows of data:</strong><br>';
-                for (let i = 0; i < Math.min(3, csvData.length); i++) {
-                    debugDiv.innerHTML += `Row ${i}: ${csvData[i].slice(0, 5).join(' | ')}<br>`;
-                }
 
                 // Find Three Rivers athletes
                 const athletes = [];
@@ -845,10 +824,6 @@
                 console.log('Columns - Name:', nameCol, 'School:', schoolCol, 'Weight Class:', weightClassCol);
                 console.log('Columns - Squat:', squatCol, 'Bench:', benchCol, 'Deadlift:', deadliftCol, 'Total:', totalCol);
 
-                debugDiv.innerHTML += `<br><strong>Column Detection:</strong><br>`;
-                debugDiv.innerHTML += `Header Row: ${headerRow}<br>`;
-                debugDiv.innerHTML += `Name: ${nameCol}, School: ${schoolCol}, Weight Class: ${weightClassCol}<br>`;
-                debugDiv.innerHTML += `Squat: ${squatCol}, Bench: ${benchCol}, Deadlift: ${deadliftCol}, Total: ${totalCol}<br>`;
 
                 // Process data rows
                 let threeRiversCount = 0;
@@ -858,14 +833,6 @@
 
                     const school = schoolCol !== -1 ? row[schoolCol] : '';
 
-                    // Debug: log schools found
-                    if (i === headerRow + 1) {
-                        debugDiv.innerHTML += `<br><strong>Sample schools found:</strong><br>`;
-                    }
-                    if (i < headerRow + 6) {
-                        console.log('Row', i, 'School:', school);
-                        debugDiv.innerHTML += `Row ${i}: "${school}"<br>`;
-                    }
 
                     // Check if this is a Three Rivers athlete (case-insensitive)
                     if (school.toLowerCase().includes('three rivers') || school.toLowerCase().includes('threerivers')) {
@@ -974,16 +941,6 @@
                 console.log('Athletes with valid data:', athletes.length);
                 console.log('Athletes list:', athletes.map(a => a.name).join(', '));
 
-                debugDiv.innerHTML += `<br><strong>Results:</strong><br>`;
-                debugDiv.innerHTML += `Three Rivers entries found: ${threeRiversCount}<br>`;
-                debugDiv.innerHTML += `Athletes added to cards: ${athletes.length}<br>`;
-                if (threeRiversCount > athletes.length) {
-                    debugDiv.innerHTML += `<strong style="color: orange;">⚠ ${threeRiversCount - athletes.length} rows skipped (no name or other issue)</strong><br>`;
-                }
-                debugDiv.innerHTML += `<br><strong>Athletes loaded:</strong><br>`;
-                athletes.forEach(a => {
-                    debugDiv.innerHTML += `${a.name} - ${a.weightClass} lbs (${a.designation}) - Total: ${a.currentTotal}<br>`;
-                });
 
                 console.log('Weight classes found:', [...new Set(athletes.map(a => a.weightClass))]);
 
@@ -1006,8 +963,6 @@
 
                 statusDiv.textContent = `✓ Loaded ${athletes.length} Three Rivers athletes successfully!`;
                 statusDiv.style.color = '#4caf50';
-
-                debugDiv.innerHTML += `<br><strong style="color: #4caf50;">✓ Cards updated with ${athletes.length} athletes!</strong><br>`;
 
                 // Update header count
                 document.querySelector('header p').textContent = `Competition Results - ${athletes.length} Athletes`;
