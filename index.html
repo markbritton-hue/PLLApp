@@ -660,12 +660,21 @@
 
                 const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
 
-                // Use CORS proxy to fetch the data
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(csvUrl)}`;
+                // Try direct fetch first, fallback to CORS proxy if needed
+                let response;
+                try {
+                    debugDiv.innerHTML += 'Trying direct fetch...<br>';
+                    response = await fetch(csvUrl);
+                    debugDiv.innerHTML += `Direct fetch status: ${response.status}<br>`;
+                } catch (directError) {
+                    debugDiv.innerHTML += `Direct fetch failed, using CORS proxy...<br>`;
+                    // Use CORS proxy as fallback
+                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
+                    response = await fetch(proxyUrl);
+                }
 
-                const response = await fetch(proxyUrl);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch data from Google Sheet');
+                    throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
                 }
 
                 const csvText = await response.text();
