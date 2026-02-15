@@ -882,7 +882,12 @@
                 if (threeRiversCount > athletes.length) {
                     debugDiv.innerHTML += `<strong style="color: orange;">⚠ ${threeRiversCount - athletes.length} rows skipped (no name or other issue)</strong><br>`;
                 }
-                debugDiv.innerHTML += `<br><strong>Athletes loaded:</strong><br>${athletes.map(a => `${a.name} (${a.weightClass})`).join(', ')}<br>`;
+                debugDiv.innerHTML += `<br><strong>Athletes loaded:</strong><br>`;
+                athletes.forEach(a => {
+                    debugDiv.innerHTML += `${a.name} - ${a.weightClass} lbs (${a.designation}) - Total: ${a.currentTotal}<br>`;
+                });
+
+                console.log('Weight classes found:', [...new Set(athletes.map(a => a.weightClass))]);
 
                 if (athletes.length === 0) {
                     let errorMsg = 'No Three Rivers athletes found. ';
