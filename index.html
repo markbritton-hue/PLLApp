@@ -566,15 +566,15 @@
                         <div class="lifts-section">
                             <div class="lifts-title">Squat</div>
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;">
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.squatAttempts[0] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">1st</div>
                                     <div style="font-weight: bold;">${athlete.squatAttempts[0] || '-'}</div>
                                 </div>
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.squatAttempts[1] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">2nd</div>
                                     <div style="font-weight: bold;">${athlete.squatAttempts[1] || '-'}</div>
                                 </div>
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.squatAttempts[2] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">3rd</div>
                                     <div style="font-weight: bold;">${athlete.squatAttempts[2] || '-'}</div>
                                 </div>
@@ -586,15 +586,15 @@
 
                             <div class="lifts-title">Bench Press</div>
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;">
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.benchAttempts[0] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">1st</div>
                                     <div style="font-weight: bold;">${athlete.benchAttempts[0] || '-'}</div>
                                 </div>
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.benchAttempts[1] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">2nd</div>
                                     <div style="font-weight: bold;">${athlete.benchAttempts[1] || '-'}</div>
                                 </div>
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.benchAttempts[2] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">3rd</div>
                                     <div style="font-weight: bold;">${athlete.benchAttempts[2] || '-'}</div>
                                 </div>
@@ -606,15 +606,15 @@
 
                             <div class="lifts-title">Deadlift</div>
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.deadliftAttempts[0] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">1st</div>
                                     <div style="font-weight: bold;">${athlete.deadliftAttempts[0] || '-'}</div>
                                 </div>
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.deadliftAttempts[1] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">2nd</div>
                                     <div style="font-weight: bold;">${athlete.deadliftAttempts[1] || '-'}</div>
                                 </div>
-                                <div style="text-align: center; padding: 5px; background: #f0f0f0; border-radius: 4px; font-size: 0.85rem;">
+                                <div style="text-align: center; padding: 5px; background: ${(athlete.deadliftAttempts[2] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
                                     <div style="color: #666; font-size: 0.7rem;">3rd</div>
                                     <div style="font-weight: bold;">${athlete.deadliftAttempts[2] || '-'}</div>
                                 </div>
