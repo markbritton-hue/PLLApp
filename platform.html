@@ -651,13 +651,27 @@
             const row = document.createElement('div');
             row.className = 'row g-4';
 
-            sortedAthletes.forEach(athlete => {
+            sortedAthletes.forEach((athlete, index) => {
                 const col = document.createElement('div');
                 col.className = 'col-lg-4 col-md-6';
 
+                // Determine status label and color
+                let statusLabel = '';
+                let statusColor = '';
+                if (index === 0) {
+                    statusLabel = 'LIFTING';
+                    statusColor = '#ef4444'; // red
+                } else if (index === 1) {
+                    statusLabel = 'ON DECK';
+                    statusColor = '#10b981'; // green
+                }
+
                 col.innerHTML = `
                     <div class="athlete-card">
-                        <div class="athlete-name">${athlete.name}</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                            <div class="athlete-name">#${index + 1} ${athlete.name}</div>
+                            ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
+                        </div>
                         <div class="athlete-school">${athlete.school}</div>
 
                         <div class="row g-2">
