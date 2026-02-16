@@ -338,45 +338,32 @@
             try {
                 const config = JSON.parse(configStr);
 
-                // Find Mens Varsity Results and Mens JV Results sheets
-                const varsitySheet = config.sheets.find(s => s.name === 'Mens Varsity Results');
-                const jvSheet = config.sheets.find(s => s.name === 'Mens JV Results');
-
-                if (!varsitySheet && !jvSheet) {
-                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Could not find Mens Varsity Results or Mens JV Results in configuration.</div>';
+                // Always use Sheet 1 (first sheet in configuration)
+                if (!config.sheets || config.sheets.length === 0) {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>No sheets found in configuration.</div>';
                     return;
                 }
 
-                statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading data from configured sheets...</div>';
+                const sheet1 = config.sheets[0];
+
+                statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading athletes from Sheet 1...</div>';
 
                 // Start auto-refresh if not already running
                 if (!autoRefreshInterval) {
                     autoRefreshInterval = setInterval(function() {
-                        console.log('Auto-refreshing configured sheets...');
+                        console.log('Auto-refreshing Sheet 1...');
                         loadConfiguredSheets();
                     }, 10000);
                     document.getElementById('autoRefreshStatus').style.display = 'block';
                 }
 
-                // Load data from both sheets
-                const allAthletes = [];
-
-                if (varsitySheet) {
-                    console.log('Loading Mens Varsity Results...');
-                    const varsityAthletes = await loadSheetByGid(config.spreadsheetId, varsitySheet.gid, 'V');
-                    allAthletes.push(...varsityAthletes);
-                    console.log(`Loaded ${varsityAthletes.length} varsity athletes`);
-                }
-
-                if (jvSheet) {
-                    console.log('Loading Mens JV Results...');
-                    const jvAthletes = await loadSheetByGid(config.spreadsheetId, jvSheet.gid, 'JV');
-                    allAthletes.push(...jvAthletes);
-                    console.log(`Loaded ${jvAthletes.length} JV athletes`);
-                }
+                // Load data from Sheet 1
+                console.log(`Loading athletes from Sheet 1: ${sheet1.name}...`);
+                const allAthletes = await loadSheetByGid(config.spreadsheetId, sheet1.gid, '');
+                console.log(`Loaded ${allAthletes.length} athletes from ${sheet1.name}`);
 
                 if (allAthletes.length === 0) {
-                    statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i>No athletes found in the sheets.</div>';
+                    statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i>No athletes found in Sheet 1.</div>';
                     return;
                 }
 
@@ -386,7 +373,7 @@
 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
-                statusDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Loaded ${allAthletes.length} athletes (${varsitySheet ? 'Varsity' : ''}${varsitySheet && jvSheet ? ' + ' : ''}${jvSheet ? 'JV' : ''}) - Last updated: ${timeStr}</div>`;
+                statusDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Loaded ${allAthletes.length} athletes from ${sheet1.name} - Last updated: ${timeStr}</div>`;
 
             } catch (error) {
                 console.error('Error loading configured sheets:', error);
