@@ -175,6 +175,26 @@
             color: white;
         }
 
+        .btn-coaches {
+            background: #ec4899;
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-coaches:hover {
+            background: #db2777;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(236, 72, 153, 0.4);
+            color: white;
+        }
+
         .info-section {
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(96, 165, 250, 0.2);
@@ -281,6 +301,19 @@
                         <p>Browse complete competition results from all schools</p>
                         <a href="results.html" class="btn-results">
                             <i class="fas fa-arrow-right me-2"></i>View Results
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card" onclick="window.location.href='coaches.html'">
+                        <div class="feature-icon">
+                            <i class="fas fa-clipboard-user" style="color: #ec4899;"></i>
+                        </div>
+                        <h2>Coaches View</h2>
+                        <p>Your team's athletes currently lifting or on deck across all platforms</p>
+                        <a href="coaches.html" class="btn-coaches">
+                            <i class="fas fa-arrow-right me-2"></i>Coaches View
                         </a>
                     </div>
                 </div>
