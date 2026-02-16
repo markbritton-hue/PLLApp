@@ -239,12 +239,20 @@
         <!-- Status Message -->
         <div id="statusMessage" style="display: none;"></div>
 
+        <!-- Auto-refresh indicator -->
+        <div id="autoRefreshStatus" style="display: none; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
+            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 10 seconds)
+        </div>
+
         <!-- Athletes Container -->
         <div id="athletesContainer"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        let autoRefreshInterval = null;
+        let currentPlatformGid = null;
+
         // Load platforms on page load
         window.addEventListener('DOMContentLoaded', function() {
             loadPlatformsList();
@@ -292,18 +300,47 @@
             if (!selectedGid) {
                 document.getElementById('athletesContainer').innerHTML = '';
                 document.getElementById('statusMessage').style.display = 'none';
+                // Stop auto-refresh if no platform selected
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
                 return;
             }
 
+            // Store current platform for auto-refresh
+            currentPlatformGid = selectedGid;
+
             const selectedName = platformSelect.options[platformSelect.selectedIndex].text;
             showStatus(`Loading ${selectedName}...`, 'info');
+
+            // Start auto-refresh if not already running
+            if (!autoRefreshInterval) {
+                autoRefreshInterval = setInterval(function() {
+                    console.log('Auto-refreshing platform data...');
+                    loadPlatformData();
+                }, 10000); // 10 seconds
+                document.getElementById('autoRefreshStatus').style.display = 'block';
+                console.log('✅ Auto-refresh enabled (every 10 seconds)');
+            }
+
+            // Load the actual data
+            await loadPlatformData();
+        }
+
+        // Load platform data (separated for auto-refresh)
+        async function loadPlatformData() {
+            if (!currentPlatformGid) return;
+
+            const platformSelect = document.getElementById('platformSelect');
+            const selectedName = platformSelect.options[platformSelect.selectedIndex].text;
 
             try {
                 const configStr = localStorage.getItem('trplConfig');
                 const config = JSON.parse(configStr);
 
                 // Fetch the platform data
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${selectedGid}`;
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${currentPlatformGid}`;
 
                 let response;
                 try {
@@ -328,7 +365,9 @@
                 }
 
                 renderAthletes(athletes);
-                showStatus(`✓ Loaded ${athletes.length} athlete${athletes.length > 1 ? 's' : ''} from ${selectedName}`, 'success');
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                showStatus(`✓ Loaded ${athletes.length} athlete${athletes.length > 1 ? 's' : ''} from ${selectedName} - Last updated: ${timeStr}`, 'success');
 
             } catch (error) {
                 console.error('Error loading platform:', error);
