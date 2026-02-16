@@ -371,9 +371,24 @@
             return parseAthletesFromCSV(csvData, designation);
         }
 
+        // Get configured school name
+        function getConfiguredSchool() {
+            const configStr = localStorage.getItem('trplConfig');
+            if (configStr) {
+                try {
+                    const config = JSON.parse(configStr);
+                    return config.schoolName || 'Three Rivers';
+                } catch (e) {
+                    return 'Three Rivers';
+                }
+            }
+            return 'Three Rivers';
+        }
+
         // Parse athletes from CSV data
         function parseAthletesFromCSV(csvData, defaultDesignation = '') {
             const athletes = [];
+            const configuredSchool = getConfiguredSchool();
 
             let headerRow = -1;
             let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
@@ -456,11 +471,11 @@
                 });
                 console.log('First 10 rows:', csvData.slice(0, 10));
 
-                // Find the first row with actual athlete data (has "Three Rivers" in it)
+                // Find the first row with actual athlete data (has school name in it)
                 let dataStartRow = -1;
                 for (let i = 0; i < Math.min(20, csvData.length); i++) {
                     const row = csvData[i];
-                    if (row[5] && row[5].toLowerCase().includes('three rivers')) {
+                    if (row[5] && row[5].toLowerCase().includes(configuredSchool.toLowerCase())) {
                         dataStartRow = i;
                         console.log('Found data starting at row:', i, row);
                         break;
@@ -468,7 +483,7 @@
                 }
 
                 if (dataStartRow === -1) {
-                    console.log('Could not find Three Rivers data');
+                    console.log(`Could not find ${configuredSchool} data`);
                     return athletes;
                 }
 
@@ -515,7 +530,7 @@
                 const name = row[nameCol]?.trim();
                 const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
 
-                if (!school || !school.toLowerCase().includes('three rivers')) {
+                if (!school || !school.toLowerCase().includes(configuredSchool.toLowerCase())) {
                     continue;
                 }
 

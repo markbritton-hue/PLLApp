@@ -368,6 +368,20 @@
             </ol>
         </div>
 
+        <!-- School Configuration -->
+        <div class="setup-section">
+            <h2>🏫 School Configuration</h2>
+            <div class="form-group">
+                <label for="schoolName">Your School Name:</label>
+                <input
+                    type="text"
+                    id="schoolName"
+                    placeholder="e.g., Three Rivers, Lincoln High, Washington Academy"
+                    value="Three Rivers">
+                <p class="help-text">Enter your school name exactly as it appears in the Google Sheet</p>
+            </div>
+        </div>
+
         <!-- Main Spreadsheet URL -->
         <div class="setup-section">
             <h2>📊 Main Google Sheet</h2>
@@ -688,10 +702,16 @@
         }
 
         function saveConfiguration() {
+            const schoolName = document.getElementById('schoolName').value.trim();
             const spreadsheetUrl = document.getElementById('spreadsheetUrl').value.trim();
 
+            if (!schoolName) {
+                showStatus('Please enter your school name first', 'error');
+                return;
+            }
+
             if (!spreadsheetUrl) {
-                showStatus('Please enter the main Google Sheet URL first', 'error');
+                showStatus('Please enter the main Google Sheet URL', 'error');
                 return;
             }
 
@@ -719,6 +739,7 @@
             }
 
             const config = {
+                schoolName,
                 spreadsheetId,
                 spreadsheetUrl,
                 sheets,
@@ -728,7 +749,7 @@
             // Save to localStorage
             localStorage.setItem('trplConfig', JSON.stringify(config));
 
-            showStatus(`✓ Configuration saved! ${sheets.length} sheet(s) configured.`, 'success');
+            showStatus(`✓ Configuration saved for ${schoolName}! ${sheets.length} sheet(s) configured.`, 'success');
             displayCurrentConfig();
         }
 
@@ -743,6 +764,7 @@
 
             if (!configStr) {
                 // Load default configuration
+                document.getElementById('schoolName').value = 'Three Rivers';
                 document.getElementById('spreadsheetUrl').value = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?usp=sharing';
 
                 // Pre-populate with actual sheets from the Google Sheet (with real GIDs)
@@ -774,7 +796,8 @@
             try {
                 const config = JSON.parse(configStr);
 
-                // Load spreadsheet URL
+                // Load school name and spreadsheet URL
+                document.getElementById('schoolName').value = config.schoolName || 'Three Rivers';
                 document.getElementById('spreadsheetUrl').value = config.spreadsheetUrl || '';
 
                 // Clear existing sheets
@@ -787,7 +810,7 @@
                         const url = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${sheet.gid}`;
                         addSheetField(sheet.name, sheet.gid, url);
                     });
-                    showStatus(`✓ Loaded configuration with ${config.sheets.length} sheet(s)`, 'success');
+                    showStatus(`✓ Loaded configuration for ${config.schoolName || 'school'} with ${config.sheets.length} sheet(s)`, 'success');
                 } else {
                     addSheetField();
                 }

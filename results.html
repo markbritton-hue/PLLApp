@@ -189,6 +189,20 @@
     </div>
 
     <script>
+        // Get configured school name
+        function getConfiguredSchool() {
+            const configStr = localStorage.getItem('trplConfig');
+            if (configStr) {
+                try {
+                    const config = JSON.parse(configStr);
+                    return config.schoolName || 'Three Rivers';
+                } catch (e) {
+                    return 'Three Rivers';
+                }
+            }
+            return 'Three Rivers';
+        }
+
         const results = {
             "114": [
                 {rank:1,name:"Jack Metz",school:"Brighton",bodyWeight:114,squat:175,bench:120,deadlift:300,total:545},
@@ -340,8 +354,9 @@
                 `;
 
                 results[wc].forEach(athlete => {
-                    const isThreeRivers = athlete.school.toLowerCase().includes('three rivers');
-                    const rowClass = isThreeRivers ? 'three-rivers' : '';
+                    const configuredSchool = getConfiguredSchool();
+                    const isMySchool = athlete.school.toLowerCase().includes(configuredSchool.toLowerCase());
+                    const rowClass = isMySchool ? 'three-rivers' : '';
 
                     let medalHTML = '';
                     if (athlete.rank === 1) medalHTML = '<span class="medal">🥇</span>';
