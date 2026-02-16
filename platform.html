@@ -585,16 +585,87 @@
             return athletes;
         }
 
+        // Determine next pending attempt for an athlete
+        function getNextAttempt(athlete) {
+            // Check squats
+            if (athlete.squat1 && !athlete.squat1.toLowerCase().includes('g') && !athlete.squat1.toLowerCase().includes('x')) {
+                return { lift: 'squat', attempt: 1, weight: parseFloat(athlete.squat1) || 0 };
+            }
+            if (athlete.squat1 && (athlete.squat1.toLowerCase().includes('g') || athlete.squat1.toLowerCase().includes('x'))) {
+                if (athlete.squat2 && !athlete.squat2.toLowerCase().includes('g') && !athlete.squat2.toLowerCase().includes('x')) {
+                    return { lift: 'squat', attempt: 2, weight: parseFloat(athlete.squat2) || 0 };
+                }
+                if (athlete.squat2 && (athlete.squat2.toLowerCase().includes('g') || athlete.squat2.toLowerCase().includes('x'))) {
+                    if (athlete.squat3 && !athlete.squat3.toLowerCase().includes('g') && !athlete.squat3.toLowerCase().includes('x')) {
+                        return { lift: 'squat', attempt: 3, weight: parseFloat(athlete.squat3) || 0 };
+                    }
+                }
+            }
+
+            // Check bench
+            if (athlete.bench1 && !athlete.bench1.toLowerCase().includes('g') && !athlete.bench1.toLowerCase().includes('x')) {
+                return { lift: 'bench', attempt: 1, weight: parseFloat(athlete.bench1) || 0 };
+            }
+            if (athlete.bench1 && (athlete.bench1.toLowerCase().includes('g') || athlete.bench1.toLowerCase().includes('x'))) {
+                if (athlete.bench2 && !athlete.bench2.toLowerCase().includes('g') && !athlete.bench2.toLowerCase().includes('x')) {
+                    return { lift: 'bench', attempt: 2, weight: parseFloat(athlete.bench2) || 0 };
+                }
+                if (athlete.bench2 && (athlete.bench2.toLowerCase().includes('g') || athlete.bench2.toLowerCase().includes('x'))) {
+                    if (athlete.bench3 && !athlete.bench3.toLowerCase().includes('g') && !athlete.bench3.toLowerCase().includes('x')) {
+                        return { lift: 'bench', attempt: 3, weight: parseFloat(athlete.bench3) || 0 };
+                    }
+                }
+            }
+
+            // Check deadlift
+            if (athlete.dead1 && !athlete.dead1.toLowerCase().includes('g') && !athlete.dead1.toLowerCase().includes('x')) {
+                return { lift: 'deadlift', attempt: 1, weight: parseFloat(athlete.dead1) || 0 };
+            }
+            if (athlete.dead1 && (athlete.dead1.toLowerCase().includes('g') || athlete.dead1.toLowerCase().includes('x'))) {
+                if (athlete.dead2 && !athlete.dead2.toLowerCase().includes('g') && !athlete.dead2.toLowerCase().includes('x')) {
+                    return { lift: 'deadlift', attempt: 2, weight: parseFloat(athlete.dead2) || 0 };
+                }
+                if (athlete.dead2 && (athlete.dead2.toLowerCase().includes('g') || athlete.dead2.toLowerCase().includes('x'))) {
+                    if (athlete.dead3 && !athlete.dead3.toLowerCase().includes('g') && !athlete.dead3.toLowerCase().includes('x')) {
+                        return { lift: 'deadlift', attempt: 3, weight: parseFloat(athlete.dead3) || 0 };
+                    }
+                }
+            }
+
+            // All attempts complete
+            return { lift: 'done', attempt: 999, weight: 99999 };
+        }
+
         // Render athletes
         function renderAthletes(athletes) {
             const container = document.getElementById('athletesContainer');
             container.innerHTML = '';
 
+            // Sort athletes by lifting order (who's up next)
+            const sortedAthletes = [...athletes].sort((a, b) => {
+                const nextA = getNextAttempt(a);
+                const nextB = getNextAttempt(b);
+
+                // Sort by lift type (squat < bench < deadlift < done)
+                const liftOrder = { 'squat': 1, 'bench': 2, 'deadlift': 3, 'done': 4 };
+                if (liftOrder[nextA.lift] !== liftOrder[nextB.lift]) {
+                    return liftOrder[nextA.lift] - liftOrder[nextB.lift];
+                }
+
+                // Then by attempt number
+                if (nextA.attempt !== nextB.attempt) {
+                    return nextA.attempt - nextB.attempt;
+                }
+
+                // Then by weight (lightest first)
+                return nextA.weight - nextB.weight;
+            });
+
             // Create grid layout
             const row = document.createElement('div');
             row.className = 'row g-4';
 
-            athletes.forEach(athlete => {
+            sortedAthletes.forEach(athlete => {
                 const col = document.createElement('div');
                 col.className = 'col-lg-4 col-md-6';
 
