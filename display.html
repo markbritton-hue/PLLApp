@@ -65,7 +65,13 @@
             font-size: 1.3rem;
             font-weight: 700;
             color: white;
-            flex: 1;
+        }
+
+        .attempt-weight {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-top: 4px;
         }
 
         .status-badge {
@@ -413,12 +419,26 @@
                     statusClass = 'on-deck';
                 }
 
+                // Get the weight they'll be attempting
+                let attemptWeight = '';
+                if (currentColumn && athlete[currentColumn]) {
+                    const attemptValue = athlete[currentColumn];
+                    // Extract numeric value, removing g/x markers
+                    const weight = attemptValue.replace(/[xgXG]/g, '').trim();
+                    if (weight) {
+                        attemptWeight = `${weight} lbs`;
+                    }
+                }
+
                 // Default background for rows without status
                 const rowClass = statusClass || 'default';
 
                 html += `
                     <div class="athlete-row ${rowClass}">
-                        <div class="athlete-name">${athlete.name}</div>
+                        <div style="flex: 1;">
+                            <div class="athlete-name">${athlete.name}</div>
+                            ${attemptWeight ? `<div class="attempt-weight">${attemptWeight}</div>` : ''}
+                        </div>
                         ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                     </div>
                 `;
