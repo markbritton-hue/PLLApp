@@ -645,8 +645,7 @@
             const currentColumn = getCurrentAttemptColumn(athletes);
             console.log('Current attempt column:', currentColumn);
 
-            // Sort: athletes with pending in CURRENT column first (in sheet order),
-            // staying in that column and going down, not across
+            // Sort: athletes with pending in CURRENT column first, ordered by weight (lightest first)
             const sortedAthletes = [...athletes].sort((a, b) => {
                 const aPending = hasPendingInColumn(a, currentColumn);
                 const bPending = hasPendingInColumn(b, currentColumn);
@@ -654,6 +653,15 @@
                 // Pending in current column comes first
                 if (aPending && !bPending) return -1;
                 if (!aPending && bPending) return 1;
+
+                // If both have pending attempts in current column, sort by weight
+                if (aPending && bPending && currentColumn) {
+                    const aWeight = parseFloat(a[currentColumn].replace(/[xgXG]/g, '').trim()) || 0;
+                    const bWeight = parseFloat(b[currentColumn].replace(/[xgXG]/g, '').trim()) || 0;
+                    if (aWeight !== bWeight) {
+                        return aWeight - bWeight; // Lightest first
+                    }
+                }
 
                 // Otherwise maintain sheet order
                 return a.sheetOrder - b.sheetOrder;

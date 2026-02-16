@@ -528,6 +528,15 @@
                 if (aPending && !bPending) return -1;
                 if (!aPending && bPending) return 1;
 
+                // If both have pending attempts in current column, sort by weight
+                if (aPending && bPending && currentColumn) {
+                    const aWeight = parseFloat(a[currentColumn].replace(/[xgXG]/g, '').trim()) || 0;
+                    const bWeight = parseFloat(b[currentColumn].replace(/[xgXG]/g, '').trim()) || 0;
+                    if (aWeight !== bWeight) {
+                        return aWeight - bWeight; // Lightest first
+                    }
+                }
+
                 return a.sheetOrder - b.sheetOrder;
             });
         }
