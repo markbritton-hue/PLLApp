@@ -65,13 +65,14 @@
             font-size: 1.3rem;
             font-weight: 700;
             color: white;
+            flex: 1;
         }
 
         .attempt-weight {
             font-size: 1rem;
             font-weight: 600;
             color: #60a5fa;
-            margin-top: 4px;
+            margin-left: 12px;
         }
 
         .status-badge {
@@ -435,9 +436,9 @@
 
                 html += `
                     <div class="athlete-row ${rowClass}">
-                        <div style="flex: 1;">
-                            <div class="athlete-name">${athlete.name}</div>
-                            ${attemptWeight ? `<div class="attempt-weight">${attemptWeight}</div>` : ''}
+                        <div class="athlete-name">
+                            ${athlete.name}
+                            ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
                         </div>
                         ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                     </div>
