@@ -380,6 +380,26 @@
                     value="Three Rivers">
                 <p class="help-text">Enter your school name exactly as it appears in the Google Sheet</p>
             </div>
+
+            <div class="form-group">
+                <label for="schoolWebsite">School Website URL:</label>
+                <input
+                    type="text"
+                    id="schoolWebsite"
+                    placeholder="e.g., https://www.yourschool.edu"
+                    value="">
+                <p class="help-text">Enter your school's website URL - we'll automatically fetch the logo/favicon</p>
+            </div>
+
+            <div class="form-group">
+                <label for="schoolLogoUrl">Direct Logo URL (Optional):</label>
+                <input
+                    type="text"
+                    id="schoolLogoUrl"
+                    placeholder="https://www.yourschool.edu/logo.png (leave blank to use favicon)"
+                    value="">
+                <p class="help-text">If you have a direct link to your school logo, paste it here. Otherwise, we'll use the website's favicon.</p>
+            </div>
         </div>
 
         <!-- Main Spreadsheet URL -->
@@ -703,6 +723,8 @@
 
         function saveConfiguration() {
             const schoolName = document.getElementById('schoolName').value.trim();
+            const schoolWebsite = document.getElementById('schoolWebsite').value.trim();
+            const schoolLogoUrl = document.getElementById('schoolLogoUrl').value.trim();
             const spreadsheetUrl = document.getElementById('spreadsheetUrl').value.trim();
 
             if (!schoolName) {
@@ -740,6 +762,8 @@
 
             const config = {
                 schoolName,
+                schoolWebsite,
+                schoolLogoUrl,
                 spreadsheetId,
                 spreadsheetUrl,
                 sheets,
@@ -796,8 +820,10 @@
             try {
                 const config = JSON.parse(configStr);
 
-                // Load school name and spreadsheet URL
+                // Load school configuration and spreadsheet URL
                 document.getElementById('schoolName').value = config.schoolName || 'Three Rivers';
+                document.getElementById('schoolWebsite').value = config.schoolWebsite || '';
+                document.getElementById('schoolLogoUrl').value = config.schoolLogoUrl || '';
                 document.getElementById('spreadsheetUrl').value = config.spreadsheetUrl || '';
 
                 // Clear existing sheets

@@ -46,11 +46,29 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
         .school-header p {
             font-size: 1.2rem;
             color: rgba(255, 255, 255, 0.7);
+        }
+
+        .school-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .school-logo-placeholder {
+            display: none;
         }
 
         .load-section {
@@ -274,7 +292,11 @@
 
             <!-- School Name Header -->
             <div class="school-header">
-                <h1><i class="fas fa-users me-3"></i><span id="schoolNameDisplay">Individual Athletes</span></h1>
+                <h1>
+                    <img id="schoolLogo" class="school-logo school-logo-placeholder" src="" alt="School Logo" onerror="this.style.display='none'">
+                    <i id="schoolIconFallback" class="fas fa-users"></i>
+                    <span id="schoolNameDisplay">Individual Athletes</span>
+                </h1>
                 <p>Varsity and JV Athletes by Weight Class</p>
             </div>
 
@@ -799,12 +821,63 @@
             alert('Please use the "Load from Configuration" button or configure your sheets in Setup first.');
         }
 
-        // Update school name display
+        // Get school logo URL
+        function getSchoolLogoUrl() {
+            const configStr = localStorage.getItem('trplConfig');
+            if (configStr) {
+                try {
+                    const config = JSON.parse(configStr);
+                    // If direct logo URL is provided, use it
+                    if (config.schoolLogoUrl) {
+                        return config.schoolLogoUrl;
+                    }
+                    // Otherwise, use favicon from website
+                    if (config.schoolWebsite) {
+                        // Use Google's favicon service for reliability
+                        return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(config.schoolWebsite)}&sz=128`;
+                    }
+                } catch (e) {
+                    console.error('Error loading logo config:', e);
+                }
+            }
+            return null;
+        }
+
+        // Update school name and logo display
         function updateSchoolNameDisplay() {
             const schoolName = getConfiguredSchool();
             const displayElement = document.getElementById('schoolNameDisplay');
             if (displayElement) {
                 displayElement.textContent = `${schoolName} Athletes`;
+            }
+
+            // Update logo
+            const logoElement = document.getElementById('schoolLogo');
+            const iconFallback = document.getElementById('schoolIconFallback');
+            const logoUrl = getSchoolLogoUrl();
+
+            if (logoUrl && logoElement) {
+                logoElement.src = logoUrl;
+                logoElement.style.display = 'block';
+                if (iconFallback) {
+                    iconFallback.style.display = 'none';
+                }
+
+                // If logo fails to load, show icon fallback
+                logoElement.onerror = function() {
+                    logoElement.style.display = 'none';
+                    if (iconFallback) {
+                        iconFallback.style.display = 'inline-block';
+                    }
+                };
+            } else {
+                // No logo configured, show icon
+                if (logoElement) {
+                    logoElement.style.display = 'none';
+                }
+                if (iconFallback) {
+                    iconFallback.style.display = 'inline-block';
+                }
             }
         }
 
