@@ -585,55 +585,19 @@
             return athletes;
         }
 
-        // Determine next pending attempt for an athlete
-        function getNextAttempt(athlete) {
-            // Check squats
-            if (athlete.squat1 && !athlete.squat1.toLowerCase().includes('g') && !athlete.squat1.toLowerCase().includes('x')) {
-                return { lift: 'squat', attempt: 1, weight: parseFloat(athlete.squat1) || 0 };
-            }
-            if (athlete.squat1 && (athlete.squat1.toLowerCase().includes('g') || athlete.squat1.toLowerCase().includes('x'))) {
-                if (athlete.squat2 && !athlete.squat2.toLowerCase().includes('g') && !athlete.squat2.toLowerCase().includes('x')) {
-                    return { lift: 'squat', attempt: 2, weight: parseFloat(athlete.squat2) || 0 };
-                }
-                if (athlete.squat2 && (athlete.squat2.toLowerCase().includes('g') || athlete.squat2.toLowerCase().includes('x'))) {
-                    if (athlete.squat3 && !athlete.squat3.toLowerCase().includes('g') && !athlete.squat3.toLowerCase().includes('x')) {
-                        return { lift: 'squat', attempt: 3, weight: parseFloat(athlete.squat3) || 0 };
-                    }
-                }
-            }
+        // Check if athlete has any pending attempt (number without g/x marker)
+        function hasPendingAttempt(athlete) {
+            const attempts = [
+                athlete.squat1, athlete.squat2, athlete.squat3,
+                athlete.bench1, athlete.bench2, athlete.bench3,
+                athlete.dead1, athlete.dead2, athlete.dead3
+            ];
 
-            // Check bench
-            if (athlete.bench1 && !athlete.bench1.toLowerCase().includes('g') && !athlete.bench1.toLowerCase().includes('x')) {
-                return { lift: 'bench', attempt: 1, weight: parseFloat(athlete.bench1) || 0 };
-            }
-            if (athlete.bench1 && (athlete.bench1.toLowerCase().includes('g') || athlete.bench1.toLowerCase().includes('x'))) {
-                if (athlete.bench2 && !athlete.bench2.toLowerCase().includes('g') && !athlete.bench2.toLowerCase().includes('x')) {
-                    return { lift: 'bench', attempt: 2, weight: parseFloat(athlete.bench2) || 0 };
-                }
-                if (athlete.bench2 && (athlete.bench2.toLowerCase().includes('g') || athlete.bench2.toLowerCase().includes('x'))) {
-                    if (athlete.bench3 && !athlete.bench3.toLowerCase().includes('g') && !athlete.bench3.toLowerCase().includes('x')) {
-                        return { lift: 'bench', attempt: 3, weight: parseFloat(athlete.bench3) || 0 };
-                    }
-                }
-            }
-
-            // Check deadlift
-            if (athlete.dead1 && !athlete.dead1.toLowerCase().includes('g') && !athlete.dead1.toLowerCase().includes('x')) {
-                return { lift: 'deadlift', attempt: 1, weight: parseFloat(athlete.dead1) || 0 };
-            }
-            if (athlete.dead1 && (athlete.dead1.toLowerCase().includes('g') || athlete.dead1.toLowerCase().includes('x'))) {
-                if (athlete.dead2 && !athlete.dead2.toLowerCase().includes('g') && !athlete.dead2.toLowerCase().includes('x')) {
-                    return { lift: 'deadlift', attempt: 2, weight: parseFloat(athlete.dead2) || 0 };
-                }
-                if (athlete.dead2 && (athlete.dead2.toLowerCase().includes('g') || athlete.dead2.toLowerCase().includes('x'))) {
-                    if (athlete.dead3 && !athlete.dead3.toLowerCase().includes('g') && !athlete.dead3.toLowerCase().includes('x')) {
-                        return { lift: 'deadlift', attempt: 3, weight: parseFloat(athlete.dead3) || 0 };
-                    }
-                }
-            }
-
-            // All attempts complete
-            return { lift: 'done', attempt: 999, weight: 99999 };
+            return attempts.some(attempt => {
+                if (!attempt) return false;
+                const lower = attempt.toLowerCase();
+                return !lower.includes('g') && !lower.includes('x');
+            });
         }
 
         // Render athletes
@@ -641,24 +605,23 @@
             const container = document.getElementById('athletesContainer');
             container.innerHTML = '';
 
-            // Sort athletes by lifting order (who's up next)
+            // Add original sheet position to each athlete
+            athletes.forEach((athlete, index) => {
+                athlete.sheetOrder = index;
+            });
+
+            // Sort: athletes with pending attempts first (in sheet order),
+            // then completed athletes (in sheet order)
             const sortedAthletes = [...athletes].sort((a, b) => {
-                const nextA = getNextAttempt(a);
-                const nextB = getNextAttempt(b);
+                const aPending = hasPendingAttempt(a);
+                const bPending = hasPendingAttempt(b);
 
-                // Sort by lift type (squat < bench < deadlift < done)
-                const liftOrder = { 'squat': 1, 'bench': 2, 'deadlift': 3, 'done': 4 };
-                if (liftOrder[nextA.lift] !== liftOrder[nextB.lift]) {
-                    return liftOrder[nextA.lift] - liftOrder[nextB.lift];
-                }
+                // Pending attempts come first
+                if (aPending && !bPending) return -1;
+                if (!aPending && bPending) return 1;
 
-                // Then by attempt number
-                if (nextA.attempt !== nextB.attempt) {
-                    return nextA.attempt - nextB.attempt;
-                }
-
-                // Then by weight (lightest first)
-                return nextA.weight - nextB.weight;
+                // Otherwise maintain sheet order
+                return a.sheetOrder - b.sheetOrder;
             });
 
             // Create grid layout
