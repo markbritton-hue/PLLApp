@@ -534,15 +534,20 @@
                 // Debug: Save HTML to console for inspection
                 console.log('=== HTML RESPONSE DEBUG ===');
                 console.log('HTML length:', html.length);
-                console.log('First 5000 chars:', html.substring(0, 5000));
+
+                // Find the sheet-menu section specifically
+                const sheetMenuStart = html.indexOf('<ul id="sheet-menu"');
+                const sheetMenuEnd = html.indexOf('</ul>', sheetMenuStart);
+                if (sheetMenuStart !== -1 && sheetMenuEnd !== -1) {
+                    const sheetMenuHTML = html.substring(sheetMenuStart, sheetMenuEnd + 5);
+                    console.log('📋 Sheet menu HTML:', sheetMenuHTML);
+                } else {
+                    console.log('⚠️ Sheet menu not found, showing first 10000 chars:', html.substring(0, 10000));
+                }
 
                 // Look for any sheet-related content
                 const gidMatches = html.match(/gid=(\d+)/g);
                 console.log('GID matches found:', gidMatches);
-
-                // Look for sheet names in various formats
-                const possibleNames = html.match(/<a[^>]*>([^<]+)<\/a>/g);
-                console.log('Link texts found (first 20):', possibleNames?.slice(0, 20));
 
                 // Parse the HTML to extract sheet names and GIDs
                 const sheets = parseSheetDataFromHTML(html);
@@ -574,17 +579,32 @@
             const sheets = [];
             let match;
 
-            // Method 1: Look for sheet tabs with both name and gid together
-            // Pattern: finds sheet tab links like <a href="#gid=123">Sheet Name</a>
-            const tabLinkRegex = /<a[^>]*href=["']#gid=(\d+)["'][^>]*>([^<]+)<\/a>/gi;
-            while ((match = tabLinkRegex.exec(html)) !== null) {
+            // Method 0: Look for sheet-menu list items with id and text
+            // Pattern: <li id="sheet-button-123"><a ...>Sheet Name</a></li>
+            const sheetMenuRegex = /<li[^>]*id=["']sheet-button-(\d+)["'][^>]*>.*?<a[^>]*>([^<]+)<\/a>/gi;
+            while ((match = sheetMenuRegex.exec(html)) !== null) {
                 const name = match[2].trim();
-                // Skip empty names or navigation elements
-                if (name && name.length > 0 && !name.match(/^[\s\u00A0]*$/)) {
+                if (name && name.length > 0) {
                     sheets.push({
                         gid: match[1],
                         name: name
                     });
+                }
+            }
+
+            // Method 1: Look for sheet tabs with both name and gid together
+            // Pattern: finds sheet tab links like <a href="#gid=123">Sheet Name</a>
+            if (sheets.length === 0) {
+                const tabLinkRegex = /<a[^>]*href=["']#gid=(\d+)["'][^>]*>([^<]+)<\/a>/gi;
+                while ((match = tabLinkRegex.exec(html)) !== null) {
+                    const name = match[2].trim();
+                    // Skip empty names or navigation elements
+                    if (name && name.length > 0 && !name.match(/^[\s\u00A0]*$/)) {
+                        sheets.push({
+                            gid: match[1],
+                            name: name
+                        });
+                    }
                 }
             }
 
