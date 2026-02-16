@@ -558,19 +558,34 @@
 
         function parseSheetDataFromHTML(html) {
             const sheets = [];
-
-            // Method 1: Look for sheet-button data attributes
-            const sheetButtonRegex = /data-sheet-id="(\d+)"[^>]*>([^<]+)</g;
             let match;
 
-            while ((match = sheetButtonRegex.exec(html)) !== null) {
-                sheets.push({
-                    gid: match[1],
-                    name: match[2].trim()
-                });
+            // Method 1: Look for sheet tabs with both name and gid together
+            // Pattern: finds sheet tab links like <a href="#gid=123">Sheet Name</a>
+            const tabLinkRegex = /<a[^>]*href=["']#gid=(\d+)["'][^>]*>([^<]+)<\/a>/gi;
+            while ((match = tabLinkRegex.exec(html)) !== null) {
+                const name = match[2].trim();
+                // Skip empty names or navigation elements
+                if (name && name.length > 0 && !name.match(/^[\s\u00A0]*$/)) {
+                    sheets.push({
+                        gid: match[1],
+                        name: name
+                    });
+                }
             }
 
-            // Method 2: Look for sheet data in script tags
+            // Method 2: Look for sheet-button data attributes
+            if (sheets.length === 0) {
+                const sheetButtonRegex = /data-sheet-id="(\d+)"[^>]*>([^<]+)</g;
+                while ((match = sheetButtonRegex.exec(html)) !== null) {
+                    sheets.push({
+                        gid: match[1],
+                        name: match[2].trim()
+                    });
+                }
+            }
+
+            // Method 3: Look for sheet data in script tags
             if (sheets.length === 0) {
                 const scriptRegex = /"sheetId":"(\d+)"[^}]*"name":"([^"]+)"/g;
                 while ((match = scriptRegex.exec(html)) !== null) {
@@ -581,28 +596,39 @@
                 }
             }
 
-            // Method 3: Look for gid in links
+            // Method 4: Try alternate script format
             if (sheets.length === 0) {
-                const gidRegex = /gid=(\d+)/g;
-                const nameRegex = /<span[^>]*>([^<]+)<\/span>/g;
-                const gids = [];
-                const names = [];
-
-                while ((match = gidRegex.exec(html)) !== null) {
-                    if (!gids.includes(match[1])) {
-                        gids.push(match[1]);
-                    }
-                }
-
-                // This method is less reliable as we can't guarantee name/gid pairing
-                gids.forEach((gid, index) => {
+                const altScriptRegex = /"sheetId":(\d+)[^}]*"name":"([^"]+)"/g;
+                while ((match = altScriptRegex.exec(html)) !== null) {
                     sheets.push({
-                        gid: gid,
-                        name: `Sheet ${index + 1}` // Generic name
+                        gid: match[1],
+                        name: match[2]
                     });
-                });
+                }
             }
 
+            // Method 5: Parse from sheets array in embedded data (most reliable)
+            if (sheets.length === 0) {
+                try {
+                    // Look for the sheets array in the embedded data
+                    const sheetsArrayMatch = html.match(/var\s+\w+\s*=\s*(\{[^;]+sheets[^;]+\});/);
+                    if (sheetsArrayMatch) {
+                        const dataStr = sheetsArrayMatch[1];
+                        // Extract sheets with names and IDs
+                        const sheetMatches = dataStr.matchAll(/"name":"([^"]+)"[^}]*"sheetId":(\d+)/g);
+                        for (const m of sheetMatches) {
+                            sheets.push({
+                                gid: m[2],
+                                name: m[1]
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.log('Method 5 failed:', e);
+                }
+            }
+
+            console.log('Parsed sheets:', sheets);
             return sheets;
         }
 
