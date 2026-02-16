@@ -339,16 +339,29 @@
                 const configStr = localStorage.getItem('trplConfig');
                 const config = JSON.parse(configStr);
 
-                // Fetch the platform data
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${currentPlatformGid}`;
+                // Fetch the platform data with cache-busting timestamp
+                const timestamp = new Date().getTime();
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${currentPlatformGid}&t=${timestamp}`;
 
                 let response;
                 try {
-                    response = await fetch(csvUrl);
+                    response = await fetch(csvUrl, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
                     if (!response.ok) throw new Error('Direct fetch failed');
                 } catch (directError) {
                     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
-                    response = await fetch(proxyUrl);
+                    response = await fetch(proxyUrl, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
                     if (!response.ok) {
                         throw new Error(`Failed to fetch platform data: ${response.status}`);
                     }
@@ -364,6 +377,7 @@
                     return;
                 }
 
+                console.log(`🔄 Rendering ${athletes.length} athletes with latest data`);
                 renderAthletes(athletes);
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
