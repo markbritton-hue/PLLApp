@@ -30,109 +30,56 @@
             font-weight: 700;
         }
 
-        .athlete-card {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-            border-left: 3px solid #60a5fa;
-            height: 100%;
-            margin-bottom: 10px;
+        .athlete-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 10px;
+            border-left: 4px solid;
+            transition: all 0.2s;
         }
 
-        .athlete-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-            border-left-color: #a78bfa;
+        .athlete-row.lifting {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .athlete-row.on-deck {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .athlete-row:hover {
+            transform: translateX(5px);
         }
 
         .athlete-name {
-            font-size: 0.95rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: white;
-            margin-bottom: 3px;
+            flex: 1;
         }
 
-        .athlete-school {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 8px;
-        }
-
-        .stat-box {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            padding: 6px;
-            border-radius: 6px;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-
-        .stat-label {
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #60a5fa;
-            margin-top: 2px;
-        }
-
-        .lifts-section {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(96, 165, 250, 0.2);
-        }
-
-        .lift-box {
-            text-align: center;
-            padding: 6px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 6px;
-        }
-
-        .lift-name {
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.6);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .lift-value {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #60a5fa;
-            margin-top: 3px;
-        }
-
-        .total-box {
-            margin-top: 8px;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
-        }
-
-        .total-label {
-            font-size: 0.5rem;
-            opacity: 0.95;
-            font-weight: 600;
-        }
-
-        .total-value {
-            font-size: 0.75rem;
+        .status-badge {
+            padding: 10px 25px;
+            border-radius: 12px;
+            font-size: 1.1rem;
             font-weight: 800;
-            margin-top: 1px;
+            letter-spacing: 1.5px;
+            color: white;
+        }
+
+        .status-badge.lifting {
+            background: #ef4444;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .status-badge.on-deck {
+            background: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
 
         .btn-back {
@@ -299,31 +246,14 @@
         function parseAthletes(csvData) {
             const athletes = [];
             let headerRow = -1;
-            let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
-            let squat1Col = -1, squat2Col = -1, squat3Col = -1;
-            let bench1Col = -1, bench2Col = -1, bench3Col = -1;
-            let dead1Col = -1, dead2Col = -1, dead3Col = -1;
-            let totalCol = -1;
+            let nameCol = -1, schoolCol = -1;
 
-            // Find header row and columns
             for (let i = 0; i < Math.min(15, csvData.length); i++) {
                 const row = csvData[i];
                 for (let j = 0; j < row.length; j++) {
                     const cell = row[j].toLowerCase().trim();
                     if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
                     if (cell === 'school' && schoolCol === -1) schoolCol = j;
-                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'class') && weightClassCol === -1) weightClassCol = j;
-                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bodyWeightCol === -1) bodyWeightCol = j;
-                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && squat1Col === -1) squat1Col = j;
-                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && squat2Col === -1) squat2Col = j;
-                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
-                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
-                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bench2Col === -1) bench2Col = j;
-                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
-                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
-                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dead2Col === -1) dead2Col = j;
-                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
-                    if (cell === 'total' && totalCol === -1) totalCol = j;
                 }
 
                 if (nameCol !== -1 && schoolCol !== -1) {
@@ -334,44 +264,10 @@
 
             if (headerRow === -1) return athletes;
 
-            // Check row 1 for detailed column names and infer missing columns
-            if (csvData.length > 1) {
-                const row1 = csvData[1];
-                for (let j = 0; j < row1.length; j++) {
-                    const cell = row1[j].toLowerCase().trim();
-                    if ((cell === 'squat 2' || cell === 'sq2') && squat2Col === -1) {
-                        squat2Col = j;
-                        if (squat1Col === -1 && j > 0) squat1Col = j - 1;
-                        if (squat3Col === -1 && j < row1.length - 1) squat3Col = j + 1;
-                    }
-                    if ((cell === 'bench 2' || cell === 'bp2') && bench2Col === -1) {
-                        bench2Col = j;
-                        if (bench1Col === -1 && j > 0) bench1Col = j - 1;
-                        if (bench3Col === -1 && j < row1.length - 1) bench3Col = j + 1;
-                    }
-                    if ((cell === 'dead lift 2') && dead2Col === -1) {
-                        dead2Col = j;
-                        if (dead1Col === -1 && j > 0) dead1Col = j - 1;
-                        if (dead3Col === -1 && j < row1.length - 1) dead3Col = j + 1;
-                    }
-                }
-                if (headerRow === 0 && csvData[1]) {
-                    headerRow = 1;
-                }
+            if (headerRow === 0 && csvData[1]) {
+                headerRow = 1;
             }
 
-            // Additional fallback: if we have columns for attempt 1 and 2, infer attempt 3
-            if (squat1Col !== -1 && squat2Col !== -1 && squat3Col === -1) {
-                squat3Col = squat2Col + 1;
-            }
-            if (bench1Col !== -1 && bench2Col !== -1 && bench3Col === -1) {
-                bench3Col = bench2Col + 1;
-            }
-            if (dead1Col !== -1 && dead2Col !== -1 && dead3Col === -1) {
-                dead3Col = dead2Col + 1;
-            }
-
-            // Parse athlete rows
             for (let i = headerRow + 1; i < csvData.length; i++) {
                 const row = csvData[i];
                 if (row.length <= nameCol) continue;
@@ -379,79 +275,18 @@
                 const name = row[nameCol]?.trim();
                 if (!name) continue;
 
-                const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
-                let weightClass = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
-
-                if (weightClass) {
-                    const match = weightClass.match(/(\d+)/);
-                    if (match) weightClass = match[1];
-                }
-
-                const athlete = {
+                athletes.push({
                     name: name,
-                    school: school,
-                    weightClass: weightClass,
-                    bodyWeight: bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0,
-                    squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
-                    squat2: squat2Col !== -1 ? row[squat2Col]?.trim() : '',
-                    squat3: squat3Col !== -1 ? row[squat3Col]?.trim() : '',
-                    bench1: bench1Col !== -1 ? row[bench1Col]?.trim() : '',
-                    bench2: bench2Col !== -1 ? row[bench2Col]?.trim() : '',
-                    bench3: bench3Col !== -1 ? row[bench3Col]?.trim() : '',
-                    dead1: dead1Col !== -1 ? row[dead1Col]?.trim() : '',
-                    dead2: dead2Col !== -1 ? row[dead2Col]?.trim() : '',
-                    dead3: dead3Col !== -1 ? row[dead3Col]?.trim() : '',
-                    total: totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0,
+                    school: schoolCol !== -1 ? row[schoolCol]?.trim() : '',
                     sheetOrder: i - headerRow - 1
-                };
-
-                athletes.push(athlete);
+                });
             }
 
             return athletes;
         }
 
         function sortAthletesByLiftingOrder(athletes) {
-            const currentColumn = getCurrentAttemptColumn(athletes);
-
-            return [...athletes].sort((a, b) => {
-                const aPending = hasPendingInColumn(a, currentColumn);
-                const bPending = hasPendingInColumn(b, currentColumn);
-
-                if (aPending && !bPending) return -1;
-                if (!aPending && bPending) return 1;
-
-                return a.sheetOrder - b.sheetOrder;
-            });
-        }
-
-        function getCurrentAttemptColumn(athletes) {
-            const attemptColumns = [
-                'squat1', 'squat2', 'squat3',
-                'bench1', 'bench2', 'bench3',
-                'dead1', 'dead2', 'dead3'
-            ];
-
-            for (const col of attemptColumns) {
-                const hasPending = athletes.some(athlete => {
-                    const value = athlete[col];
-                    if (!value) return false;
-                    const lower = value.toLowerCase();
-                    return !lower.includes('g') && !lower.includes('x');
-                });
-
-                if (hasPending) return col;
-            }
-
-            return null;
-        }
-
-        function hasPendingInColumn(athlete, column) {
-            if (!column) return false;
-            const value = athlete[column];
-            if (!value) return false;
-            const lower = value.toLowerCase();
-            return !lower.includes('g') && !lower.includes('x');
+            return [...athletes].sort((a, b) => a.sheetOrder - b.sheetOrder);
         }
 
         function renderPlatformSection(platformName, athletes) {
@@ -463,126 +298,19 @@
             let html = `<div class="platform-name"><i class="fas fa-layer-group me-2"></i>${platformName}</div>`;
 
             athletes.forEach((athlete, index) => {
-                let statusLabel = '';
-                let statusColor = '';
-                if (index === 0) {
-                    statusLabel = 'LIFTING';
-                    statusColor = '#ef4444';
-                } else if (index === 1) {
-                    statusLabel = 'ON DECK';
-                    statusColor = '#10b981';
-                }
+                const status = index === 0 ? 'LIFTING' : 'ON DECK';
+                const statusClass = index === 0 ? 'lifting' : 'on-deck';
 
                 html += `
-                    <div class="athlete-card">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
-                            <div class="athlete-name">#${index + 1} ${athlete.name}</div>
-                            ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 8px; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.3px;">${statusLabel}</div>` : ''}
-                        </div>
-                        <div class="athlete-school">${athlete.school}</div>
-
-                        <div class="row g-1">
-                            <div class="col-6">
-                                <div class="stat-box">
-                                    <div class="stat-label">Weight Class</div>
-                                    <div class="stat-value">${athlete.weightClass || 'N/A'} <small style="font-size: 0.65rem;">lbs</small></div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-box">
-                                    <div class="stat-label">Body Weight</div>
-                                    <div class="stat-value">${athlete.bodyWeight} <small style="font-size: 0.65rem;">lbs</small></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="lifts-section">
-                            <h6 style="color: rgba(255,255,255,0.8); font-size: 0.7rem; margin-bottom: 5px;">
-                                <i class="fas fa-compress-arrows-alt me-1"></i>Squat
-                            </h6>
-                            <div class="row g-1 mb-2">
-                                ${renderAttempt(athlete.squat1, '1')}
-                                ${renderAttempt(athlete.squat2, '2')}
-                                ${renderAttempt(athlete.squat3, '3')}
-                            </div>
-
-                            <h6 style="color: rgba(255,255,255,0.8); font-size: 0.7rem; margin-bottom: 5px;">
-                                <i class="fas fa-hands me-1"></i>Bench Press
-                            </h6>
-                            <div class="row g-1 mb-2">
-                                ${renderAttempt(athlete.bench1, '1')}
-                                ${renderAttempt(athlete.bench2, '2')}
-                                ${renderAttempt(athlete.bench3, '3')}
-                            </div>
-
-                            <h6 style="color: rgba(255,255,255,0.8); font-size: 0.7rem; margin-bottom: 5px;">
-                                <i class="fas fa-weight-hanging me-1"></i>Deadlift
-                            </h6>
-                            <div class="row g-1">
-                                ${renderAttempt(athlete.dead1, '1')}
-                                ${renderAttempt(athlete.dead2, '2')}
-                                ${renderAttempt(athlete.dead3, '3')}
-                            </div>
-                        </div>
-
-                        <div class="total-box">
-                            <div class="total-label">TOTAL</div>
-                            <div class="total-value">${athlete.total} lbs</div>
-                        </div>
+                    <div class="athlete-row ${statusClass}">
+                        <div class="athlete-name">${athlete.name}</div>
+                        <div class="status-badge ${statusClass}">${status}</div>
                     </div>
                 `;
             });
 
             section.innerHTML = html;
             container.appendChild(section);
-        }
-
-        function renderAttempt(attempt, attemptNum) {
-            if (!attempt) {
-                return `
-                    <div class="col-4">
-                        <div class="lift-box" style="opacity: 0.3;">
-                            <div class="lift-name">Att ${attemptNum}</div>
-                            <div class="lift-value">-</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            const isFailed = attempt.toLowerCase().includes('x');
-            const isGood = attempt.toLowerCase().includes('g');
-            const hasMarker = isFailed || isGood;
-            let value = attempt.replace(/[xgXG]/g, '');
-
-            let bgColor, borderColor, textColor, labelColor;
-
-            if (isFailed) {
-                bgColor = '#ef4444';
-                borderColor = '#dc2626';
-                textColor = 'white';
-                labelColor = 'rgba(255,255,255,0.8)';
-            } else if (isGood) {
-                bgColor = 'rgba(16, 185, 129, 0.2)';
-                borderColor = '#10b981';
-                textColor = '#60a5fa';
-                labelColor = 'rgba(255, 255, 255, 0.6)';
-            } else {
-                bgColor = '#000000';
-                borderColor = 'rgba(96, 165, 250, 0.2)';
-                textColor = 'white';
-                labelColor = 'rgba(255,255,255,0.8)';
-            }
-
-            return `
-                <div class="col-4">
-                    <div class="lift-box" style="background: ${bgColor}; border-color: ${borderColor};">
-                        <div class="lift-name" style="color: ${labelColor};">Att ${attemptNum}</div>
-                        <div class="lift-value" style="color: ${textColor};">
-                            ${value}${isFailed ? '<i class="fas fa-times" style="font-size: 0.7rem;"></i>' : ''}${isGood ? '<i class="fas fa-check" style="color: #10b981; font-size: 0.7rem;"></i>' : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
         }
     </script>
 </body>
