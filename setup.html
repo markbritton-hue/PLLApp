@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRPL App - Setup</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -326,6 +327,82 @@
             margin-bottom: 8px;
             color: #333;
         }
+
+        /* QR Scanner Modal */
+        .qr-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .qr-modal-content {
+            position: relative;
+            margin: 5% auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .qr-video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            border: 3px solid #60a5fa;
+        }
+
+        .qr-close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .qr-close:hover {
+            color: #60a5fa;
+        }
+
+        .qr-status {
+            color: white;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .btn-qr {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-qr:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .url-input-group input {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -407,12 +484,17 @@
             <h2>📊 Main Google Sheet</h2>
             <div class="form-group">
                 <label for="spreadsheetUrl">Google Sheet URL:</label>
-                <input
-                    type="text"
-                    id="spreadsheetUrl"
-                    placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit..."
-                    value="">
-                <p class="help-text">Paste the URL from your browser when viewing the Google Sheet</p>
+                <div class="url-input-group">
+                    <input
+                        type="text"
+                        id="spreadsheetUrl"
+                        placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit..."
+                        value="">
+                    <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code">
+                        📷 Scan QR
+                    </button>
+                </div>
+                <p class="help-text">Paste the URL from your browser or scan a QR code</p>
             </div>
 
             <div class="form-group">
@@ -1011,6 +1093,92 @@
 
             return result;
         }
+
+        // QR Code Scanner Functions
+        let qrStream = null;
+        let qrScanInterval = null;
+
+        function openQRScanner() {
+            const modal = document.getElementById('qrModal');
+            const video = document.getElementById('qrVideo');
+            const statusDiv = document.getElementById('qrStatus');
+
+            modal.style.display = 'block';
+            statusDiv.textContent = 'Initializing camera...';
+
+            // Request camera access
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function(stream) {
+                    qrStream = stream;
+                    video.srcObject = stream;
+                    video.play();
+                    statusDiv.textContent = 'Point camera at QR code...';
+
+                    // Start scanning
+                    qrScanInterval = setInterval(scanQRCode, 250);
+                })
+                .catch(function(err) {
+                    console.error('Camera access error:', err);
+                    statusDiv.textContent = 'Error: Could not access camera. Please allow camera permissions.';
+                });
+        }
+
+        function closeQRScanner() {
+            const modal = document.getElementById('qrModal');
+            const video = document.getElementById('qrVideo');
+
+            // Stop video stream
+            if (qrStream) {
+                qrStream.getTracks().forEach(track => track.stop());
+                qrStream = null;
+            }
+
+            // Stop scanning interval
+            if (qrScanInterval) {
+                clearInterval(qrScanInterval);
+                qrScanInterval = null;
+            }
+
+            video.srcObject = null;
+            modal.style.display = 'none';
+        }
+
+        function scanQRCode() {
+            const video = document.getElementById('qrVideo');
+            const canvas = document.createElement('canvas');
+            const statusDiv = document.getElementById('qrStatus');
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Scan for QR code
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (code) {
+                    // QR code detected!
+                    const url = code.data;
+                    document.getElementById('spreadsheetUrl').value = url;
+                    statusDiv.textContent = '✓ QR Code scanned successfully!';
+
+                    // Close scanner after 1 second
+                    setTimeout(closeQRScanner, 1000);
+                }
+            }
+        }
     </script>
+
+    <!-- QR Scanner Modal -->
+    <div id="qrModal" class="qr-modal">
+        <span class="qr-close" onclick="closeQRScanner()">&times;</span>
+        <div class="qr-modal-content">
+            <video id="qrVideo" class="qr-video"></video>
+            <div id="qrStatus" class="qr-status">Initializing...</div>
+        </div>
+    </div>
+
 </body>
 </html>
