@@ -555,6 +555,42 @@
                     statusColor = '#10b981';
                 }
 
+                // Build lift sections HTML - only show lifts with pending attempts
+                let liftsHTML = '';
+
+                // Squat attempts
+                const squatAttempts = renderPendingAttempts([athlete.squat1, athlete.squat2, athlete.squat3]);
+                if (squatAttempts) {
+                    liftsHTML += `
+                        <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px; margin-top: 12px;">
+                            <i class="fas fa-compress-arrows-alt me-2"></i>Squat
+                        </h6>
+                        <div class="row g-2">${squatAttempts}</div>
+                    `;
+                }
+
+                // Bench attempts
+                const benchAttempts = renderPendingAttempts([athlete.bench1, athlete.bench2, athlete.bench3]);
+                if (benchAttempts) {
+                    liftsHTML += `
+                        <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px; margin-top: 12px;">
+                            <i class="fas fa-hands me-2"></i>Bench Press
+                        </h6>
+                        <div class="row g-2">${benchAttempts}</div>
+                    `;
+                }
+
+                // Deadlift attempts
+                const deadAttempts = renderPendingAttempts([athlete.dead1, athlete.dead2, athlete.dead3]);
+                if (deadAttempts) {
+                    liftsHTML += `
+                        <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px; margin-top: 12px;">
+                            <i class="fas fa-weight-hanging me-2"></i>Deadlift
+                        </h6>
+                        <div class="row g-2">${deadAttempts}</div>
+                    `;
+                }
+
                 sectionHTML += `
                     <div class="col-lg-6 col-md-12">
                         <div class="athlete-card">
@@ -564,54 +600,12 @@
                             </div>
                             <div class="athlete-school">${athlete.school}</div>
 
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <div class="stat-box">
-                                        <div class="stat-label">Weight Class</div>
-                                        <div class="stat-value">${athlete.weightClass || 'N/A'} <small>lbs</small></div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-box">
-                                        <div class="stat-label">Body Weight</div>
-                                        <div class="stat-value">${athlete.bodyWeight} <small>lbs</small></div>
-                                    </div>
-                                </div>
+                            <div class="stat-box" style="max-width: 200px;">
+                                <div class="stat-label">Weight Class</div>
+                                <div class="stat-value">${athlete.weightClass || 'N/A'} <small>lbs</small></div>
                             </div>
 
-                            <div class="lifts-section">
-                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
-                                    <i class="fas fa-compress-arrows-alt me-2"></i>Squat
-                                </h6>
-                                <div class="row g-2 mb-3">
-                                    ${renderAttempt(athlete.squat1, '1')}
-                                    ${renderAttempt(athlete.squat2, '2')}
-                                    ${renderAttempt(athlete.squat3, '3')}
-                                </div>
-
-                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
-                                    <i class="fas fa-hands me-2"></i>Bench Press
-                                </h6>
-                                <div class="row g-2 mb-3">
-                                    ${renderAttempt(athlete.bench1, '1')}
-                                    ${renderAttempt(athlete.bench2, '2')}
-                                    ${renderAttempt(athlete.bench3, '3')}
-                                </div>
-
-                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
-                                    <i class="fas fa-weight-hanging me-2"></i>Deadlift
-                                </h6>
-                                <div class="row g-2">
-                                    ${renderAttempt(athlete.dead1, '1')}
-                                    ${renderAttempt(athlete.dead2, '2')}
-                                    ${renderAttempt(athlete.dead3, '3')}
-                                </div>
-                            </div>
-
-                            <div class="total-box">
-                                <div class="total-label">TOTAL</div>
-                                <div class="total-value">${athlete.total} lbs</div>
-                            </div>
+                            ${liftsHTML ? `<div class="lifts-section" style="margin-top: 12px; padding-top: 12px;">${liftsHTML}</div>` : '<p style="color: rgba(255,255,255,0.5); margin-top: 15px;">All attempts complete</p>'}
                         </div>
                     </div>
                 `;
@@ -620,6 +614,46 @@
             sectionHTML += '</div>';
             section.innerHTML = sectionHTML;
             container.appendChild(section);
+        }
+
+        // Render only pending attempts (no g/x markers)
+        function renderPendingAttempts(attempts) {
+            let html = '';
+            let attemptNum = 1;
+
+            attempts.forEach((attempt, index) => {
+                // Skip completed attempts (have g or x marker)
+                if (attempt && (attempt.toLowerCase().includes('g') || attempt.toLowerCase().includes('x'))) {
+                    return;
+                }
+
+                // Render pending attempt
+                if (!attempt) {
+                    html += `
+                        <div class="col-4">
+                            <div class="lift-box" style="opacity: 0.3;">
+                                <div class="lift-name">Attempt ${index + 1}</div>
+                                <div class="lift-value">-</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Pending attempt with weight
+                    const value = attempt.replace(/[xgXG]/g, '');
+                    html += `
+                        <div class="col-4">
+                            <div class="lift-box" style="background: #000000; border-color: rgba(96, 165, 250, 0.2);">
+                                <div class="lift-name" style="color: rgba(255,255,255,0.8);">Attempt ${index + 1}</div>
+                                <div class="lift-value" style="color: white;">
+                                    ${value}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            return html;
         }
 
         // Render single attempt
