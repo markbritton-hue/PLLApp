@@ -456,26 +456,12 @@
 
         <!-- Instructions -->
         <div class="setup-section instructions">
-            <h4>📋 How to Set Up:</h4>
-            <p style="margin-bottom: 10px;"><strong>Option 1: Use Pre-Configured Sheets (Easiest!)</strong></p>
-            <ol>
-                <li>All sheets are already loaded with names and GIDs!</li>
-                <li>Just click <strong>Save Configuration</strong> and you're done!</li>
-            </ol>
-            <p style="margin-top: 15px; margin-bottom: 10px;"><strong>Option 2: Auto-Detect from Different Sheet (No API Key Needed!)</strong></p>
-            <ol>
-                <li><strong>Enter your Google Sheet URL</strong> below</li>
-                <li>Make sure the sheet is publicly shared (Anyone with link can view)</li>
-                <li>Click <strong>"Auto-Detect All Sheets"</strong> - finds all sheets automatically!</li>
-                <li>Review the detected sheets and click <strong>Save Configuration</strong></li>
-            </ol>
-            <p style="margin-top: 15px; margin-bottom: 10px;"><strong>Option 3: Manual Entry</strong></p>
-            <ol>
-                <li><strong>Enter your Google Sheet URL</strong> below</li>
-                <li><strong>Add sheets manually:</strong> Click "+ Add Sheet" and paste each sheet's URL</li>
-                <li>The URL will look like: <code>...#gid=847893000</code></li>
-                <li>The app will automatically extract the sheet name and ID</li>
-                <li>Click <strong>Save Configuration</strong> when done!</li>
+            <h2>📋 Setup Instructions</h2>
+            <ol style="font-size: 1.1rem; line-height: 2; color: rgba(255, 255, 255, 0.9);">
+                <li><strong>Step 1:</strong> Enter your high school name and school's website</li>
+                <li><strong>Step 2:</strong> Enter the Google Sheet URL link or use the <strong>📷 Scan QR Code</strong> button to automatically fill in the URL</li>
+                <li><strong>Step 3:</strong> Click the <strong>🔍 Auto-Detect All Sheets</strong> button (optional but recommended)</li>
+                <li><strong>Step 4:</strong> Click the <strong>💾 Save Configuration</strong> button</li>
             </ol>
         </div>
 
@@ -919,6 +905,10 @@
 
             showStatus(`✓ Configuration saved for ${schoolName}! ${sheets.length} sheet(s) configured.`, 'success');
             displayCurrentConfig();
+
+            // Show popup and scroll to top
+            alert(`✓ Configuration saved successfully!\n\nYour ${schoolName} setup is complete with ${sheets.length} sheet(s).\n\nScroll to the top of the page to continue.`);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function loadConfiguration() {
