@@ -442,17 +442,29 @@
             } else {
                 console.log('✅ Using header-based parsing');
                 // For platform sheets, look in row 1 for detailed column names if needed
-                if (squat2Col === -1 && csvData.length > 1) {
+                if (csvData.length > 1) {
                     const row1 = csvData[1];
                     for (let j = 0; j < row1.length; j++) {
                         const cell = row1[j].toLowerCase().trim();
-                        if ((cell === 'squat 2' || cell === 'sq2') && squat2Col === -1) squat2Col = j;
+                        if ((cell === 'squat 2' || cell === 'sq2') && squat2Col === -1) {
+                            squat2Col = j;
+                            // Infer squat 1 is the column before squat 2
+                            if (squat1Col === -1 && j > 0) squat1Col = j - 1;
+                        }
                         if ((cell === 'squat 3' || cell === 'sq3') && squat3Col === -1) squat3Col = j;
                         if ((cell === 'bench 1' || cell === 'bp1') && bench1Col === -1) bench1Col = j;
-                        if ((cell === 'bench 2' || cell === 'bp2') && bench2Col === -1) bench2Col = j;
+                        if ((cell === 'bench 2' || cell === 'bp2') && bench2Col === -1) {
+                            bench2Col = j;
+                            // Infer bench 1 is the column before bench 2 if not found
+                            if (bench1Col === -1 && j > 0) bench1Col = j - 1;
+                        }
                         if ((cell === 'bench 3' || cell === 'bp3') && bench3Col === -1) bench3Col = j;
                         if ((cell === 'dead lift 1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
-                        if ((cell === 'dead lift 2') && dead2Col === -1) dead2Col = j;
+                        if ((cell === 'dead lift 2') && dead2Col === -1) {
+                            dead2Col = j;
+                            // Infer dead lift 1 is the column before dead lift 2 if not found
+                            if (dead1Col === -1 && j > 0) dead1Col = j - 1;
+                        }
                         if ((cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
                     }
                 }
