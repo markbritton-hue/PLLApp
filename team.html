@@ -52,27 +52,22 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
-        .nav-buttons {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .nav-buttons a {
-            display: inline-block;
-            background: white;
-            color: #667eea;
-            padding: 10px 20px;
-            margin: 0 10px;
-            border-radius: 5px;
-            border: 2px solid #667eea;
-            font-weight: bold;
+        .btn-home {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
             text-decoration: none;
-            transition: transform 0.2s;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.2s;
         }
 
-        .nav-buttons a:hover {
+        .btn-home:hover {
+            background: rgba(30, 41, 59, 1);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
         }
 
         .load-section {
@@ -378,12 +373,10 @@
             <p>Team Rankings by Total Points</p>
         </header>
 
-        <div class="nav-buttons">
-            <a href="index.html">Home</a>
-            <a href="athletes.html">Individual Athletes</a>
-            <a href="team.html">Team Standings</a>
-            <a href="results.html">All Schools Results</a>
-            <a href="setup.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">⚙️ Setup</a>
+        <div style="margin-bottom: 30px;">
+            <a href="index.html" class="btn-home">
+                <i class="fas fa-home me-2"></i>Home
+            </a>
         </div>
 
         <div class="load-section">
