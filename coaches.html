@@ -583,7 +583,7 @@
                                 <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px;">
                                     <i class="fas fa-compress-arrows-alt me-2"></i>Squat
                                 </h6>
-                                <div class="row g-2 mb-3">
+                                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
                                     ${renderAttempt(athlete.squat1, '1')}
                                     ${renderAttempt(athlete.squat2, '2')}
                                     ${renderAttempt(athlete.squat3, '3')}
@@ -592,7 +592,7 @@
                                 <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px;">
                                     <i class="fas fa-hands me-2"></i>Bench Press
                                 </h6>
-                                <div class="row g-2 mb-3">
+                                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
                                     ${renderAttempt(athlete.bench1, '1')}
                                     ${renderAttempt(athlete.bench2, '2')}
                                     ${renderAttempt(athlete.bench3, '3')}
@@ -601,7 +601,7 @@
                                 <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px;">
                                     <i class="fas fa-weight-hanging me-2"></i>Deadlift
                                 </h6>
-                                <div class="row g-2">
+                                <div style="display: flex; gap: 8px;">
                                     ${renderAttempt(athlete.dead1, '1')}
                                     ${renderAttempt(athlete.dead2, '2')}
                                     ${renderAttempt(athlete.dead3, '3')}
@@ -621,7 +621,7 @@
         function renderAttempt(attempt, attemptNum) {
             if (!attempt) {
                 return `
-                    <div class="col-4">
+                    <div style="flex: 1; min-width: 0;">
                         <div class="lift-box" style="opacity: 0.3;">
                             <div class="lift-name">Attempt ${attemptNum}</div>
                             <div class="lift-value">-</div>
@@ -655,7 +655,7 @@
             }
 
             return `
-                <div class="col-4">
+                <div style="flex: 1; min-width: 0;">
                     <div class="lift-box" style="background: ${bgColor}; border-color: ${borderColor};">
                         <div class="lift-name" style="color: ${labelColor};">Attempt ${attemptNum}</div>
                         <div class="lift-value" style="color: ${textColor};">
