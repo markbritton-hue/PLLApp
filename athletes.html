@@ -519,18 +519,31 @@
                 console.log('First 10 rows:', csvData.slice(0, 10));
 
                 // Find the first row with actual athlete data (has school name in it)
+                // Search across all columns, not just column 5
                 let dataStartRow = -1;
+                console.log(`🔍 Searching for "${configuredSchool}" in first 20 rows...`);
+
                 for (let i = 0; i < Math.min(20, csvData.length); i++) {
                     const row = csvData[i];
-                    if (row[5] && row[5].toLowerCase().includes(configuredSchool.toLowerCase())) {
-                        dataStartRow = i;
-                        console.log('Found data starting at row:', i, row);
-                        break;
+                    // Search across all columns in this row
+                    for (let col = 0; col < row.length; col++) {
+                        const cellValue = row[col]?.toString().trim();
+                        if (cellValue && cellValue.toLowerCase().includes(configuredSchool.toLowerCase())) {
+                            dataStartRow = i;
+                            console.log(`✅ Found "${configuredSchool}" at row ${i}, column ${col}:`, row);
+                            console.log(`   Cell value: "${cellValue}"`);
+                            break;
+                        }
                     }
+                    if (dataStartRow !== -1) break;
                 }
 
                 if (dataStartRow === -1) {
-                    console.log(`Could not find ${configuredSchool} data`);
+                    console.log(`❌ Could not find "${configuredSchool}" in any of the first 20 rows`);
+                    console.log('First 5 rows of data:');
+                    csvData.slice(0, 5).forEach((row, idx) => {
+                        console.log(`Row ${idx}:`, row);
+                    });
                     return athletes;
                 }
 
@@ -569,18 +582,27 @@
             });
 
             // Parse athlete rows
+            let totalRows = 0;
+            let matchedRows = 0;
+            let skippedSchools = new Set();
+
             for (let i = headerRow + 1; i < csvData.length; i++) {
                 const row = csvData[i];
 
                 if (row.length <= nameCol) continue;
 
+                totalRows++;
                 const name = row[nameCol]?.trim();
                 const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
 
                 if (!school || !school.toLowerCase().includes(configuredSchool.toLowerCase())) {
+                    if (school && totalRows <= 10) {
+                        skippedSchools.add(school);
+                    }
                     continue;
                 }
 
+                matchedRows++;
                 if (!name) continue;
 
                 let weightClass = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
@@ -638,6 +660,15 @@
                     : '0.00';
 
                 athletes.push(athlete);
+            }
+
+            // Log summary
+            console.log(`📊 Parsing Summary for "${configuredSchool}":`);
+            console.log(`   Total rows processed: ${totalRows}`);
+            console.log(`   Rows matching "${configuredSchool}": ${matchedRows}`);
+            console.log(`   Athletes added: ${athletes.length}`);
+            if (skippedSchools.size > 0) {
+                console.log(`   Other schools found in first 10 rows:`, Array.from(skippedSchools));
             }
 
             return athletes;
