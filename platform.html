@@ -585,19 +585,38 @@
             return athletes;
         }
 
-        // Check if athlete has any pending attempt (number without g/x marker)
-        function hasPendingAttempt(athlete) {
-            const attempts = [
-                athlete.squat1, athlete.squat2, athlete.squat3,
-                athlete.bench1, athlete.bench2, athlete.bench3,
-                athlete.dead1, athlete.dead2, athlete.dead3
+        // Determine which attempt column is currently active
+        function getCurrentAttemptColumn(athletes) {
+            const attemptColumns = [
+                'squat1', 'squat2', 'squat3',
+                'bench1', 'bench2', 'bench3',
+                'dead1', 'dead2', 'dead3'
             ];
 
-            return attempts.some(attempt => {
-                if (!attempt) return false;
-                const lower = attempt.toLowerCase();
-                return !lower.includes('g') && !lower.includes('x');
-            });
+            // Find the first column that has pending attempts (numbers without g/x)
+            for (const col of attemptColumns) {
+                const hasPending = athletes.some(athlete => {
+                    const value = athlete[col];
+                    if (!value) return false;
+                    const lower = value.toLowerCase();
+                    return !lower.includes('g') && !lower.includes('x');
+                });
+
+                if (hasPending) {
+                    return col;
+                }
+            }
+
+            return null; // All attempts complete
+        }
+
+        // Check if athlete has pending attempt in specific column
+        function hasPendingInColumn(athlete, column) {
+            if (!column) return false;
+            const value = athlete[column];
+            if (!value) return false;
+            const lower = value.toLowerCase();
+            return !lower.includes('g') && !lower.includes('x');
         }
 
         // Render athletes
@@ -610,13 +629,17 @@
                 athlete.sheetOrder = index;
             });
 
-            // Sort: athletes with pending attempts first (in sheet order),
-            // then completed athletes (in sheet order)
-            const sortedAthletes = [...athletes].sort((a, b) => {
-                const aPending = hasPendingAttempt(a);
-                const bPending = hasPendingAttempt(b);
+            // Determine current attempt column
+            const currentColumn = getCurrentAttemptColumn(athletes);
+            console.log('Current attempt column:', currentColumn);
 
-                // Pending attempts come first
+            // Sort: athletes with pending in CURRENT column first (in sheet order),
+            // staying in that column and going down, not across
+            const sortedAthletes = [...athletes].sort((a, b) => {
+                const aPending = hasPendingInColumn(a, currentColumn);
+                const bPending = hasPendingInColumn(b, currentColumn);
+
+                // Pending in current column comes first
                 if (aPending && !bPending) return -1;
                 if (!aPending && bPending) return 1;
 
