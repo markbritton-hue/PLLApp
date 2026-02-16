@@ -403,6 +403,40 @@
         .url-input-group input {
             flex: 1;
         }
+
+        /* Collapsible sections */
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapsible-header:hover {
+            color: #a78bfa;
+        }
+
+        .collapse-icon {
+            transition: transform 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -499,32 +533,42 @@
 
             <div class="button-group">
                 <button class="btn btn-primary" onclick="autoDetectSheets()">🔍 Auto-Detect All Sheets</button>
+                <button class="btn btn-success" onclick="saveConfiguration()">💾 Save Configuration</button>
                 <button class="btn btn-secondary" onclick="extractSpreadsheetId()">Validate URL</button>
             </div>
         </div>
 
         <!-- Sheet Configuration -->
         <div class="setup-section">
-            <h2>📑 Sheet Configuration</h2>
-            <p style="margin-bottom: 20px;">Add all the sheets/tabs from your Google Spreadsheet below.</p>
+            <h2 class="collapsible-header" onclick="toggleCollapse('sheetConfig')">
+                <span class="collapse-icon collapsed">▼</span>
+                📑 Sheet Configuration (Advanced)
+            </h2>
+            <div id="sheetConfig" class="collapsible-content collapsed">
+                <p style="margin-bottom: 20px;">Add all the sheets/tabs from your Google Spreadsheet below.</p>
 
-            <div id="sheetsContainer">
-                <!-- Sheets will be added here dynamically -->
-            </div>
+                <div id="sheetsContainer">
+                    <!-- Sheets will be added here dynamically -->
+                </div>
 
-            <button class="btn btn-primary" onclick="addSheetField()">+ Add Sheet</button>
+                <button class="btn btn-primary" onclick="addSheetField()">+ Add Sheet</button>
 
-            <div class="button-group">
-                <button class="btn btn-success" onclick="saveConfiguration()">💾 Save Configuration</button>
-                <button class="btn btn-secondary" onclick="loadConfiguration()">🔄 Reload Configuration</button>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="loadConfiguration()">🔄 Reload Configuration</button>
+                </div>
             </div>
         </div>
 
         <!-- Current Configuration Display -->
         <div class="setup-section">
-            <h2>📋 Current Configuration</h2>
-            <div id="currentConfig" style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">
-                No configuration saved yet.
+            <h2 class="collapsible-header" onclick="toggleCollapse('currentConfig')">
+                <span class="collapse-icon collapsed">▼</span>
+                📋 Current Configuration
+            </h2>
+            <div id="currentConfigContent" class="collapsible-content collapsed">
+                <div id="currentConfig" style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">
+                    No configuration saved yet.
+                </div>
             </div>
         </div>
     </div>
@@ -536,6 +580,15 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadConfiguration();
         });
+
+        // Toggle collapsible sections
+        function toggleCollapse(contentId) {
+            const content = document.getElementById(contentId === 'currentConfig' ? 'currentConfigContent' : contentId);
+            const icon = event.currentTarget.querySelector('.collapse-icon');
+
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+        }
 
         function showStatus(message, type = 'info') {
             const statusDiv = document.getElementById('statusMessage');
