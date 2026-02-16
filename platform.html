@@ -390,16 +390,16 @@
                     if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
                     if (cell === 'school' && schoolCol === -1) schoolCol = j;
                     if ((cell === 'weight class' || cell === 'wt class' || cell === 'class') && weightClassCol === -1) weightClassCol = j;
-                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight') && bodyWeightCol === -1) bodyWeightCol = j;
-                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1') && squat1Col === -1) squat1Col = j;
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bodyWeightCol === -1) bodyWeightCol = j;
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && squat1Col === -1) squat1Col = j;
                     if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && squat2Col === -1) squat2Col = j;
                     if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
                     if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
                     if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bench2Col === -1) bench2Col = j;
                     if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
-                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1') && dead1Col === -1) dead1Col = j;
-                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2') && dead2Col === -1) dead2Col = j;
-                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3') && dead3Col === -1) dead3Col = j;
+                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
+                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dead2Col === -1) dead2Col = j;
+                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
                     if (cell === 'total' && totalCol === -1) totalCol = j;
                 }
 
@@ -421,9 +421,9 @@
                 totalCol
             });
 
-            // Use position-based if needed
-            if (headerRow === -1 || squat1Col === -1) {
-                console.log('⚠️ Using position-based parsing - header detection failed');
+            // Only use position-based if header detection completely failed
+            if (headerRow === -1) {
+                console.log('⚠️ Using position-based parsing - no header row found');
                 headerRow = 7;
                 nameCol = 7;
                 schoolCol = 5;
@@ -439,6 +439,28 @@
                 dead2Col = 17;
                 dead3Col = 18;
                 totalCol = 20;
+            } else {
+                console.log('✅ Using header-based parsing');
+                // For platform sheets, look in row 1 for detailed column names if needed
+                if (squat2Col === -1 && csvData.length > 1) {
+                    const row1 = csvData[1];
+                    for (let j = 0; j < row1.length; j++) {
+                        const cell = row1[j].toLowerCase().trim();
+                        if ((cell === 'squat 2' || cell === 'sq2') && squat2Col === -1) squat2Col = j;
+                        if ((cell === 'squat 3' || cell === 'sq3') && squat3Col === -1) squat3Col = j;
+                        if ((cell === 'bench 1' || cell === 'bp1') && bench1Col === -1) bench1Col = j;
+                        if ((cell === 'bench 2' || cell === 'bp2') && bench2Col === -1) bench2Col = j;
+                        if ((cell === 'bench 3' || cell === 'bp3') && bench3Col === -1) bench3Col = j;
+                        if ((cell === 'dead lift 1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
+                        if ((cell === 'dead lift 2') && dead2Col === -1) dead2Col = j;
+                        if ((cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
+                    }
+                }
+
+                // Use header row + 1 to skip both header rows (platform sheets have 2 header rows)
+                if (headerRow === 0 && csvData[1]) {
+                    headerRow = 1; // Skip both header rows
+                }
             }
 
             console.log('Final columns used:', {
