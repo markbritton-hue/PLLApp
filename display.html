@@ -52,6 +52,11 @@
             background: rgba(16, 185, 129, 0.2);
         }
 
+        .athlete-row.default {
+            border-left-color: rgba(96, 165, 250, 0.3);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
         .athlete-row:hover {
             transform: translateX(5px);
         }
@@ -247,6 +252,9 @@
             const athletes = [];
             let headerRow = -1;
             let nameCol = -1, schoolCol = -1;
+            let squat1Col = -1, squat2Col = -1, squat3Col = -1;
+            let bench1Col = -1, bench2Col = -1, bench3Col = -1;
+            let dead1Col = -1, dead2Col = -1, dead3Col = -1;
 
             for (let i = 0; i < Math.min(15, csvData.length); i++) {
                 const row = csvData[i];
@@ -254,6 +262,15 @@
                     const cell = row[j].toLowerCase().trim();
                     if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
                     if (cell === 'school' && schoolCol === -1) schoolCol = j;
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && squat1Col === -1) squat1Col = j;
+                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && squat2Col === -1) squat2Col = j;
+                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
+                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
+                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bench2Col === -1) bench2Col = j;
+                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
+                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
+                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dead2Col === -1) dead2Col = j;
+                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
                 }
 
                 if (nameCol !== -1 && schoolCol !== -1) {
@@ -264,8 +281,41 @@
 
             if (headerRow === -1) return athletes;
 
-            if (headerRow === 0 && csvData[1]) {
-                headerRow = 1;
+            // Check row 1 for detailed column names and infer missing columns
+            if (csvData.length > 1) {
+                const row1 = csvData[1];
+                for (let j = 0; j < row1.length; j++) {
+                    const cell = row1[j].toLowerCase().trim();
+                    if ((cell === 'squat 2' || cell === 'sq2') && squat2Col === -1) {
+                        squat2Col = j;
+                        if (squat1Col === -1 && j > 0) squat1Col = j - 1;
+                        if (squat3Col === -1 && j < row1.length - 1) squat3Col = j + 1;
+                    }
+                    if ((cell === 'bench 2' || cell === 'bp2') && bench2Col === -1) {
+                        bench2Col = j;
+                        if (bench1Col === -1 && j > 0) bench1Col = j - 1;
+                        if (bench3Col === -1 && j < row1.length - 1) bench3Col = j + 1;
+                    }
+                    if ((cell === 'dead lift 2') && dead2Col === -1) {
+                        dead2Col = j;
+                        if (dead1Col === -1 && j > 0) dead1Col = j - 1;
+                        if (dead3Col === -1 && j < row1.length - 1) dead3Col = j + 1;
+                    }
+                }
+                if (headerRow === 0 && csvData[1]) {
+                    headerRow = 1;
+                }
+            }
+
+            // Additional fallback: if we have columns for attempt 1 and 2, infer attempt 3
+            if (squat1Col !== -1 && squat2Col !== -1 && squat3Col === -1) {
+                squat3Col = squat2Col + 1;
+            }
+            if (bench1Col !== -1 && bench2Col !== -1 && bench3Col === -1) {
+                bench3Col = bench2Col + 1;
+            }
+            if (dead1Col !== -1 && dead2Col !== -1 && dead3Col === -1) {
+                dead3Col = dead2Col + 1;
             }
 
             for (let i = headerRow + 1; i < csvData.length; i++) {
@@ -278,6 +328,15 @@
                 athletes.push({
                     name: name,
                     school: schoolCol !== -1 ? row[schoolCol]?.trim() : '',
+                    squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
+                    squat2: squat2Col !== -1 ? row[squat2Col]?.trim() : '',
+                    squat3: squat3Col !== -1 ? row[squat3Col]?.trim() : '',
+                    bench1: bench1Col !== -1 ? row[bench1Col]?.trim() : '',
+                    bench2: bench2Col !== -1 ? row[bench2Col]?.trim() : '',
+                    bench3: bench3Col !== -1 ? row[bench3Col]?.trim() : '',
+                    dead1: dead1Col !== -1 ? row[dead1Col]?.trim() : '',
+                    dead2: dead2Col !== -1 ? row[dead2Col]?.trim() : '',
+                    dead3: dead3Col !== -1 ? row[dead3Col]?.trim() : '',
                     sheetOrder: i - headerRow - 1
                 });
             }
@@ -286,7 +345,46 @@
         }
 
         function sortAthletesByLiftingOrder(athletes) {
-            return [...athletes].sort((a, b) => a.sheetOrder - b.sheetOrder);
+            const currentColumn = getCurrentAttemptColumn(athletes);
+
+            return [...athletes].sort((a, b) => {
+                const aPending = hasPendingInColumn(a, currentColumn);
+                const bPending = hasPendingInColumn(b, currentColumn);
+
+                if (aPending && !bPending) return -1;
+                if (!aPending && bPending) return 1;
+
+                return a.sheetOrder - b.sheetOrder;
+            });
+        }
+
+        function getCurrentAttemptColumn(athletes) {
+            const attemptColumns = [
+                'squat1', 'squat2', 'squat3',
+                'bench1', 'bench2', 'bench3',
+                'dead1', 'dead2', 'dead3'
+            ];
+
+            for (const col of attemptColumns) {
+                const hasPending = athletes.some(athlete => {
+                    const value = athlete[col];
+                    if (!value) return false;
+                    const lower = value.toLowerCase();
+                    return !lower.includes('g') && !lower.includes('x');
+                });
+
+                if (hasPending) return col;
+            }
+
+            return null;
+        }
+
+        function hasPendingInColumn(athlete, column) {
+            if (!column) return false;
+            const value = athlete[column];
+            if (!value) return false;
+            const lower = value.toLowerCase();
+            return !lower.includes('g') && !lower.includes('x');
         }
 
         function renderPlatformSection(platformName, athletes) {
@@ -297,14 +395,31 @@
 
             let html = `<div class="platform-name"><i class="fas fa-layer-group me-2"></i>${platformName}</div>`;
 
+            // Determine current attempt column to check if athletes are actually lifting
+            const currentColumn = getCurrentAttemptColumn(athletes);
+
             athletes.forEach((athlete, index) => {
-                const status = index === 0 ? 'LIFTING' : 'ON DECK';
-                const statusClass = index === 0 ? 'lifting' : 'on-deck';
+                // Only show status if athlete has pending attempt in current column
+                const hasPending = hasPendingInColumn(athlete, currentColumn);
+
+                let status = '';
+                let statusClass = '';
+
+                if (index === 0 && hasPending) {
+                    status = 'LIFTING';
+                    statusClass = 'lifting';
+                } else if (index === 1 && hasPending) {
+                    status = 'ON DECK';
+                    statusClass = 'on-deck';
+                }
+
+                // Default background for rows without status
+                const rowClass = statusClass || 'default';
 
                 html += `
-                    <div class="athlete-row ${statusClass}">
+                    <div class="athlete-row ${rowClass}">
                         <div class="athlete-name">${athlete.name}</div>
-                        <div class="status-badge ${statusClass}">${status}</div>
+                        ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                     </div>
                 `;
             });
