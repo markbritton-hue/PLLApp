@@ -624,6 +624,18 @@
             const container = document.getElementById('athletesContainer');
             container.innerHTML = '';
 
+            // Get configured school name
+            const configStr = localStorage.getItem('trplConfig');
+            let configuredSchool = '';
+            if (configStr) {
+                try {
+                    const config = JSON.parse(configStr);
+                    configuredSchool = config.schoolName || '';
+                } catch (e) {
+                    console.error('Error parsing config:', e);
+                }
+            }
+
             // Add original sheet position to each athlete
             athletes.forEach((athlete, index) => {
                 athlete.sheetOrder = index;
@@ -666,8 +678,14 @@
                     statusColor = '#10b981'; // green
                 }
 
+                // Check if this athlete's school matches configured school
+                const isMySchool = configuredSchool && athlete.school &&
+                    athlete.school.toLowerCase().includes(configuredSchool.toLowerCase());
+                const cardBgColor = isMySchool ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.9)';
+                const cardBorderColor = isMySchool ? 'rgba(16, 185, 129, 0.4)' : 'rgba(96, 165, 250, 0.2)';
+
                 col.innerHTML = `
-                    <div class="athlete-card">
+                    <div class="athlete-card" style="background: ${cardBgColor}; border-color: ${cardBorderColor};">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                             <div class="athlete-name">#${index + 1} ${athlete.name}</div>
                             ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
