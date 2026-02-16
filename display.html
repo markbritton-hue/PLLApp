@@ -413,6 +413,26 @@
             // Determine current attempt column to check if athletes are actually lifting
             const currentColumn = getCurrentAttemptColumn(athletes);
 
+            // Find the last athlete with a completed attempt (g or x)
+            let lastCompletedRow = -1;
+            for (const athlete of athletes) {
+                const allAttempts = [
+                    athlete.squat1, athlete.squat2, athlete.squat3,
+                    athlete.bench1, athlete.bench2, athlete.bench3,
+                    athlete.dead1, athlete.dead2, athlete.dead3
+                ];
+
+                const hasCompleted = allAttempts.some(attempt => {
+                    if (!attempt) return false;
+                    const lower = attempt.toLowerCase();
+                    return lower.includes('g') || lower.includes('x');
+                });
+
+                if (hasCompleted && athlete.sheetOrder > lastCompletedRow) {
+                    lastCompletedRow = athlete.sheetOrder;
+                }
+            }
+
             athletes.forEach((athlete, index) => {
                 // Only show status if athlete has pending attempt in current column
                 const hasPending = hasPendingInColumn(athlete, currentColumn);
@@ -439,12 +459,15 @@
                     }
                 }
 
+                // Calculate rows down from last completed attempt
+                const rowsDown = lastCompletedRow >= 0 ? athlete.sheetOrder - lastCompletedRow : 0;
+
                 // Default background for rows without status
                 const rowClass = statusClass || 'default';
 
                 html += `
                     <div class="athlete-row ${rowClass}">
-                        <div class="athlete-position">#${index + 1}</div>
+                        <div class="athlete-position">${rowsDown > 0 ? rowsDown : '#1'}</div>
                         <div class="athlete-name">
                             ${athlete.name}
                             ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
