@@ -662,7 +662,11 @@
 
         // Render single attempt
         function renderAttempt(attempt, attemptNum) {
-            if (!attempt) {
+            // Only display if attempt is empty OR contains 'g' or 'x' (valid attempt markers)
+            // Plain numbers without g/x are likely wrong column data
+            const hasValidMarker = attempt && (attempt.toLowerCase().includes('g') || attempt.toLowerCase().includes('x'));
+
+            if (!attempt || !hasValidMarker) {
                 return `
                     <div class="col-4">
                         <div class="lift-box" style="opacity: 0.3;">
