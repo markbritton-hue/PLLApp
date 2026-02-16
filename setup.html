@@ -497,18 +497,6 @@
                 <p class="help-text">Paste the URL from your browser or scan a QR code</p>
             </div>
 
-            <div class="form-group">
-                <label for="apiKey">Google Sheets API Key (Optional - only needed as fallback):</label>
-                <input
-                    type="text"
-                    id="apiKey"
-                    placeholder="Optional: Only needed if auto-detect fails">
-                <p class="help-text">
-                    Auto-detect works without an API key for public sheets! Only add this if auto-detect fails.
-                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #667eea; font-weight: bold;">Get API key here</a>
-                </p>
-            </div>
-
             <div class="button-group">
                 <button class="btn btn-primary" onclick="autoDetectSheets()">🔍 Auto-Detect All Sheets</button>
                 <button class="btn btn-secondary" onclick="extractSpreadsheetId()">Validate URL</button>
@@ -584,21 +572,13 @@
                 return;
             }
 
-            const apiKey = document.getElementById('apiKey').value.trim();
-
-            // Try HTML view method first (works for public sheets, no API key needed)
+            // Try HTML view method (works for public sheets)
             showStatus('🔍 Auto-detecting sheets from Google Sheets...', 'info');
 
             try {
                 await autoDetectSheetsFromHTML(spreadsheetId);
             } catch (error) {
-                // If HTML method fails and user has API key, try API method
-                if (apiKey) {
-                    showStatus('HTML method failed, trying API method...', 'info');
-                    await autoDetectSheetsWithAuth(spreadsheetId, apiKey);
-                } else {
-                    showStatus('❌ Auto-detection failed. Make sure the sheet is publicly shared or add an API key.', 'error');
-                }
+                showStatus('❌ Auto-detection failed. Make sure the sheet is publicly shared (Anyone with the link can view).', 'error');
             }
         }
 
@@ -760,49 +740,6 @@
             return sheets;
         }
 
-        async function autoDetectSheetsWithAuth(spreadsheetId, apiKey) {
-            showStatus('🔍 Fetching sheets from Google Sheets API...', 'info');
-
-            try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?key=${apiKey}`;
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.sheets || data.sheets.length === 0) {
-                    showStatus('No sheets found in this spreadsheet', 'error');
-                    return;
-                }
-
-                // Clear existing sheets
-                document.getElementById('sheetsContainer').innerHTML = '';
-                sheetCounter = 0;
-
-                // Add each detected sheet
-                data.sheets.forEach(sheet => {
-                    const sheetName = sheet.properties.title;
-                    const gid = sheet.properties.sheetId;
-                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${gid}`;
-
-                    addSheetField(sheetName, gid, sheetUrl);
-                });
-
-                showStatus(`✓ Success! Auto-detected ${data.sheets.length} sheet(s). Review and save configuration.`, 'success');
-
-                // Save API key for future use
-                localStorage.setItem('trplApiKey', apiKey);
-
-            } catch (error) {
-                showStatus(`Error: ${error.message}. Make sure your API key is valid and the sheet is accessible.`, 'error');
-                console.error('Auto-detect error:', error);
-            }
-        }
-
-
         function addSheetField(name = '', gid = '', url = '') {
             sheetCounter++;
             const container = document.getElementById('sheetsContainer');
@@ -933,12 +870,6 @@
 
         function loadConfiguration() {
             const configStr = localStorage.getItem('trplConfig');
-
-            // Load saved API key if available
-            const savedApiKey = localStorage.getItem('trplApiKey');
-            if (savedApiKey) {
-                document.getElementById('apiKey').value = savedApiKey;
-            }
 
             if (!configStr) {
                 // Load default configuration
