@@ -440,7 +440,7 @@
 
             if (headerRow === -1) return athletes;
 
-            // Check row 1 for detailed column names
+            // Check row 1 for detailed column names and infer missing columns
             if (csvData.length > 1) {
                 const row1 = csvData[1];
                 for (let j = 0; j < row1.length; j++) {
@@ -448,19 +448,33 @@
                     if ((cell === 'squat 2' || cell === 'sq2') && squat2Col === -1) {
                         squat2Col = j;
                         if (squat1Col === -1 && j > 0) squat1Col = j - 1;
+                        if (squat3Col === -1 && j < row1.length - 1) squat3Col = j + 1;
                     }
                     if ((cell === 'bench 2' || cell === 'bp2') && bench2Col === -1) {
                         bench2Col = j;
                         if (bench1Col === -1 && j > 0) bench1Col = j - 1;
+                        if (bench3Col === -1 && j < row1.length - 1) bench3Col = j + 1;
                     }
                     if ((cell === 'dead lift 2') && dead2Col === -1) {
                         dead2Col = j;
                         if (dead1Col === -1 && j > 0) dead1Col = j - 1;
+                        if (dead3Col === -1 && j < row1.length - 1) dead3Col = j + 1;
                     }
                 }
                 if (headerRow === 0 && csvData[1]) {
                     headerRow = 1;
                 }
+            }
+
+            // Additional fallback: if we have columns for attempt 1 and 2, infer attempt 3
+            if (squat1Col !== -1 && squat2Col !== -1 && squat3Col === -1) {
+                squat3Col = squat2Col + 1;
+            }
+            if (bench1Col !== -1 && bench2Col !== -1 && bench3Col === -1) {
+                bench3Col = bench2Col + 1;
+            }
+            if (dead1Col !== -1 && dead2Col !== -1 && dead3Col === -1) {
+                dead3Col = dead2Col + 1;
             }
 
             // Parse athlete rows
@@ -577,38 +591,53 @@
                             </div>
                             <div class="athlete-school">${athlete.school}</div>
 
-                            <div class="stat-box" style="max-width: 200px;">
-                                <div class="stat-label">Weight Class</div>
-                                <div class="stat-value">${athlete.weightClass || 'N/A'} <small>lbs</small></div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="stat-box">
+                                        <div class="stat-label">Weight Class</div>
+                                        <div class="stat-value">${athlete.weightClass || 'N/A'} <small>lbs</small></div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-box">
+                                        <div class="stat-label">Body Weight</div>
+                                        <div class="stat-value">${athlete.bodyWeight} <small>lbs</small></div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="lifts-section" style="margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(96, 165, 250, 0.2);">
-                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px;">
+                            <div class="lifts-section">
+                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
                                     <i class="fas fa-compress-arrows-alt me-2"></i>Squat
                                 </h6>
-                                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                                <div class="row g-2 mb-3">
                                     ${renderAttempt(athlete.squat1, '1')}
                                     ${renderAttempt(athlete.squat2, '2')}
                                     ${renderAttempt(athlete.squat3, '3')}
                                 </div>
 
-                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px;">
+                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
                                     <i class="fas fa-hands me-2"></i>Bench Press
                                 </h6>
-                                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                                <div class="row g-2 mb-3">
                                     ${renderAttempt(athlete.bench1, '1')}
                                     ${renderAttempt(athlete.bench2, '2')}
                                     ${renderAttempt(athlete.bench3, '3')}
                                 </div>
 
-                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 8px;">
+                                <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
                                     <i class="fas fa-weight-hanging me-2"></i>Deadlift
                                 </h6>
-                                <div style="display: flex; gap: 8px;">
+                                <div class="row g-2">
                                     ${renderAttempt(athlete.dead1, '1')}
                                     ${renderAttempt(athlete.dead2, '2')}
                                     ${renderAttempt(athlete.dead3, '3')}
                                 </div>
+                            </div>
+
+                            <div class="total-box">
+                                <div class="total-label">TOTAL</div>
+                                <div class="total-value">${athlete.total} lbs</div>
                             </div>
                         </div>
                     </div>
@@ -624,7 +653,7 @@
         function renderAttempt(attempt, attemptNum) {
             if (!attempt) {
                 return `
-                    <div style="flex: 1; min-width: 0;">
+                    <div class="col-4">
                         <div class="lift-box" style="opacity: 0.3;">
                             <div class="lift-name">Attempt ${attemptNum}</div>
                             <div class="lift-value">-</div>
@@ -658,7 +687,7 @@
             }
 
             return `
-                <div style="flex: 1; min-width: 0;">
+                <div class="col-4">
                     <div class="lift-box" style="background: ${bgColor}; border-color: ${borderColor};">
                         <div class="lift-name" style="color: ${labelColor};">Attempt ${attemptNum}</div>
                         <div class="lift-value" style="color: ${textColor};">
