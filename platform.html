@@ -662,11 +662,7 @@
 
         // Render single attempt
         function renderAttempt(attempt, attemptNum) {
-            // Only display if attempt is empty OR contains 'g' or 'x' (valid attempt markers)
-            // Plain numbers without g/x are likely wrong column data
-            const hasValidMarker = attempt && (attempt.toLowerCase().includes('g') || attempt.toLowerCase().includes('x'));
-
-            if (!attempt || !hasValidMarker) {
+            if (!attempt) {
                 return `
                     <div class="col-4">
                         <div class="lift-box" style="opacity: 0.3;">
@@ -679,16 +675,36 @@
 
             const isFailed = attempt.toLowerCase().includes('x');
             const isGood = attempt.toLowerCase().includes('g');
+            const hasMarker = isFailed || isGood;
             let value = attempt.replace(/[xgXG]/g, '');
 
-            const bgColor = isFailed ? '#ef4444' : (isGood ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.6)');
-            const borderColor = isFailed ? '#dc2626' : (isGood ? '#10b981' : 'rgba(96, 165, 250, 0.2)');
-            const textColor = isFailed ? 'white' : '#60a5fa';
+            // Color scheme based on attempt status
+            let bgColor, borderColor, textColor, labelColor;
+
+            if (isFailed) {
+                // Failed attempt - red
+                bgColor = '#ef4444';
+                borderColor = '#dc2626';
+                textColor = 'white';
+                labelColor = 'rgba(255,255,255,0.8)';
+            } else if (isGood) {
+                // Good attempt - green
+                bgColor = 'rgba(16, 185, 129, 0.2)';
+                borderColor = '#10b981';
+                textColor = '#60a5fa';
+                labelColor = 'rgba(255, 255, 255, 0.6)';
+            } else {
+                // Number without marker - black background, white text
+                bgColor = '#000000';
+                borderColor = 'rgba(96, 165, 250, 0.2)';
+                textColor = 'white';
+                labelColor = 'rgba(255,255,255,0.8)';
+            }
 
             return `
                 <div class="col-4">
                     <div class="lift-box" style="background: ${bgColor}; border-color: ${borderColor};">
-                        <div class="lift-name" style="color: ${isFailed ? 'rgba(255,255,255,0.8)' : 'rgba(255, 255, 255, 0.6)'};">Attempt ${attemptNum}</div>
+                        <div class="lift-name" style="color: ${labelColor};">Attempt ${attemptNum}</div>
                         <div class="lift-value" style="color: ${textColor};">
                             ${value}${isFailed ? '<i class="fas fa-times ms-1"></i>' : ''}${isGood ? '<i class="fas fa-check ms-1" style="color: #10b981;"></i>' : ''}
                         </div>
