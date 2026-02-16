@@ -579,16 +579,28 @@
             const sheets = [];
             let match;
 
-            // Method 0: Look for sheet-menu list items with id and text
+            // Method 0: Parse items.push() calls in JavaScript
+            // Pattern: items.push({name: "Sheet Name", ... gid: "12345" ...});
+            const itemsPushRegex = /items\.push\(\{name:\s*"([^"]+)"[^}]*gid:\s*"(\d+)"/gi;
+            while ((match = itemsPushRegex.exec(html)) !== null) {
+                sheets.push({
+                    name: match[1],
+                    gid: match[2]
+                });
+            }
+
+            // Method 0b: Look for sheet-menu list items with id and text
             // Pattern: <li id="sheet-button-123"><a ...>Sheet Name</a></li>
-            const sheetMenuRegex = /<li[^>]*id=["']sheet-button-(\d+)["'][^>]*>.*?<a[^>]*>([^<]+)<\/a>/gi;
-            while ((match = sheetMenuRegex.exec(html)) !== null) {
-                const name = match[2].trim();
-                if (name && name.length > 0) {
-                    sheets.push({
-                        gid: match[1],
-                        name: name
-                    });
+            if (sheets.length === 0) {
+                const sheetMenuRegex = /<li[^>]*id=["']sheet-button-(\d+)["'][^>]*>.*?<a[^>]*>([^<]+)<\/a>/gi;
+                while ((match = sheetMenuRegex.exec(html)) !== null) {
+                    const name = match[2].trim();
+                    if (name && name.length > 0) {
+                        sheets.push({
+                            gid: match[1],
+                            name: name
+                        });
+                    }
                 }
             }
 
