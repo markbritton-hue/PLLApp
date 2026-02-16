@@ -3,1036 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three Rivers Varsity Weightlifting</title>
+    <title>Weightlifting - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
-            padding: 20px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
+        .hero {
+            padding-top: 80px;
+            padding-bottom: 60px;
             text-align: center;
-            color: white;
-            margin-bottom: 40px;
         }
 
-        .logo {
-            width: 120px;
-            height: auto;
+        .hero-icon {
+            font-size: 5rem;
+            color: #60a5fa;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .weight-class-section {
+        .hero p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.3rem;
             margin-bottom: 50px;
         }
 
-        .weight-class-header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px;
-            border-radius: 10px;
+        .feature-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border-color: #60a5fa;
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .weight-class-header h2 {
-            color: #667eea;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .athlete-count {
-            font-size: 1rem;
-            color: #666;
-            font-weight: normal;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-
-        .athlete-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 5px solid #667eea;
-        }
-
-        .athlete-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .athlete-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .designation {
-            font-size: 0.8rem;
-            color: #666;
-            font-weight: normal;
-            margin-top: 4px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+        .feature-card h2 {
+            color: #60a5fa;
+            font-size: 1.5rem;
+            font-weight: 700;
             margin-bottom: 15px;
         }
 
-        .stat-item {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 25px;
         }
 
-        .stat-label {
-            font-size: 0.8rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .btn-athletes {
+            background: #10b981;
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            margin-top: 2px;
+        .btn-athletes:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            color: white;
         }
 
-        .lifts-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #f0f0f0;
+        .btn-team {
+            background: #f59e0b;
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
-        .lifts-title {
-            font-size: 0.9rem;
-            color: #666;
+        .btn-team:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+            color: white;
+        }
+
+        .btn-results {
+            background: #8b5cf6;
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-results:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+            color: white;
+        }
+
+        .btn-setup {
+            background: #ef4444;
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-setup:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        .info-section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .info-section h3 {
+            color: #60a5fa;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .info-section p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+        }
+
+        .info-section ul,
+        .info-section ol {
+            margin: 15px 0 15px 25px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .info-section li {
             margin-bottom: 10px;
+        }
+
+        .info-section a {
+            color: #60a5fa;
+            text-decoration: none;
             font-weight: 600;
         }
 
-        .lifts-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .lift-item {
-            text-align: center;
-            padding: 8px;
-            background: #e8eaf6;
-            border-radius: 6px;
-        }
-
-        .lift-name {
-            font-size: 0.7rem;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        .lift-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .total-section {
-            margin-top: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .total-label {
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-
-        .total-value {
-            font-size: 1.8rem;
-            font-weight: bold;
+        .info-section a:hover {
+            color: #a78bfa;
         }
 
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
-            }
-
-            .cards-grid {
-                grid-template-columns: 1fr;
+            .hero h1 {
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <img src="https://threerivers-cdn.fxbrt.com/downloads/logos-assets/trcs_powercat.png" alt="Three Rivers Schools" class="logo">
-            <h1>🏋️ Three Rivers Varsity Weightlifting</h1>
-            <p>Load a Google Sheet to view competition results</p>
-        </header>
-
-        <div style="text-align: center; margin-bottom: 30px;">
-            <a href="index.html" style="display: inline-block; background: white; color: #667eea; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 2px solid #667eea;">Individual Athletes</a>
-            <a href="team.html" style="display: inline-block; background: white; color: #667eea; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 2px solid #667eea;">Team Standings</a>
-            <a href="results.html" style="display: inline-block; background: white; color: #667eea; padding: 10px 20px; margin: 0 10px; border-radius: 5px; text-decoration: none; font-weight: bold; border: 2px solid #667eea;">All Schools Results</a>
-        </div>
-
-        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <h3 style="color: #667eea; margin-bottom: 15px;">Load Competition Data</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" id="sheetUrl" placeholder="Paste Google Sheet URL here..." style="flex: 1; min-width: 300px; padding: 10px; border: 2px solid #667eea; border-radius: 5px; font-size: 14px;">
-                <button onclick="loadSheetData()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 30px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px;">Load Data</button>
+        <div class="hero">
+            <div class="hero-icon">
+                <i class="fas fa-dumbbell"></i>
             </div>
-            <p style="margin-top: 10px; color: #666; font-size: 12px;">Paste the Google Sheet URL and click "Load Data" to display Three Rivers athletes</p>
-            <div id="loadingStatus" style="margin-top: 10px; color: #667eea; font-weight: bold;"></div>
-            <div id="autoRefreshStatus" style="margin-top: 5px; color: #4caf50; font-size: 12px; display: none;">
-                🔄 Auto-refresh enabled (every 10 seconds)
+            <h1>Weightlifting Dashboard</h1>
+            <p>Competition Results & Team Standings</p>
+
+            <div class="row g-4 mb-5">
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-friends" style="color: #10b981;"></i>
+                        </div>
+                        <h2>Individual Athletes</h2>
+                        <p>View detailed stats for all varsity and JV athletes by weight class</p>
+                        <a href="athletes.html" class="btn-athletes">
+                            <i class="fas fa-arrow-right me-2"></i>View Athletes
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy" style="color: #f59e0b;"></i>
+                        </div>
+                        <h2>Team Standings</h2>
+                        <p>Check team rankings and see how schools stack up</p>
+                        <a href="team.html" class="btn-team">
+                            <i class="fas fa-arrow-right me-2"></i>View Standings
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar" style="color: #8b5cf6;"></i>
+                        </div>
+                        <h2>All Results</h2>
+                        <p>Browse complete competition results from all schools</p>
+                        <a href="results.html" class="btn-results">
+                            <i class="fas fa-arrow-right me-2"></i>View Results
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-cog" style="color: #ef4444;"></i>
+                        </div>
+                        <h2>Setup</h2>
+                        <p>Configure Google Sheets integration and data sources</p>
+                        <a href="setup.html" class="btn-setup">
+                            <i class="fas fa-arrow-right me-2"></i>Go to Setup
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fas fa-info-circle me-2"></i>How It Works</h3>
+                <p>This application loads competition data from Google Sheets and displays it in an easy-to-read format. Here's how to get started:</p>
+                <ul>
+                    <li><strong>First Time Setup:</strong> Visit the <a href="setup.html">Setup page</a> to configure your Google Sheets</li>
+                    <li><strong>Auto-Load:</strong> Once configured, all pages will automatically load data from your sheets</li>
+                    <li><strong>Live Updates:</strong> Data refreshes automatically every 10 seconds during competitions</li>
+                    <li><strong>Multiple Sheets:</strong> Supports Varsity, JV, and multiple platform sheets</li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fas fa-rocket me-2"></i>Quick Start Guide</h3>
+                <p><strong>New here?</strong> Follow these simple steps:</p>
+                <ol>
+                    <li>Click <a href="setup.html">Setup</a> in any page navigation</li>
+                    <li>Your Google Sheet is already configured! Just click <strong>"Save Configuration"</strong></li>
+                    <li>Navigate to any page (Athletes, Team Standings, Results) and data will load automatically</li>
+                    <li>That's it! The app will auto-refresh data during competitions</li>
+                </ol>
             </div>
         </div>
-
-        <div id="weightClassContainer"></div>
     </div>
 
-    <script>
-        let athleteData = [];
-
-        // Old default data removed - now loads only from Google Sheets
-        /*
-        let athleteData = [
-            // Platform 1
-            {
-                name: "Cooper Roggelien",
-                weightClass: "114",
-                designation: "JV",
-                bodyWeight: 110.6,
-                squat: 190,
-                bench: 100,
-                deadlift: 230,
-                currentTotal: 520
-            },
-            {
-                name: "Brody Montcalm",
-                weightClass: "114",
-                designation: "V",
-                bodyWeight: 108.6,
-                squat: 155,
-                bench: 120,
-                deadlift: 235,
-                currentTotal: 510
-            },
-            {
-                name: "Ezekiel Britton",
-                weightClass: "123",
-                designation: "V",
-                bodyWeight: 117,
-                squat: 255,
-                bench: 175,
-                deadlift: 375,
-                currentTotal: 805
-            },
-            // Platform 2
-            {
-                name: "Cesar Rodriguez Delgado",
-                weightClass: "145",
-                designation: "V",
-                bodyWeight: 135.8,
-                squat: 290,
-                bench: 165,
-                deadlift: 405,
-                currentTotal: 860
-            },
-            {
-                name: "Giovanni Desi",
-                weightClass: "145",
-                designation: "V",
-                bodyWeight: 142,
-                squat: 275,
-                bench: 170,
-                deadlift: 350,
-                currentTotal: 795
-            },
-            {
-                name: "Nicholas Allen",
-                weightClass: "155",
-                designation: "V",
-                bodyWeight: 153.8,
-                squat: 300,
-                bench: 195,
-                deadlift: 455,
-                currentTotal: 950
-            },
-            // Platform 3
-            {
-                name: "Zachary Carr",
-                weightClass: "145",
-                designation: "JV",
-                bodyWeight: 144.8,
-                squat: 245,
-                bench: 165,
-                deadlift: 315,
-                currentTotal: 725
-            },
-            {
-                name: "Jaxon Fuller",
-                weightClass: "155",
-                designation: "JV",
-                bodyWeight: 152.2,
-                squat: 225,
-                bench: 175,
-                deadlift: 360,
-                currentTotal: 760
-            },
-            // Platform 4
-            {
-                name: "Matthew Montcalm",
-                weightClass: "165",
-                designation: "V",
-                bodyWeight: 157.4,
-                squat: 235,
-                bench: 165,
-                deadlift: 300,
-                currentTotal: 700
-            },
-            {
-                name: "Carter Fuller",
-                weightClass: "165",
-                designation: "V",
-                bodyWeight: 164.6,
-                squat: 265,
-                bench: 195,
-                deadlift: 365,
-                currentTotal: 825
-            },
-            {
-                name: "Frederico de Godoy Barreto",
-                weightClass: "165",
-                designation: "V",
-                bodyWeight: 164.8,
-                squat: 315,
-                bench: 155,
-                deadlift: 385,
-                currentTotal: 855
-            },
-            {
-                name: "Braden Carpenter",
-                weightClass: "165",
-                designation: "V",
-                bodyWeight: 163.8,
-                squat: 345,
-                bench: 245,
-                deadlift: 385,
-                currentTotal: 975
-            },
-            {
-                name: "Todd Wadsworth",
-                weightClass: "165",
-                designation: "V",
-                bodyWeight: 162,
-                squat: 300,
-                bench: 185,
-                deadlift: 405,
-                currentTotal: 890
-            },
-            {
-                name: "Canady Marzett",
-                weightClass: "165",
-                designation: "V",
-                bodyWeight: 163.8,
-                squat: 340,
-                bench: 245,
-                deadlift: 440,
-                currentTotal: 1025
-            },
-            {
-                name: "Jaden Purdiman",
-                weightClass: "181",
-                designation: "V",
-                bodyWeight: 177,
-                squat: 380,
-                bench: 290,
-                deadlift: 455,
-                currentTotal: 1125
-            },
-            {
-                name: "Hunter Koenig",
-                weightClass: "181",
-                designation: "V",
-                bodyWeight: 180,
-                squat: 445,
-                bench: 295,
-                deadlift: 540,
-                currentTotal: 1280
-            },
-            // Platform 5
-            {
-                name: "Carson Bowley",
-                weightClass: "194",
-                designation: "V",
-                bodyWeight: 192,
-                squat: 405,
-                bench: 255,
-                deadlift: 475,
-                currentTotal: 1135
-            },
-            // Platform 6
-            {
-                name: "Josiah Dear",
-                weightClass: "207",
-                designation: "V",
-                bodyWeight: 197.4,
-                squat: 375,
-                bench: 255,
-                deadlift: 425,
-                currentTotal: 1055
-            },
-            {
-                name: "Xander Kenyon",
-                weightClass: "207",
-                designation: "V",
-                bodyWeight: 197.6,
-                squat: 375,
-                bench: 275,
-                deadlift: 500,
-                currentTotal: 1150
-            },
-            // Platform 7
-            {
-                name: "Matthew Ballard",
-                weightClass: "242",
-                designation: "V",
-                bodyWeight: 237,
-                squat: 275,
-                bench: 105,
-                deadlift: 365,
-                currentTotal: 745
-            },
-            {
-                name: "Chase Hunt",
-                weightClass: "242",
-                designation: "V",
-                bodyWeight: 241.8,
-                squat: 320,
-                bench: 175,
-                deadlift: 395,
-                currentTotal: 890
-            },
-            {
-                name: "Luis E. Rodriguez Delgado",
-                weightClass: "242",
-                designation: "V",
-                bodyWeight: 224.6,
-                squat: 380,
-                bench: 230,
-                deadlift: 420,
-                currentTotal: 1030
-            },
-            {
-                name: "Daniel Beachey",
-                weightClass: "275",
-                designation: "V",
-                bodyWeight: 272.2,
-                squat: 405,
-                bench: 245,
-                deadlift: 415,
-                currentTotal: 1065
-            },
-            // Platform 8
-            {
-                name: "Harper James",
-                weightClass: "275",
-                designation: "JV",
-                bodyWeight: 266.4,
-                squat: 315,
-                bench: 200,
-                deadlift: 385,
-                currentTotal: 900
-            },
-            {
-                name: "Burton Vandenbrink",
-                weightClass: "SHW",
-                designation: "V",
-                bodyWeight: 298.6,
-                squat: 305,
-                bench: 115,
-                deadlift: 295,
-                currentTotal: 715
-            },
-            {
-                name: "Bennett Vandenbrink",
-                weightClass: "SHW",
-                designation: "V",
-                bodyWeight: 343.4,
-                squat: 350,
-                bench: 245,
-                deadlift: 500,
-                currentTotal: 1095
-            }
-        ];
-        */
-
-        function renderAthletes() {
-            console.log('renderAthletes called with', athleteData.length, 'athletes');
-
-            // Group athletes by weight class
-            const groupedData = athleteData.reduce((acc, athlete) => {
-                if (!acc[athlete.weightClass]) {
-                    acc[athlete.weightClass] = [];
-                }
-                acc[athlete.weightClass].push(athlete);
-                return acc;
-            }, {});
-
-            console.log('Grouped into weight classes:', Object.keys(groupedData));
-
-            // Sort weight classes
-            const weightClassOrder = ["114", "123", "132", "145", "155", "165", "181", "194", "207", "220", "242", "275", "SHW"];
-            const container = document.getElementById('weightClassContainer');
-            container.innerHTML = '';
-            console.log('Container cleared, rendering cards...');
-
-            weightClassOrder.forEach(weightClass => {
-                if (!groupedData[weightClass]) return;
-
-                const athletesInClass = groupedData[weightClass];
-
-                const section = document.createElement('div');
-                section.className = 'weight-class-section';
-
-                const headerHTML = `
-                    <div class="weight-class-header">
-                        <h2>${weightClass} lbs <span class="athlete-count">(${athletesInClass.length} athlete${athletesInClass.length > 1 ? 's' : ''})</span></h2>
-                    </div>
-                `;
-
-                const cardsHTML = athletesInClass.map(athlete => `
-                    <div class="athlete-card">
-                        <div class="card-header">
-                            <div>
-                                <div class="athlete-name">${athlete.name}</div>
-                                <div class="designation">${athlete.designation}</div>
-                            </div>
-                        </div>
-
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-label">Body Weight</div>
-                                <div class="stat-value">${athlete.bodyWeight} lbs</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">lb per lb</div>
-                                <div class="stat-value">${athlete.lbPerLb}</div>
-                            </div>
-                        </div>
-
-                        <div class="lifts-section">
-                            <div class="lifts-title">Squat</div>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;">
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.squatAttempts[0] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">1st</div>
-                                    <div style="font-weight: bold;">${athlete.squatAttempts[0] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.squatAttempts[1] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">2nd</div>
-                                    <div style="font-weight: bold;">${athlete.squatAttempts[1] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.squatAttempts[2] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">3rd</div>
-                                    <div style="font-weight: bold;">${athlete.squatAttempts[2] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: #667eea; color: white; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="opacity: 0.9; font-size: 0.7rem;">Total</div>
-                                    <div style="font-weight: bold; font-size: 1.1rem;">${athlete.squat}</div>
-                                </div>
-                            </div>
-
-                            <div class="lifts-title">Bench Press</div>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;">
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.benchAttempts[0] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">1st</div>
-                                    <div style="font-weight: bold;">${athlete.benchAttempts[0] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.benchAttempts[1] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">2nd</div>
-                                    <div style="font-weight: bold;">${athlete.benchAttempts[1] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.benchAttempts[2] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">3rd</div>
-                                    <div style="font-weight: bold;">${athlete.benchAttempts[2] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: #667eea; color: white; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="opacity: 0.9; font-size: 0.7rem;">Total</div>
-                                    <div style="font-weight: bold; font-size: 1.1rem;">${athlete.bench}</div>
-                                </div>
-                            </div>
-
-                            <div class="lifts-title">Deadlift</div>
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.deadliftAttempts[0] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">1st</div>
-                                    <div style="font-weight: bold;">${athlete.deadliftAttempts[0] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.deadliftAttempts[1] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">2nd</div>
-                                    <div style="font-weight: bold;">${athlete.deadliftAttempts[1] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: ${(athlete.deadliftAttempts[2] || '').includes('x') ? '#ffcdd2' : '#f0f0f0'}; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="color: #666; font-size: 0.7rem;">3rd</div>
-                                    <div style="font-weight: bold;">${athlete.deadliftAttempts[2] || '-'}</div>
-                                </div>
-                                <div style="text-align: center; padding: 5px; background: #667eea; color: white; border-radius: 4px; font-size: 0.85rem;">
-                                    <div style="opacity: 0.9; font-size: 0.7rem;">Total</div>
-                                    <div style="font-weight: bold; font-size: 1.1rem;">${athlete.deadlift}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="total-section">
-                            <div class="total-label">Current Total</div>
-                            <div class="total-value">${athlete.currentTotal} lbs</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                section.innerHTML = headerHTML + `<div class="cards-grid">${cardsHTML}</div>`;
-                container.appendChild(section);
-            });
-
-            console.log('Rendering complete. Total cards rendered:', athleteData.length);
-        }
-
-        // Auto-refresh interval (10 seconds)
-        let autoRefreshInterval = null;
-
-        // On page load, check for saved URL and auto-load
-        window.addEventListener('DOMContentLoaded', function() {
-            const savedUrl = localStorage.getItem('trplSheetUrl');
-            if (savedUrl) {
-                document.getElementById('sheetUrl').value = savedUrl;
-                console.log('Auto-loading saved sheet URL...');
-                loadSheetData();
-
-                // Start auto-refresh every 10 seconds
-                if (autoRefreshInterval) {
-                    clearInterval(autoRefreshInterval);
-                }
-                autoRefreshInterval = setInterval(function() {
-                    console.log('Auto-refreshing data...');
-                    loadSheetData(true); // Preserve scroll position on auto-refresh
-                }, 10000); // 10 seconds
-
-                console.log('Auto-refresh enabled (every 10 seconds)');
-                document.getElementById('autoRefreshStatus').style.display = 'block';
-            }
-        });
-
-        // Function to extract spreadsheet ID and gid from URL
-        function parseSheetUrl(url) {
-            const spreadsheetIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-            const gidMatch = url.match(/[#&]gid=([0-9]+)/);
-
-            if (spreadsheetIdMatch) {
-                return {
-                    spreadsheetId: spreadsheetIdMatch[1],
-                    gid: gidMatch ? gidMatch[1] : '0'
-                };
-            }
-            return null;
-        }
-
-        // Function to parse CSV text (handles quoted fields with commas)
-        function parseCSV(text) {
-            // Handle different line break types (\r\n, \n, \r)
-            const lines = text.split(/\r\n|\n|\r/);
-            const result = [];
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-
-                const values = [];
-                let current = '';
-                let inQuotes = false;
-
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        values.push(current.trim());
-                        current = '';
-                    } else {
-                        current += char;
-                    }
-                }
-                values.push(current.trim());
-                result.push(values);
-            }
-
-            return result;
-        }
-
-        // Function to load data from Google Sheet
-        async function loadSheetData(preserveScroll = false) {
-            const urlInput = document.getElementById('sheetUrl');
-            const statusDiv = document.getElementById('loadingStatus');
-            const url = urlInput.value.trim();
-
-            // Save current scroll position if preserving
-            const scrollPosition = preserveScroll ? window.pageYOffset || document.documentElement.scrollTop : 0;
-
-            if (!url) {
-                statusDiv.textContent = 'Please enter a Google Sheet URL';
-                statusDiv.style.color = '#d32f2f';
-                return;
-            }
-
-            // Save URL to localStorage
-            localStorage.setItem('trplSheetUrl', url);
-
-            // Start auto-refresh if not already running
-            if (!autoRefreshInterval) {
-                autoRefreshInterval = setInterval(function() {
-                    console.log('Auto-refreshing data...');
-                    loadSheetData(true); // Preserve scroll position on auto-refresh
-                }, 10000); // 10 seconds
-                console.log('Auto-refresh enabled (every 10 seconds)');
-                document.getElementById('autoRefreshStatus').style.display = 'block';
-            }
-
-            statusDiv.textContent = 'Loading data...';
-            statusDiv.style.color = '#667eea';
-
-            try {
-                const parsed = parseSheetUrl(url);
-                if (!parsed) {
-                    throw new Error('Invalid Google Sheet URL. Make sure it contains /d/ followed by the spreadsheet ID.');
-                }
-
-
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
-
-                // Try direct fetch first, fallback to CORS proxy if needed
-                let response;
-                let usedProxy = false;
-
-                try {
-                    response = await fetch(csvUrl);
-
-                    // If direct fetch fails, try CORS proxy
-                    if (!response.ok) {
-                        throw new Error('Direct fetch returned error status');
-                    }
-                } catch (directError) {
-                    usedProxy = true;
-                    // Use CORS proxy as fallback
-                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
-                    response = await fetch(proxyUrl);
-
-                    if (!response.ok) {
-                        let errorMsg = `Failed to fetch data via proxy: ${response.status}. `;
-                        if (response.status === 400) {
-                            errorMsg += 'Make sure the Google Sheet is set to "Anyone with the link can view" in Share settings.';
-                        }
-                        throw new Error(errorMsg);
-                    }
-                }
-
-
-                const csvText = await response.text();
-                console.log('CSV Data received, length:', csvText.length);
-                console.log('First 500 chars:', csvText.substring(0, 500));
-                console.log('Line break check - has \\n:', csvText.includes('\n'));
-                console.log('Line break check - has \\r\\n:', csvText.includes('\r\n'));
-                console.log('Line break check - has \\r:', csvText.includes('\r'));
-
-
-                const csvData = parseCSV(csvText);
-                console.log('Parsed rows:', csvData.length);
-
-                // Find Three Rivers athletes
-                const athletes = [];
-
-                // Try to find header row and column indices
-                let headerRow = -1;
-                let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
-                let squatCol = -1, benchCol = -1, deadliftCol = -1, totalCol = -1, lbPerLbCol = -1;
-
-                // First pass - find basic columns from first header row
-                for (let i = 0; i < Math.min(10, csvData.length); i++) {
-                    const row = csvData[i];
-                    let foundName = false, foundSchool = false;
-
-                    for (let j = 0; j < row.length; j++) {
-                        const cell = row[j].toLowerCase().trim();
-
-                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) {
-                            nameCol = j;
-                            foundName = true;
-                        }
-                        if (cell === 'school' && schoolCol === -1) {
-                            schoolCol = j;
-                            foundSchool = true;
-                        }
-                        if ((cell === 'class' || cell === 'weight class') && weightClassCol === -1) weightClassCol = j;
-                        if ((cell === 'weight' || cell === 'body weight') && bodyWeightCol === -1) bodyWeightCol = j;
-                    }
-
-                    if (foundName && foundSchool && headerRow === -1) {
-                        headerRow = i;
-                    }
-                }
-
-                // Second pass - find total columns (might be in a different row)
-                for (let i = 0; i < Math.min(10, csvData.length); i++) {
-                    const row = csvData[i];
-                    for (let j = 0; j < row.length; j++) {
-                        const cell = row[j].toLowerCase().trim();
-
-                        // Look for "Squat Total", "Bench Total", etc.
-                        if (cell.includes('squat') && cell.includes('total')) squatCol = j;
-                        if (cell.includes('bench') && cell.includes('total')) benchCol = j;
-                        if (cell.includes('dead') && cell.includes('total')) deadliftCol = j;
-
-                        // Also look for just "Squat", "Bench", "Dead Lift" (Mens Varsity format)
-                        // The total will be 3 columns after the label
-                        if (cell === 'squat' && squatCol === -1) squatCol = j + 3;
-                        if (cell === 'bench' && benchCol === -1) benchCol = j + 3;
-                        if ((cell === 'dead lift' || cell === 'deadlift' || cell.startsWith('dead')) && deadliftCol === -1) deadliftCol = j + 3;
-
-                        // Find overall total column
-                        if (cell === 'total' || (cell.includes('total') && !cell.includes('squat') && !cell.includes('bench') && !cell.includes('dead'))) {
-                            if (totalCol === -1) totalCol = j;
-                        }
-
-                        // Find lb per lb column
-                        if (cell.includes('lb per lb') || cell.includes('lb/lb')) {
-                            lbPerLbCol = j;
-                        }
-                    }
-                }
-
-                console.log('After detection - Squat:', squatCol, 'Bench:', benchCol, 'Deadlift:', deadliftCol, 'Total:', totalCol);
-
-                console.log('Header row:', headerRow);
-                console.log('Columns - Name:', nameCol, 'School:', schoolCol, 'Weight Class:', weightClassCol);
-                console.log('Columns - Squat:', squatCol, 'Bench:', benchCol, 'Deadlift:', deadliftCol, 'Total:', totalCol);
-
-
-                // Process data rows
-                let threeRiversCount = 0;
-                for (let i = headerRow + 1; i < csvData.length; i++) {
-                    const row = csvData[i];
-                    if (row.length < 3) continue;
-
-                    const school = schoolCol !== -1 ? row[schoolCol] : '';
-
-
-                    // Check if this is a Three Rivers athlete (case-insensitive)
-                    if (school.toLowerCase().includes('three rivers') || school.toLowerCase().includes('threerivers')) {
-                        threeRiversCount++;
-                        console.log(`Row ${i}: Three Rivers athlete found`);
-                        console.log(`  School column value: "${school}"`);
-                        console.log(`  Full row data:`, row.slice(0, 10));
-
-                        const name = nameCol !== -1 ? row[nameCol] : '';
-                        console.log(`  Name column (${nameCol}): "${name}"`);
-
-                        const weightClass = weightClassCol !== -1 ? row[weightClassCol] : '';
-                        console.log(`  Weight class column (${weightClassCol}): "${weightClass}"`);
-
-                        // Body weight from detected column
-                        const bodyWeight = bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 :
-                                          (nameCol !== -1 ? parseFloat(row[nameCol - 1]) || 0 : 0);
-
-                        // Extract attempt data and totals
-                        // Attempts are in columns before the total (total - 3, total - 2, total - 1)
-                        const squatAttempts = squatCol !== -1 ? [
-                            row[squatCol - 3] || '',
-                            row[squatCol - 2] || '',
-                            row[squatCol - 1] || ''
-                        ] : ['', '', ''];
-                        const squat = squatCol !== -1 ? parseFloat(row[squatCol]) || 0 : 0;
-
-                        const benchAttempts = benchCol !== -1 ? [
-                            row[benchCol - 3] || '',
-                            row[benchCol - 2] || '',
-                            row[benchCol - 1] || ''
-                        ] : ['', '', ''];
-                        const bench = benchCol !== -1 ? parseFloat(row[benchCol]) || 0 : 0;
-
-                        const deadliftAttempts = deadliftCol !== -1 ? [
-                            row[deadliftCol - 3] || '',
-                            row[deadliftCol - 2] || '',
-                            row[deadliftCol - 1] || ''
-                        ] : ['', '', ''];
-                        const deadlift = deadliftCol !== -1 ? parseFloat(row[deadliftCol]) || 0 : 0;
-
-                        const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
-
-                        // Get lb per lb ratio
-                        const lbPerLb = lbPerLbCol !== -1 ? parseFloat(row[lbPerLbCol]) || 0 :
-                                       (bodyWeight > 0 ? (total / bodyWeight).toFixed(3) : 0);
-
-                        // Extract weight class number and designation
-                        let wcNum = '';
-                        let designation = 'V';
-
-                        // First, try column 0 (first column often has weight class)
-                        if (row[0] && row[0].trim()) {
-                            const numMatch = row[0].match(/\d+/);
-                            if (numMatch) {
-                                wcNum = numMatch[0];
-                            } else if (row[0].toUpperCase().includes('SHW')) {
-                                wcNum = 'SHW';
-                            }
-                        }
-
-                        // If not found, try the detected weight class column
-                        if (!wcNum && weightClass) {
-                            const numMatch = weightClass.match(/\d+/);
-                            wcNum = numMatch ? numMatch[0] : '';
-                            if (weightClass.toUpperCase().includes('SHW')) wcNum = 'SHW';
-                        }
-
-                        // If still not found, try column 3 (might have "114 V" format)
-                        if (!wcNum && row[3]) {
-                            const numMatch = row[3].match(/\d+/);
-                            wcNum = numMatch ? numMatch[0] : '';
-                            if (row[3].toUpperCase().includes('SHW')) wcNum = 'SHW';
-                        }
-
-                        // Get designation from column 4 or column 3
-                        if (row[4]) {
-                            designation = row[4].includes('JV') || row[4].includes('W') ? row[4].trim() : 'V';
-                        } else if (row[3] && row[3].includes('JV')) {
-                            designation = 'JV';
-                        }
-
-                        if (!wcNum) wcNum = '0';
-
-                        console.log(`  Extracted weight class: ${wcNum}, designation: ${designation}`);
-
-                        // Include athlete if they have a name (even with total = 0)
-                        if (name && name.trim().length > 0) {
-                            console.log(`Adding athlete: ${name}, Total: ${total}`);
-                            athletes.push({
-                                name: name,
-                                weightClass: wcNum,
-                                designation: designation,
-                                bodyWeight: bodyWeight,
-                                lbPerLb: lbPerLb,
-                                squatAttempts: squatAttempts,
-                                squat: squat,
-                                benchAttempts: benchAttempts,
-                                bench: bench,
-                                deadliftAttempts: deadliftAttempts,
-                                deadlift: deadlift,
-                                currentTotal: total
-                            });
-                        } else {
-                            console.log(`Skipping row - no name found. School: ${school}, Total: ${total}`);
-                        }
-                    }
-                }
-
-                console.log('Three Rivers athletes found:', threeRiversCount);
-                console.log('Athletes with valid data:', athletes.length);
-                console.log('Athletes list:', athletes.map(a => a.name).join(', '));
-
-
-                console.log('Weight classes found:', [...new Set(athletes.map(a => a.weightClass))]);
-
-                if (athletes.length === 0) {
-                    let errorMsg = 'No Three Rivers athletes found. ';
-                    if (headerRow === -1) {
-                        errorMsg += 'Could not find header row. ';
-                    }
-                    if (schoolCol === -1) {
-                        errorMsg += 'Could not find School column. ';
-                    }
-                    errorMsg += 'See debug info above.';
-                    throw new Error(errorMsg);
-                }
-
-                // Update the global athleteData and re-render
-                athleteData = athletes;
-                console.log('Updated athleteData, now rendering...');
-                renderAthletes();
-
-                // Restore scroll position if preserving
-                if (preserveScroll && scrollPosition > 0) {
-                    setTimeout(() => {
-                        window.scrollTo(0, scrollPosition);
-                    }, 100); // Small delay to ensure DOM is updated
-                }
-
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString();
-                statusDiv.textContent = `✓ Loaded ${athletes.length} Three Rivers athletes successfully! (Last updated: ${timeStr})`;
-                statusDiv.style.color = '#4caf50';
-
-                // Update header count
-                document.querySelector('header p').textContent = `Competition Results - ${athletes.length} Athletes`;
-
-                // Only scroll to cards if not preserving scroll position (i.e., first load)
-                if (!preserveScroll) {
-                    document.getElementById('weightClassContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-
-            } catch (error) {
-                statusDiv.textContent = `Error: ${error.message}`;
-                statusDiv.style.color = '#d32f2f';
-                console.error('Error loading sheet:', error);
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

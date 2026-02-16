@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mens Varsity Team Standings</title>
+    <title>Team Standings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -39,12 +41,15 @@
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
 
         header p {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .nav-buttons {
@@ -71,15 +76,16 @@
         }
 
         .load-section {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
         }
 
         .load-section h3 {
-            color: #667eea;
+            color: #60a5fa;
             margin-bottom: 15px;
         }
 
@@ -99,7 +105,7 @@
         }
 
         .input-group button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #10b981;
             color: white;
             padding: 10px 30px;
             border: none;
@@ -107,6 +113,11 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 14px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .input-group button:hover {
+            background: #059669;
         }
 
         .stats-container {
@@ -117,15 +128,16 @@
         }
 
         .stat-card {
-            background: white;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            border-left: 5px solid #60a5fa;
         }
 
         .stat-card h3 {
-            color: #667eea;
+            color: #60a5fa;
             font-size: 1.1rem;
             margin-bottom: 10px;
             text-transform: uppercase;
@@ -135,25 +147,26 @@
         .stat-card .value {
             font-size: 2.5rem;
             font-weight: bold;
-            color: #333;
+            color: white;
         }
 
         .stat-card .label {
             font-size: 0.9rem;
-            color: #666;
+            color: rgba(255, 255, 255, 0.6);
             margin-top: 5px;
         }
 
         .dashboard {
-            background: white;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
         }
 
         .dashboard h2 {
-            color: #667eea;
+            color: #60a5fa;
             text-align: center;
             margin-bottom: 25px;
             font-size: 1.8rem;
@@ -256,15 +269,16 @@
         }
 
         .team-table {
-            background: white;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
             overflow-x: auto;
         }
 
         .team-table h3 {
-            color: #667eea;
+            color: #60a5fa;
             margin-bottom: 20px;
             font-size: 1.5rem;
             text-align: center;
@@ -283,7 +297,7 @@
         }
 
         th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
             color: white;
             font-weight: bold;
             font-size: 0.9rem;
@@ -294,17 +308,21 @@
             z-index: 10;
         }
 
+        td {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         td:first-child, th:first-child {
             text-align: left;
             font-weight: 600;
         }
 
         tbody tr:nth-child(even) {
-            background: #f9f9f9;
+            background: rgba(15, 23, 42, 0.3);
         }
 
         tbody tr:hover {
-            background: #e8eaf6;
+            background: rgba(96, 165, 250, 0.1);
             transition: background 0.2s;
         }
 
@@ -353,15 +371,19 @@
 <body>
     <div class="container">
         <header>
-            <img src="https://threerivers-cdn.fxbrt.com/downloads/logos-assets/trcs_powercat.png" alt="Three Rivers Schools" class="logo">
-            <h1>🏆 Mens Varsity Team Standings</h1>
+            <div style="font-size: 4rem; color: #60a5fa; margin-bottom: 20px;">
+                <i class="fas fa-dumbbell"></i>
+            </div>
+            <h1><i class="fas fa-trophy me-2"></i>Team Standings</h1>
             <p>Team Rankings by Total Points</p>
         </header>
 
         <div class="nav-buttons">
-            <a href="index.html">Individual Athletes</a>
+            <a href="index.html">Home</a>
+            <a href="athletes.html">Individual Athletes</a>
             <a href="team.html">Team Standings</a>
             <a href="results.html">All Schools Results</a>
+            <a href="setup.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">⚙️ Setup</a>
         </div>
 
         <div class="load-section">
@@ -846,5 +868,6 @@
             dashboard.innerHTML = dashboardHTML;
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

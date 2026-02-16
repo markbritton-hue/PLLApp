@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Results by Weight Class - All Schools</title>
+    <title>All Schools Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -39,12 +41,15 @@
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
 
         header p {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .nav-links {
@@ -71,21 +76,22 @@
         }
 
         .weight-class-section {
-            background: white;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
         }
 
         .weight-class-header {
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #60a5fa;
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
 
         .weight-class-header h2 {
-            color: #667eea;
+            color: #60a5fa;
             font-size: 2rem;
         }
 
@@ -96,7 +102,7 @@
         }
 
         thead {
-            background: #667eea;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
             color: white;
         }
 
@@ -106,27 +112,32 @@
             font-weight: 600;
         }
 
+        td {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         th.rank { width: 60px; text-align: center; }
         th.name { width: 20%; }
         th.school { width: 20%; }
         th.stat { width: 10%; text-align: center; }
 
         tbody tr {
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
             transition: background 0.2s;
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
+            background: rgba(96, 165, 250, 0.1);
         }
 
         tbody tr.three-rivers {
-            background: #fff9e6;
+            background: rgba(245, 158, 11, 0.2);
             font-weight: bold;
+            border-left: 3px solid #f59e0b;
         }
 
         tbody tr.three-rivers:hover {
-            background: #fff3d6;
+            background: rgba(245, 158, 11, 0.3);
         }
 
         td {
@@ -136,7 +147,7 @@
         td.rank {
             text-align: center;
             font-weight: bold;
-            color: #667eea;
+            color: #60a5fa;
         }
 
         td.stat {
@@ -166,15 +177,19 @@
 <body>
     <div class="container">
         <header>
-            <img src="https://threerivers-cdn.fxbrt.com/downloads/logos-assets/trcs_powercat.png" alt="Three Rivers Schools" class="logo">
-            <h1>🏆 Final Results by Weight Class</h1>
-            <p>All Schools - Men's Varsity Competition</p>
+            <div style="font-size: 4rem; color: #60a5fa; margin-bottom: 20px;">
+                <i class="fas fa-dumbbell"></i>
+            </div>
+            <h1><i class="fas fa-trophy me-2"></i>All Schools Results</h1>
+            <p>Competition Results by Weight Class</p>
         </header>
 
         <div class="nav-links">
-            <a href="index.html">Individual Athletes</a>
+            <a href="index.html">Home</a>
+            <a href="athletes.html">Individual Athletes</a>
             <a href="team.html">Team Standings</a>
             <a href="results.html">All Schools Results</a>
+            <a href="setup.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">⚙️ Setup</a>
         </div>
 
         <div id="resultsContainer"></div>
@@ -362,5 +377,6 @@
 
         renderResults();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

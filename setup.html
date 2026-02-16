@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRPL App - Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .nav-buttons {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-buttons a {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .nav-buttons a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .setup-section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        .setup-section h2 {
+            color: #60a5fa;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setup-section h3 {
+            color: #a78bfa;
+            margin-bottom: 15px;
+            margin-top: 25px;
+        }
+
+        .setup-section p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .setup-section label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-radius: 5px;
+            font-size: 14px;
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+        }
+
+        .sheet-item {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .sheet-item h4 {
+            color: #60a5fa;
+        }
+
+        .sheet-item input {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(96, 165, 250, 0.3);
+            color: white;
+        }
+
+        .sheet-item input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .sheet-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .sheet-item-header input {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .sheet-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #60a5fa;
+            color: white;
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(96, 165, 250, 0.4);
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 8px 15px;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #8b5cf6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #7c3aed;
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .help-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .quick-load-section {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .quick-load-section h3 {
+            color: #fbbf24;
+            margin-top: 0;
+        }
+
+        .quick-load-section p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .instructions {
+            background: rgba(96, 165, 250, 0.1);
+            border-left: 4px solid #60a5fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: white !important;
+        }
+
+        .instructions * {
+            color: white !important;
+        }
+
+        .instructions h4 {
+            color: #60a5fa !important;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: white !important;
+        }
+
+        .instructions li {
+            color: white !important;
+        }
+
+        .instructions ol,
+        .instructions ul {
+            color: white !important;
+        }
+
+        .instructions strong {
+            color: white !important;
+        }
+
+        .instructions code {
+            background: rgba(96, 165, 250, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #60a5fa !important;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ TRPL App Setup</h1>
+            <p>Configure your Google Sheets integration</p>
+        </header>
+
+        <div class="nav-buttons">
+            <a href="index.html">← Back to Dashboard</a>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- Instructions -->
+        <div class="setup-section instructions">
+            <h4>📋 How to Set Up:</h4>
+            <p style="margin-bottom: 10px;"><strong>Option 1: Use Pre-Configured Sheets (Easiest!)</strong></p>
+            <ol>
+                <li>All sheets are already loaded with names and GIDs!</li>
+                <li>Just click <strong>Save Configuration</strong> and you're done!</li>
+            </ol>
+            <p style="margin-top: 15px; margin-bottom: 10px;"><strong>Option 2: Auto-Detect from Different Sheet (No API Key Needed!)</strong></p>
+            <ol>
+                <li><strong>Enter your Google Sheet URL</strong> below</li>
+                <li>Make sure the sheet is publicly shared (Anyone with link can view)</li>
+                <li>Click <strong>"Auto-Detect All Sheets"</strong> - finds all sheets automatically!</li>
+                <li>Review the detected sheets and click <strong>Save Configuration</strong></li>
+            </ol>
+            <p style="margin-top: 15px; margin-bottom: 10px;"><strong>Option 3: Manual Entry</strong></p>
+            <ol>
+                <li><strong>Enter your Google Sheet URL</strong> below</li>
+                <li><strong>Add sheets manually:</strong> Click "+ Add Sheet" and paste each sheet's URL</li>
+                <li>The URL will look like: <code>...#gid=847893000</code></li>
+                <li>The app will automatically extract the sheet name and ID</li>
+                <li>Click <strong>Save Configuration</strong> when done!</li>
+            </ol>
+        </div>
+
+        <!-- Main Spreadsheet URL -->
+        <div class="setup-section">
+            <h2>📊 Main Google Sheet</h2>
+            <div class="form-group">
+                <label for="spreadsheetUrl">Google Sheet URL:</label>
+                <input
+                    type="text"
+                    id="spreadsheetUrl"
+                    placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit..."
+                    value="">
+                <p class="help-text">Paste the URL from your browser when viewing the Google Sheet</p>
+            </div>
+
+            <div class="form-group">
+                <label for="apiKey">Google Sheets API Key (Optional - only needed as fallback):</label>
+                <input
+                    type="text"
+                    id="apiKey"
+                    placeholder="Optional: Only needed if auto-detect fails">
+                <p class="help-text">
+                    Auto-detect works without an API key for public sheets! Only add this if auto-detect fails.
+                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #667eea; font-weight: bold;">Get API key here</a>
+                </p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="autoDetectSheets()">🔍 Auto-Detect All Sheets</button>
+                <button class="btn btn-secondary" onclick="extractSpreadsheetId()">Validate URL</button>
+            </div>
+        </div>
+
+        <!-- Sheet Configuration -->
+        <div class="setup-section">
+            <h2>📑 Sheet Configuration</h2>
+            <p style="margin-bottom: 20px;">Add all the sheets/tabs from your Google Spreadsheet below.</p>
+
+            <div id="sheetsContainer">
+                <!-- Sheets will be added here dynamically -->
+            </div>
+
+            <button class="btn btn-primary" onclick="addSheetField()">+ Add Sheet</button>
+
+            <div class="button-group">
+                <button class="btn btn-success" onclick="saveConfiguration()">💾 Save Configuration</button>
+                <button class="btn btn-secondary" onclick="loadConfiguration()">🔄 Reload Configuration</button>
+            </div>
+        </div>
+
+        <!-- Current Configuration Display -->
+        <div class="setup-section">
+            <h2>📋 Current Configuration</h2>
+            <div id="currentConfig" style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">
+                No configuration saved yet.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sheetCounter = 0;
+
+        // Load configuration on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfiguration();
+        });
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function extractSpreadsheetId() {
+            const url = document.getElementById('spreadsheetUrl').value.trim();
+
+            if (!url) {
+                showStatus('Please enter a Google Sheet URL', 'error');
+                return;
+            }
+
+            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (match && match[1]) {
+                showStatus(`✓ Valid spreadsheet ID found: ${match[1]}`, 'success');
+                return match[1];
+            } else {
+                showStatus('Invalid Google Sheet URL. Please check and try again.', 'error');
+                return null;
+            }
+        }
+
+        async function autoDetectSheets() {
+            const spreadsheetId = extractSpreadsheetId();
+            if (!spreadsheetId) {
+                return;
+            }
+
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            // Try HTML view method first (works for public sheets, no API key needed)
+            showStatus('🔍 Auto-detecting sheets from Google Sheets...', 'info');
+
+            try {
+                await autoDetectSheetsFromHTML(spreadsheetId);
+            } catch (error) {
+                // If HTML method fails and user has API key, try API method
+                if (apiKey) {
+                    showStatus('HTML method failed, trying API method...', 'info');
+                    await autoDetectSheetsWithAuth(spreadsheetId, apiKey);
+                } else {
+                    showStatus('❌ Auto-detection failed. Make sure the sheet is publicly shared or add an API key.', 'error');
+                }
+            }
+        }
+
+        async function autoDetectSheetsFromHTML(spreadsheetId) {
+            try {
+                const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/htmlview`;
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch: ${response.status}`);
+                }
+
+                const html = await response.text();
+
+                // Parse the HTML to extract sheet names and GIDs
+                const sheets = parseSheetDataFromHTML(html);
+
+                if (sheets.length === 0) {
+                    throw new Error('No sheets found in HTML');
+                }
+
+                // Clear existing sheets
+                document.getElementById('sheetsContainer').innerHTML = '';
+                sheetCounter = 0;
+
+                // Add each detected sheet
+                sheets.forEach(sheet => {
+                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${sheet.gid}`;
+                    addSheetField(sheet.name, sheet.gid, sheetUrl);
+                });
+
+                showStatus(`✓ Success! Auto-detected ${sheets.length} sheet(s) (no API key needed!)`, 'success');
+
+            } catch (error) {
+                console.error('HTML auto-detect error:', error);
+                throw error;
+            }
+        }
+
+        function parseSheetDataFromHTML(html) {
+            const sheets = [];
+
+            // Method 1: Look for sheet-button data attributes
+            const sheetButtonRegex = /data-sheet-id="(\d+)"[^>]*>([^<]+)</g;
+            let match;
+
+            while ((match = sheetButtonRegex.exec(html)) !== null) {
+                sheets.push({
+                    gid: match[1],
+                    name: match[2].trim()
+                });
+            }
+
+            // Method 2: Look for sheet data in script tags
+            if (sheets.length === 0) {
+                const scriptRegex = /"sheetId":"(\d+)"[^}]*"name":"([^"]+)"/g;
+                while ((match = scriptRegex.exec(html)) !== null) {
+                    sheets.push({
+                        gid: match[1],
+                        name: match[2]
+                    });
+                }
+            }
+
+            // Method 3: Look for gid in links
+            if (sheets.length === 0) {
+                const gidRegex = /gid=(\d+)/g;
+                const nameRegex = /<span[^>]*>([^<]+)<\/span>/g;
+                const gids = [];
+                const names = [];
+
+                while ((match = gidRegex.exec(html)) !== null) {
+                    if (!gids.includes(match[1])) {
+                        gids.push(match[1]);
+                    }
+                }
+
+                // This method is less reliable as we can't guarantee name/gid pairing
+                gids.forEach((gid, index) => {
+                    sheets.push({
+                        gid: gid,
+                        name: `Sheet ${index + 1}` // Generic name
+                    });
+                });
+            }
+
+            return sheets;
+        }
+
+        async function autoDetectSheetsWithAuth(spreadsheetId, apiKey) {
+            showStatus('🔍 Fetching sheets from Google Sheets API...', 'info');
+
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?key=${apiKey}`;
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.sheets || data.sheets.length === 0) {
+                    showStatus('No sheets found in this spreadsheet', 'error');
+                    return;
+                }
+
+                // Clear existing sheets
+                document.getElementById('sheetsContainer').innerHTML = '';
+                sheetCounter = 0;
+
+                // Add each detected sheet
+                data.sheets.forEach(sheet => {
+                    const sheetName = sheet.properties.title;
+                    const gid = sheet.properties.sheetId;
+                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${gid}`;
+
+                    addSheetField(sheetName, gid, sheetUrl);
+                });
+
+                showStatus(`✓ Success! Auto-detected ${data.sheets.length} sheet(s). Review and save configuration.`, 'success');
+
+                // Save API key for future use
+                localStorage.setItem('trplApiKey', apiKey);
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}. Make sure your API key is valid and the sheet is accessible.`, 'error');
+                console.error('Auto-detect error:', error);
+            }
+        }
+
+
+        function addSheetField(name = '', gid = '', url = '') {
+            sheetCounter++;
+            const container = document.getElementById('sheetsContainer');
+
+            const sheetDiv = document.createElement('div');
+            sheetDiv.className = 'sheet-item';
+            sheetDiv.id = `sheet-${sheetCounter}`;
+
+            sheetDiv.innerHTML = `
+                <div class="sheet-item-header">
+                    <h4 style="margin: 0; color: #667eea;">Sheet ${sheetCounter}</h4>
+                    <button class="btn btn-danger" onclick="removeSheet('sheet-${sheetCounter}')">Remove</button>
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Full Sheet URL (paste from browser):</label>
+                    <input
+                        type="text"
+                        class="sheet-url"
+                        placeholder="https://docs.google.com/spreadsheets/d/.../edit#gid=123456789"
+                        value="${url}"
+                        onblur="parseSheetUrl(this, 'sheet-${sheetCounter}')">
+                    <p class="help-text">Click on the sheet tab in Google Sheets and copy the URL from your browser</p>
+                </div>
+                <div class="sheet-inputs">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Sheet Name:</label>
+                        <input
+                            type="text"
+                            class="sheet-name"
+                            placeholder="e.g., Platform 1, Mens Varsity"
+                            value="${name}">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>GID:</label>
+                        <input
+                            type="text"
+                            class="sheet-gid"
+                            placeholder="847893000"
+                            value="${gid}">
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(sheetDiv);
+        }
+
+        function parseSheetUrl(input, sheetId) {
+            const url = input.value.trim();
+            if (!url) return;
+
+            const sheetDiv = document.getElementById(sheetId);
+            const nameInput = sheetDiv.querySelector('.sheet-name');
+            const gidInput = sheetDiv.querySelector('.sheet-gid');
+
+            // Extract GID
+            const gidMatch = url.match(/[#&]gid=([0-9]+)/);
+            if (gidMatch && gidMatch[1]) {
+                gidInput.value = gidMatch[1];
+            }
+
+            // Try to extract sheet name from URL if possible
+            // Google Sheets doesn't always include sheet name in URL, so this is optional
+            showStatus('GID extracted! Please enter the sheet name manually.', 'info');
+        }
+
+        function removeSheet(sheetId) {
+            const sheet = document.getElementById(sheetId);
+            if (sheet) {
+                sheet.remove();
+            }
+        }
+
+        function saveConfiguration() {
+            const spreadsheetUrl = document.getElementById('spreadsheetUrl').value.trim();
+
+            if (!spreadsheetUrl) {
+                showStatus('Please enter the main Google Sheet URL first', 'error');
+                return;
+            }
+
+            const spreadsheetId = extractSpreadsheetId();
+            if (!spreadsheetId) {
+                return;
+            }
+
+            // Gather all sheets
+            const sheets = [];
+            const sheetItems = document.querySelectorAll('.sheet-item');
+
+            sheetItems.forEach(item => {
+                const name = item.querySelector('.sheet-name').value.trim();
+                const gid = item.querySelector('.sheet-gid').value.trim();
+
+                if (name && gid) {
+                    sheets.push({ name, gid });
+                }
+            });
+
+            if (sheets.length === 0) {
+                showStatus('Please add at least one sheet', 'error');
+                return;
+            }
+
+            const config = {
+                spreadsheetId,
+                spreadsheetUrl,
+                sheets,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            localStorage.setItem('trplConfig', JSON.stringify(config));
+
+            showStatus(`✓ Configuration saved! ${sheets.length} sheet(s) configured.`, 'success');
+            displayCurrentConfig();
+        }
+
+        function loadConfiguration() {
+            const configStr = localStorage.getItem('trplConfig');
+
+            // Load saved API key if available
+            const savedApiKey = localStorage.getItem('trplApiKey');
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+
+            if (!configStr) {
+                // Load default configuration
+                document.getElementById('spreadsheetUrl').value = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?usp=sharing';
+
+                // Pre-populate with actual sheets from the Google Sheet (with real GIDs)
+                const defaultSheets = [
+                    { name: 'Mens Varsity Results', gid: '1621470558' },
+                    { name: 'Mens JV Results', gid: '1003308815' },
+                    { name: 'Platform 1', gid: '1555475534' },
+                    { name: 'Platform 2', gid: '1810642262' },
+                    { name: 'Platform 3', gid: '1030574309' },
+                    { name: 'Platform 3B', gid: '109247638' },
+                    { name: 'Platform 4', gid: '1453770688' },
+                    { name: 'Platform 5', gid: '865457569' },
+                    { name: 'Platform 6', gid: '1262716783' },
+                    { name: 'Platform 7', gid: '280175070' },
+                    { name: 'Platform 8_', gid: '647971897' },
+                    { name: 'Mens JV Team', gid: '629789763' },
+                    { name: 'Mens Varsity Team', gid: '847893000' }
+                ];
+
+                defaultSheets.forEach(sheet => {
+                    const url = `https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit#gid=${sheet.gid}`;
+                    addSheetField(sheet.name, sheet.gid, url);
+                });
+
+                showStatus('✓ Loaded 13 sheets with GIDs! Review and save configuration.', 'success');
+                return;
+            }
+
+            try {
+                const config = JSON.parse(configStr);
+
+                // Load spreadsheet URL
+                document.getElementById('spreadsheetUrl').value = config.spreadsheetUrl || '';
+
+                // Clear existing sheets
+                document.getElementById('sheetsContainer').innerHTML = '';
+                sheetCounter = 0;
+
+                // Load sheets
+                if (config.sheets && config.sheets.length > 0) {
+                    config.sheets.forEach(sheet => {
+                        const url = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${sheet.gid}`;
+                        addSheetField(sheet.name, sheet.gid, url);
+                    });
+                    showStatus(`✓ Loaded configuration with ${config.sheets.length} sheet(s)`, 'success');
+                } else {
+                    addSheetField();
+                }
+
+                displayCurrentConfig();
+            } catch (e) {
+                showStatus('Error loading configuration: ' + e.message, 'error');
+                addSheetField();
+            }
+        }
+
+        function displayCurrentConfig() {
+            const configStr = localStorage.getItem('trplConfig');
+            const display = document.getElementById('currentConfig');
+
+            if (!configStr) {
+                display.textContent = 'No configuration saved yet.';
+                return;
+            }
+
+            try {
+                const config = JSON.parse(configStr);
+                display.textContent = JSON.stringify(config, null, 2);
+            } catch (e) {
+                display.textContent = 'Error displaying configuration.';
+            }
+        }
+
+        // Quick Load Team Data Function
+        async function quickLoadTeamData() {
+            const url = document.getElementById('quickLoadUrl').value.trim();
+            const statusDiv = document.getElementById('loadStatus');
+
+            if (!url) {
+                statusDiv.innerHTML = '<p style="color: #dc3545;">Please enter a Google Sheet URL</p>';
+                return;
+            }
+
+            statusDiv.innerHTML = '<p style="color: #0c5460;">Loading data...</p>';
+
+            try {
+                // Parse the URL
+                const parsed = parseGoogleSheetUrl(url);
+                if (!parsed) {
+                    throw new Error('Invalid Google Sheet URL');
+                }
+
+                // Construct CSV URL
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
+
+                // Fetch the data
+                const response = await fetch(csvUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data. Make sure the sheet is shared publicly.');
+                }
+
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+
+                // Store the data
+                localStorage.setItem('teamStandings', JSON.stringify(data));
+
+                statusDiv.innerHTML = `
+                    <p style="color: #155724; font-weight: bold;">✓ Data loaded successfully!</p>
+                    <p>Loaded ${data.length} rows of data.</p>
+                    <p><a href="team.html" style="color: #667eea; font-weight: bold;">→ View Team Standings</a></p>
+                `;
+
+            } catch (error) {
+                statusDiv.innerHTML = `<p style="color: #dc3545;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function parseGoogleSheetUrl(url) {
+            const spreadsheetIdMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            const gidMatch = url.match(/[#&]gid=([0-9]+)/);
+
+            if (!spreadsheetIdMatch) {
+                return null;
+            }
+
+            return {
+                spreadsheetId: spreadsheetIdMatch[1],
+                gid: gidMatch ? gidMatch[1] : '0'
+            };
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const result = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line) {
+                    // Simple CSV parsing (handles quoted fields)
+                    const row = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                    result.push(row.map(field => field.replace(/^"|"$/g, '')));
+                }
+            }
+
+            return result;
+        }
+    </script>
+</body>
+</html>

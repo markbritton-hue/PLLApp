@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Individual Athletes - Three Rivers Weightlifting</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .navbar-custom {
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.2s;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #60a5fa;
+            transform: translateY(-2px);
+        }
+
+        .navbar-custom .nav-link.setup {
+            background: #8b5cf6;
+            color: white !important;
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
+
+        .navbar-custom .nav-link.setup:hover {
+            background: #7c3aed;
+        }
+
+        .header-section {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header-section h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .load-section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+        }
+
+        .load-section h3 {
+            color: #60a5fa;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .weight-class-section {
+            margin-bottom: 50px;
+        }
+
+        .weight-class-header {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .weight-class-header h2 {
+            color: #60a5fa;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .athlete-count {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: normal;
+        }
+
+        .athlete-card {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            border-left: 4px solid #60a5fa;
+            height: 100%;
+        }
+
+        .athlete-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+            border-left-color: #a78bfa;
+        }
+
+        .athlete-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .designation-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .designation-badge.varsity {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .designation-badge.jv {
+            background: #10b981;
+            color: white;
+        }
+
+        .stat-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-top: 3px;
+        }
+
+        .lifts-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(96, 165, 250, 0.2);
+        }
+
+        .lift-box {
+            text-align: center;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 10px;
+        }
+
+        .lift-name {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .lift-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-top: 5px;
+        }
+
+        .total-box {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+        }
+
+        .total-label {
+            font-size: 0.75rem;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .total-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-top: 3px;
+        }
+
+        .btn-load {
+            background: #10b981;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-load:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
+        .btn-manual {
+            background: #f59e0b;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-manual:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #8b5cf6 !important;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: #7c3aed !important;
+        }
+
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+                <a class="navbar-brand text-white" href="index.html">
+                    <i class="fas fa-dumbbell fa-2x"></i>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html"><i class="fas fa-home me-1"></i>Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="athletes.html"><i class="fas fa-user-friends me-1"></i>Individual Athletes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="team.html"><i class="fas fa-trophy me-1"></i>Team Standings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="results.html"><i class="fas fa-chart-bar me-1"></i>All Results</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link setup" href="setup.html"><i class="fas fa-cog me-1"></i>Setup</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- Home Button -->
+            <div class="mb-4">
+                <a href="index.html" class="btn btn-lg" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); color: white;">
+                    <i class="fas fa-home me-2"></i>Home
+                </a>
+            </div>
+
+            <!-- Status Section -->
+            <div class="load-section">
+                <div id="loadingStatus" class="fw-bold"></div>
+                <div id="autoRefreshStatus" class="mt-2" style="display: none; color: #10b981;">
+                    <i class="fas fa-sync-alt me-1"></i>Auto-refresh enabled (every 10 seconds)
+                </div>
+            </div>
+
+            <!-- Athletes Container -->
+            <div id="weightClassContainer"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let athleteData = [];
+        let autoRefreshInterval = null;
+
+        // Toggle manual load section
+        function toggleManualLoad() {
+            const section = document.getElementById('manualLoadSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Load data from configured sheets
+        async function loadConfiguredSheets() {
+            const statusDiv = document.getElementById('loadingStatus');
+
+            // Load configuration
+            const configStr = localStorage.getItem('trplConfig');
+            if (!configStr) {
+                statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>No configuration found. Please go to Setup first.</div>';
+                return;
+            }
+
+            try {
+                const config = JSON.parse(configStr);
+
+                // Find Mens Varsity Results and Mens JV Results sheets
+                const varsitySheet = config.sheets.find(s => s.name === 'Mens Varsity Results');
+                const jvSheet = config.sheets.find(s => s.name === 'Mens JV Results');
+
+                if (!varsitySheet && !jvSheet) {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Could not find Mens Varsity Results or Mens JV Results in configuration.</div>';
+                    return;
+                }
+
+                statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading data from configured sheets...</div>';
+
+                // Start auto-refresh if not already running
+                if (!autoRefreshInterval) {
+                    autoRefreshInterval = setInterval(function() {
+                        console.log('Auto-refreshing configured sheets...');
+                        loadConfiguredSheets();
+                    }, 10000);
+                    document.getElementById('autoRefreshStatus').style.display = 'block';
+                }
+
+                // Load data from both sheets
+                const allAthletes = [];
+
+                if (varsitySheet) {
+                    console.log('Loading Mens Varsity Results...');
+                    const varsityAthletes = await loadSheetByGid(config.spreadsheetId, varsitySheet.gid, 'V');
+                    allAthletes.push(...varsityAthletes);
+                    console.log(`Loaded ${varsityAthletes.length} varsity athletes`);
+                }
+
+                if (jvSheet) {
+                    console.log('Loading Mens JV Results...');
+                    const jvAthletes = await loadSheetByGid(config.spreadsheetId, jvSheet.gid, 'JV');
+                    allAthletes.push(...jvAthletes);
+                    console.log(`Loaded ${jvAthletes.length} JV athletes`);
+                }
+
+                if (allAthletes.length === 0) {
+                    statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i>No athletes found in the sheets.</div>';
+                    return;
+                }
+
+                // Update athlete data and display
+                athleteData = allAthletes;
+                renderAthletes();
+
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                statusDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Loaded ${allAthletes.length} athletes (${varsitySheet ? 'Varsity' : ''}${varsitySheet && jvSheet ? ' + ' : ''}${jvSheet ? 'JV' : ''}) - Last updated: ${timeStr}</div>`;
+
+            } catch (error) {
+                console.error('Error loading configured sheets:', error);
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>Error: ${error.message}</div>`;
+            }
+        }
+
+        // Load a single sheet by GID and return athletes
+        async function loadSheetByGid(spreadsheetId, gid, designation = '') {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
+
+            let response;
+            try {
+                response = await fetch(csvUrl);
+                if (!response.ok) {
+                    throw new Error('Direct fetch returned error status');
+                }
+            } catch (directError) {
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
+                response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch sheet (gid=${gid}): ${response.status}`);
+                }
+            }
+
+            const csvText = await response.text();
+            const csvData = parseCSV(csvText);
+
+            return parseAthletesFromCSV(csvData, designation);
+        }
+
+        // Parse athletes from CSV data
+        function parseAthletesFromCSV(csvData, defaultDesignation = '') {
+            const athletes = [];
+
+            let headerRow = -1;
+            let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1;
+            let squat1Col = -1, squat2Col = -1, squat3Col = -1;
+            let bench1Col = -1, bench2Col = -1, bench3Col = -1;
+            let dead1Col = -1, dead2Col = -1, dead3Col = -1;
+            let totalCol = -1;
+
+            // Find header row - look for row with "Name" or "Lifter" column
+            for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                const row = csvData[i];
+                let foundName = false, foundSchool = false;
+
+                for (let j = 0; j < row.length; j++) {
+                    const cell = row[j].toLowerCase().trim();
+
+                    if ((cell === 'name' || cell === 'lifter') && nameCol === -1) {
+                        nameCol = j;
+                        foundName = true;
+                    }
+                    if (cell === 'school' && schoolCol === -1) {
+                        schoolCol = j;
+                        foundSchool = true;
+                    }
+                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'class' || cell === 'weightclass' || cell === 'wt. class') && weightClassCol === -1) {
+                        weightClassCol = j;
+                    }
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight') && bodyWeightCol === -1) {
+                        bodyWeightCol = j;
+                    }
+                    // Squat attempts
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 's1' || cell === 'squat-1') && squat1Col === -1) {
+                        squat1Col = j;
+                    }
+                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2' || cell === 's2' || cell === 'squat-2') && squat2Col === -1) {
+                        squat2Col = j;
+                    }
+                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3' || cell === 's3' || cell === 'squat-3') && squat3Col === -1) {
+                        squat3Col = j;
+                    }
+                    // Bench attempts
+                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1' || cell === 'b1' || cell === 'bench-1' || cell === 'bench press 1') && bench1Col === -1) {
+                        bench1Col = j;
+                    }
+                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2' || cell === 'b2' || cell === 'bench-2' || cell === 'bench press 2') && bench2Col === -1) {
+                        bench2Col = j;
+                    }
+                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3' || cell === 'b3' || cell === 'bench-3' || cell === 'bench press 3') && bench3Col === -1) {
+                        bench3Col = j;
+                    }
+                    // Deadlift attempts
+                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deadlift1' || cell === 'd1' || cell === 'deadlift-1') && dead1Col === -1) {
+                        dead1Col = j;
+                    }
+                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'deadlift2' || cell === 'd2' || cell === 'deadlift-2') && dead2Col === -1) {
+                        dead2Col = j;
+                    }
+                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'deadlift3' || cell === 'd3' || cell === 'deadlift-3') && dead3Col === -1) {
+                        dead3Col = j;
+                    }
+                    if (cell === 'total' && totalCol === -1) {
+                        totalCol = j;
+                    }
+                }
+
+                if (foundName && foundSchool) {
+                    headerRow = i;
+                    break;
+                }
+            }
+
+            // If no header found OR missing critical columns, use position-based parsing
+            const missingColumns = headerRow === -1 || nameCol === -1 || weightClassCol === -1 || squat1Col === -1;
+            if (missingColumns) {
+                console.log('Using position-based parsing because:', {
+                    noHeader: headerRow === -1,
+                    noName: nameCol === -1,
+                    noWeightClass: weightClassCol === -1,
+                    noSquat1: squat1Col === -1
+                });
+                console.log('First 10 rows:', csvData.slice(0, 10));
+
+                // Find the first row with actual athlete data (has "Three Rivers" in it)
+                let dataStartRow = -1;
+                for (let i = 0; i < Math.min(20, csvData.length); i++) {
+                    const row = csvData[i];
+                    if (row[5] && row[5].toLowerCase().includes('three rivers')) {
+                        dataStartRow = i;
+                        console.log('Found data starting at row:', i, row);
+                        break;
+                    }
+                }
+
+                if (dataStartRow === -1) {
+                    console.log('Could not find Three Rivers data');
+                    return athletes;
+                }
+
+                // Common format: Place, Points, Weight Class, Division, School, Body Weight, Name, Sq1, Sq2, Sq3, Best Sq, ...
+                // Force override all columns with position-based values
+                headerRow = dataStartRow - 1; // Set header to one before data
+                nameCol = 7;
+                schoolCol = 5;
+                weightClassCol = 3; // Contains "114 JV" format
+                bodyWeightCol = 6;
+                squat1Col = 8;
+                squat2Col = 9;
+                squat3Col = 10;
+                bench1Col = 12;
+                bench2Col = 13;
+                bench3Col = 14;
+                dead1Col = 16;
+                dead2Col = 17;
+                dead3Col = 18;
+                totalCol = 20;
+
+                console.log('✅ Position-based columns set, starting from row:', dataStartRow);
+                console.log('Sample data row:', csvData[dataStartRow]);
+            }
+
+            // Debug: Log detected columns
+            console.log('Column detection:', {
+                name: nameCol,
+                school: schoolCol,
+                weightClass: weightClassCol,
+                bodyWeight: bodyWeightCol,
+                squat: [squat1Col, squat2Col, squat3Col],
+                bench: [bench1Col, bench2Col, bench3Col],
+                deadlift: [dead1Col, dead2Col, dead3Col],
+                total: totalCol
+            });
+
+            // Parse athlete rows
+            for (let i = headerRow + 1; i < csvData.length; i++) {
+                const row = csvData[i];
+
+                if (row.length <= nameCol) continue;
+
+                const name = row[nameCol]?.trim();
+                const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
+
+                if (!school || !school.toLowerCase().includes('three rivers')) {
+                    continue;
+                }
+
+                if (!name) continue;
+
+                let weightClass = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+
+                // Extract just the number from weight class (e.g., "114 JV" -> "114")
+                if (weightClass) {
+                    const match = weightClass.match(/(\d+)/);
+                    if (match) {
+                        weightClass = match[1];
+                    }
+                }
+
+                const athlete = {
+                    name: name,
+                    school: school,
+                    designation: defaultDesignation,
+                    weightClass: weightClass,
+                    bodyWeight: bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0,
+                    squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
+                    squat2: squat2Col !== -1 ? row[squat2Col]?.trim() : '',
+                    squat3: squat3Col !== -1 ? row[squat3Col]?.trim() : '',
+                    bench1: bench1Col !== -1 ? row[bench1Col]?.trim() : '',
+                    bench2: bench2Col !== -1 ? row[bench2Col]?.trim() : '',
+                    bench3: bench3Col !== -1 ? row[bench3Col]?.trim() : '',
+                    dead1: dead1Col !== -1 ? row[dead1Col]?.trim() : '',
+                    dead2: dead2Col !== -1 ? row[dead2Col]?.trim() : '',
+                    dead3: dead3Col !== -1 ? row[dead3Col]?.trim() : '',
+                    currentTotal: totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0
+                };
+
+                // Debug first athlete
+                if (athletes.length === 0) {
+                    console.log('First athlete data:', athlete);
+                }
+
+                // Calculate best lifts from attempts (only count successful lifts - those without 'x')
+                const getBestLift = (attempt1, attempt2, attempt3) => {
+                    const lifts = [attempt1, attempt2, attempt3]
+                        .filter(a => a && !a.toLowerCase().includes('x')) // Only successful attempts
+                        .map(a => parseFloat(a.replace(/[gG]/g, ''))) // Remove 'g' suffix
+                        .filter(a => !isNaN(a) && a > 0);
+                    return lifts.length > 0 ? Math.max(...lifts) : 0;
+                };
+
+                athlete.bestSquat = getBestLift(athlete.squat1, athlete.squat2, athlete.squat3);
+                athlete.bestBench = getBestLift(athlete.bench1, athlete.bench2, athlete.bench3);
+                athlete.bestDeadlift = getBestLift(athlete.dead1, athlete.dead2, athlete.dead3);
+
+                if (athlete.currentTotal === 0) {
+                    athlete.currentTotal = athlete.bestSquat + athlete.bestBench + athlete.bestDeadlift;
+                }
+
+                athlete.lbPerLb = athlete.bodyWeight > 0
+                    ? (athlete.currentTotal / athlete.bodyWeight).toFixed(2)
+                    : '0.00';
+
+                athletes.push(athlete);
+            }
+
+            return athletes;
+        }
+
+        // Helper function to render an attempt box
+        function renderAttempt(attempt, attemptNum) {
+            if (!attempt) {
+                return `
+                    <div class="col-4">
+                        <div class="lift-box" style="opacity: 0.3;">
+                            <div class="lift-name">Attempt ${attemptNum}</div>
+                            <div class="lift-value">-</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const isFailed = attempt.toLowerCase().includes('x');
+            const isGood = attempt.toLowerCase().includes('g');
+
+            // Remove 'x' and 'g' suffixes
+            let value = attempt.replace(/[xgXG]/g, '');
+
+            const bgColor = isFailed ? '#ef4444' : (isGood ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.6)');
+            const borderColor = isFailed ? '#dc2626' : (isGood ? '#10b981' : 'rgba(96, 165, 250, 0.2)');
+            const textColor = isFailed ? 'white' : '#60a5fa';
+
+            return `
+                <div class="col-4">
+                    <div class="lift-box" style="background: ${bgColor}; border-color: ${borderColor};">
+                        <div class="lift-name" style="color: ${isFailed ? 'rgba(255,255,255,0.8)' : 'rgba(255, 255, 255, 0.6)'};">Attempt ${attemptNum}</div>
+                        <div class="lift-value" style="color: ${textColor};">
+                            ${value}${isFailed ? '<i class="fas fa-times ms-1"></i>' : ''}${isGood ? '<i class="fas fa-check ms-1" style="color: #10b981;"></i>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render athletes
+        function renderAthletes() {
+            console.log('renderAthletes called with', athleteData.length, 'athletes');
+
+            const groupedData = athleteData.reduce((acc, athlete) => {
+                const wc = athlete.weightClass || 'Unclassified';
+                if (!acc[wc]) {
+                    acc[wc] = [];
+                }
+                acc[wc].push(athlete);
+                return acc;
+            }, {});
+
+            console.log('Weight classes found:', Object.keys(groupedData));
+            console.log('Athletes per weight class:', Object.entries(groupedData).map(([wc, athletes]) => `${wc}: ${athletes.length}`));
+
+            const weightClassOrder = ["114", "123", "132", "145", "155", "165", "181", "194", "207", "220", "242", "275", "SHW"];
+            const container = document.getElementById('weightClassContainer');
+            container.innerHTML = '';
+
+            // Add all weight classes found (including empty ones)
+            const allWeightClasses = [...weightClassOrder];
+            Object.keys(groupedData).forEach(wc => {
+                if (!allWeightClasses.includes(wc)) {
+                    allWeightClasses.push(wc);
+                }
+            });
+
+            allWeightClasses.forEach(weightClass => {
+                if (!groupedData[weightClass]) return;
+
+                const athletesInClass = groupedData[weightClass];
+                const section = document.createElement('div');
+                section.className = 'weight-class-section';
+
+                const displayClass = weightClass || 'Unclassified';
+                section.innerHTML = `
+                    <div class="weight-class-header">
+                        <h2><i class="fas fa-weight me-2"></i>${displayClass}${weightClass ? ' lbs' : ''} <span class="athlete-count">(${athletesInClass.length} athlete${athletesInClass.length > 1 ? 's' : ''})</span></h2>
+                    </div>
+                    <div class="row g-4">
+                        ${athletesInClass.map(athlete => `
+                            <div class="col-lg-4 col-md-6">
+                                <div class="athlete-card">
+                                    <div class="athlete-name">${athlete.name}</div>
+                                    <span class="designation-badge ${athlete.designation === 'V' ? 'varsity' : 'jv'}">
+                                        ${athlete.designation === 'V' ? 'Varsity' : 'JV'}
+                                    </span>
+
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="stat-box">
+                                                <div class="stat-label">Body Weight</div>
+                                                <div class="stat-value">${athlete.bodyWeight} <small>lbs</small></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-box">
+                                                <div class="stat-label">lb per lb</div>
+                                                <div class="stat-value">${athlete.lbPerLb}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="lifts-section">
+                                        <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
+                                            <i class="fas fa-compress-arrows-alt me-2"></i>Squat
+                                        </h6>
+                                        <div class="row g-2 mb-3">
+                                            ${renderAttempt(athlete.squat1, '1')}
+                                            ${renderAttempt(athlete.squat2, '2')}
+                                            ${renderAttempt(athlete.squat3, '3')}
+                                        </div>
+
+                                        <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
+                                            <i class="fas fa-hands me-2"></i>Bench Press
+                                        </h6>
+                                        <div class="row g-2 mb-3">
+                                            ${renderAttempt(athlete.bench1, '1')}
+                                            ${renderAttempt(athlete.bench2, '2')}
+                                            ${renderAttempt(athlete.bench3, '3')}
+                                        </div>
+
+                                        <h6 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px;">
+                                            <i class="fas fa-weight-hanging me-2"></i>Deadlift
+                                        </h6>
+                                        <div class="row g-2">
+                                            ${renderAttempt(athlete.dead1, '1')}
+                                            ${renderAttempt(athlete.dead2, '2')}
+                                            ${renderAttempt(athlete.dead3, '3')}
+                                        </div>
+                                    </div>
+
+                                    <div class="total-box">
+                                        <div class="total-label">TOTAL</div>
+                                        <div class="total-value">${athlete.currentTotal} lbs</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(section);
+            });
+        }
+
+        // Parse CSV
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const result = [];
+
+            for (let line of lines) {
+                if (!line.trim()) continue;
+
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim().replace(/^"|"$/g, ''));
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim().replace(/^"|"$/g, ''));
+                result.push(values);
+            }
+
+            return result;
+        }
+
+        // Manual load function (legacy)
+        async function loadSheetData() {
+            alert('Please use the "Load from Configuration" button or configure your sheets in Setup first.');
+        }
+
+        // Auto-load on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const configStr = localStorage.getItem('trplConfig');
+
+            if (configStr) {
+                console.log('Auto-loading from configuration...');
+                loadConfiguredSheets();
+            }
+        });
+    </script>
+</body>
+</html>
