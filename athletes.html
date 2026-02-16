@@ -361,16 +361,16 @@
                 // Load data from both sheets
                 const allAthletes = [];
 
-                console.log(`Loading athletes from Sheet 1: ${sheet1.name}...`);
-                const sheet1Athletes = await loadSheetByGid(config.spreadsheetId, sheet1.gid, '');
+                console.log(`Loading athletes from Sheet 1 (Varsity): ${sheet1.name}...`);
+                const sheet1Athletes = await loadSheetByGid(config.spreadsheetId, sheet1.gid, 'V');
                 allAthletes.push(...sheet1Athletes);
-                console.log(`Loaded ${sheet1Athletes.length} athletes from ${sheet1.name}`);
+                console.log(`Loaded ${sheet1Athletes.length} varsity athletes from ${sheet1.name}`);
 
                 if (sheet2) {
-                    console.log(`Loading athletes from Sheet 2: ${sheet2.name}...`);
-                    const sheet2Athletes = await loadSheetByGid(config.spreadsheetId, sheet2.gid, '');
+                    console.log(`Loading athletes from Sheet 2 (JV): ${sheet2.name}...`);
+                    const sheet2Athletes = await loadSheetByGid(config.spreadsheetId, sheet2.gid, 'JV');
                     allAthletes.push(...sheet2Athletes);
-                    console.log(`Loaded ${sheet2Athletes.length} athletes from ${sheet2.name}`);
+                    console.log(`Loaded ${sheet2Athletes.length} JV athletes from ${sheet2.name}`);
                 }
 
                 if (allAthletes.length === 0) {
