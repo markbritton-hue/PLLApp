@@ -7,49 +7,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-        }
-
-        .logo {
-            width: 120px;
-            height: auto;
-            margin-bottom: 20px;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        header p {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.7);
+            padding: 20px 0;
         }
 
         .btn-home {
@@ -70,91 +31,29 @@
             color: white;
         }
 
-        .load-section {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-        }
-
-        .load-section h3 {
-            color: #60a5fa;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .input-group input {
-            flex: 1;
-            min-width: 300px;
-            padding: 10px;
-            border: 2px solid #667eea;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .input-group button {
-            background: #10b981;
-            color: white;
-            padding: 10px 30px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .input-group button:hover {
-            background: #059669;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        .page-header {
+            text-align: center;
             margin-bottom: 30px;
         }
 
-        .stat-card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-            border-left: 5px solid #60a5fa;
-        }
-
-        .stat-card h3 {
-            color: #60a5fa;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card .value {
+        .page-header h1 {
             font-size: 2.5rem;
-            font-weight: bold;
-            color: white;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
 
-        .stat-card .label {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 5px;
+        .page-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .dashboard {
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 12px;
+            border-radius: 15px;
             padding: 25px;
             margin-bottom: 30px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
@@ -165,37 +64,39 @@
             text-align: center;
             margin-bottom: 25px;
             font-size: 1.8rem;
+            font-weight: 700;
         }
 
         .podium {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
 
         .podium-card {
-            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-left: 5px solid #ccc;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            border-left: 5px solid rgba(96, 165, 250, 0.4);
         }
 
         .podium-card.first {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            border-left-color: #ffd700;
+            border-left-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.08);
         }
 
         .podium-card.second {
-            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-            border-left-color: #c0c0c0;
+            border-left-color: #94a3b8;
+            background: rgba(148, 163, 184, 0.08);
         }
 
         .podium-card.third {
-            background: linear-gradient(135deg, #cd7f32 0%, #e6a757 100%);
             border-left-color: #cd7f32;
+            background: rgba(205, 127, 50, 0.08);
         }
 
         .podium-card .medal {
@@ -205,68 +106,72 @@
 
         .podium-card .team-name {
             font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
+            font-weight: 700;
+            color: white;
             margin-bottom: 8px;
         }
 
         .podium-card .points {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #667eea;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #60a5fa;
         }
 
         .podium-card .label {
             font-size: 0.8rem;
-            color: #666;
+            color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-top: 4px;
         }
 
-        .three-rivers-card {
-            background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
-            border-radius: 10px;
+        .school-card {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            border-radius: 12px;
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border: 3px solid #fbc02d;
             margin-bottom: 20px;
         }
 
-        .three-rivers-card h3 {
-            color: #f57f17;
+        .school-card h3 {
+            color: #10b981;
             margin-bottom: 15px;
             font-size: 1.3rem;
+            font-weight: 700;
         }
 
-        .three-rivers-stats {
+        .school-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
         }
 
-        .three-rivers-stat {
-            background: white;
+        .school-stat {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 8px;
             padding: 12px;
+            text-align: center;
         }
 
-        .three-rivers-stat .value {
+        .school-stat .value {
             font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
+            font-weight: 800;
+            color: #60a5fa;
         }
 
-        .three-rivers-stat .label {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
+        .school-stat .label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
         }
 
         .team-table {
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 12px;
+            border-radius: 15px;
             padding: 25px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
             overflow-x: auto;
@@ -276,26 +181,27 @@
             color: #60a5fa;
             margin-bottom: 20px;
             font-size: 1.5rem;
+            font-weight: 700;
             text-align: center;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         th, td {
-            padding: 14px 16px;
+            padding: 12px 14px;
             text-align: center;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(96, 165, 250, 0.15);
         }
 
         th {
             background: linear-gradient(135deg, #60a5fa, #a78bfa);
             color: white;
-            font-weight: bold;
-            font-size: 0.9rem;
+            font-weight: 700;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             position: sticky;
@@ -304,7 +210,7 @@
         }
 
         td {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.85);
         }
 
         td:first-child, th:first-child {
@@ -322,73 +228,62 @@
         }
 
         .total-column {
-            background: #e8f5e9 !important;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #2e7d32;
+            background: rgba(96, 165, 250, 0.15) !important;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #60a5fa !important;
         }
 
         .points-column {
             font-weight: 600;
-            color: #333;
+            color: rgba(255, 255, 255, 0.85);
         }
 
-        .three-rivers-row {
-            background: #fff9c4 !important;
-            border-left: 4px solid #fbc02d;
-            border-right: 4px solid #fbc02d;
+        .school-row {
+            background: rgba(16, 185, 129, 0.12) !important;
+            border-left: 3px solid #10b981;
         }
 
-        .three-rivers-row td {
-            font-weight: bold;
+        .school-row td {
+            font-weight: 700;
+            color: white !important;
+        }
+
+        .school-row .total-column {
+            color: #10b981 !important;
         }
 
         .rank-column {
             font-size: 1.1rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        #loadingStatus {
-            margin-top: 10px;
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        #autoRefreshStatus {
-            margin-top: 5px;
-            color: #4caf50;
-            font-size: 12px;
-            display: none;
+            font-weight: 800;
+            color: #a78bfa;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container px-4">
         <!-- Auto-refresh indicator -->
-        <div id="autoRefreshStatus" style="display: block; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
+        <div id="autoRefreshStatus" style="padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
             <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 15 seconds)
         </div>
 
-        <header>
-            <div style="font-size: 4rem; color: #60a5fa; margin-bottom: 20px;">
-                <i class="fas fa-dumbbell"></i>
-            </div>
-            <h1><i class="fas fa-trophy me-2"></i>Team Standings</h1>
-            <p>Team Rankings by Total Points</p>
-        </header>
-
-        <div style="margin-bottom: 30px;">
+        <!-- Navigation -->
+        <div class="mb-4">
             <a href="index.html" class="btn-home">
                 <i class="fas fa-home me-2"></i>Home
             </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-trophy me-3"></i>Team Standings</h1>
+            <p>Team Rankings by Total Points</p>
         </div>
 
         <input type="hidden" id="sheetUrl">
         <div id="loadingStatus" style="display: none;"></div>
 
         <div id="dashboard"></div>
-        <div id="statsContainer" class="stats-container"></div>
         <div id="tableContainer"></div>
     </div>
 
@@ -694,10 +589,12 @@
 
                 const totalPoints = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
 
+                const configStr = localStorage.getItem('trplConfig');
+                const configuredSchool = configStr ? (JSON.parse(configStr).schoolName || '').toLowerCase() : 'three rivers';
                 teamsData.push({
                     row: row,
                     total: totalPoints,
-                    isThreeRivers: row.some(cell => cell && cell.toLowerCase().includes('three rivers'))
+                    isMySchool: row.some(cell => cell && cell.toLowerCase().includes(configuredSchool))
                 });
             }
 
@@ -726,7 +623,7 @@
                 const row = teamData.row;
                 const isThreeRivers = teamData.isThreeRivers;
 
-                tableHTML += isThreeRivers ? '<tr class="three-rivers-row">' : '<tr>';
+                tableHTML += teamData.isMySchool ? '<tr class="school-row">' : '<tr>';
 
                 // Add rank
                 tableHTML += `<td class="rank-column">${rank + 1}</td>`;
@@ -762,15 +659,17 @@
             if (headerRow === -1 || teamCol === -1 || totalCol === -1) {
                 console.log('Dashboard not built - missing columns:', { headerRow, teamCol, totalCol });
                 dashboard.innerHTML = `
-                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                        <h3 style="color: #856404; margin-bottom: 10px;">⚠️ Dashboard Not Available</h3>
-                        <p style="color: #856404;">Click the green "📊 Load Mens Varsity Team" button above to see the leaderboard.</p>
+                    <div style="background: rgba(96, 165, 250, 0.1); border: 2px solid #60a5fa; border-radius: 10px; padding: 20px; margin-bottom: 20px; text-align: center; color: #60a5fa;">
+                        <h3 style="margin-bottom: 10px;">⚠️ Dashboard Not Available</h3>
+                        <p>Could not detect required columns. Check the sheet structure.</p>
                     </div>
                 `;
                 return;
             }
 
-            console.log('Building dashboard with', { headerRow, teamCol, totalCol });
+            // Get configured school name
+            const configStr = localStorage.getItem('trplConfig');
+            const schoolName = configStr ? (JSON.parse(configStr).schoolName || '') : '';
 
             // Extract team data
             const teams = [];
@@ -787,7 +686,7 @@
                     teams.push({
                         name: teamName,
                         points: totalPoints,
-                        isThreeRivers: teamName.toLowerCase().includes('three rivers')
+                        isMySchool: schoolName && teamName.toLowerCase().includes(schoolName.toLowerCase())
                     });
                 }
             }
@@ -795,27 +694,22 @@
             // Sort by points descending
             teams.sort((a, b) => b.points - a.points);
 
-            console.log('Teams for dashboard (top 5):', teams.slice(0, 5).map(t => ({ name: t.name, points: t.points })));
-
-            // Find Three Rivers
-            const threeRiversTeam = teams.find(t => t.isThreeRivers);
-            const threeRiversRank = teams.findIndex(t => t.isThreeRivers) + 1;
-
-            console.log('Three Rivers:', { rank: threeRiversRank, points: threeRiversTeam?.points || 'Not found' });
+            // Find configured school
+            const mySchoolTeam = teams.find(t => t.isMySchool);
+            const mySchoolRank = teams.findIndex(t => t.isMySchool) + 1;
 
             let dashboardHTML = '<div class="dashboard">';
-            dashboardHTML += '<h2>🏆 Leaderboard</h2>';
+            dashboardHTML += '<h2><i class="fas fa-trophy me-2"></i>Leaderboard</h2>';
 
             // Top 3 Podium
             dashboardHTML += '<div class="podium">';
-
             const medals = ['🥇', '🥈', '🥉'];
-            const classes = ['first', 'second', 'third'];
+            const podiumClasses = ['first', 'second', 'third'];
 
             for (let i = 0; i < Math.min(3, teams.length); i++) {
                 const team = teams[i];
                 dashboardHTML += `
-                    <div class="podium-card ${classes[i]}">
+                    <div class="podium-card ${podiumClasses[i]}">
                         <div class="medal">${medals[i]}</div>
                         <div class="team-name">${team.name}</div>
                         <div class="points">${team.points}</div>
@@ -826,27 +720,27 @@
 
             dashboardHTML += '</div>';
 
-            // Three Rivers Stats Card
-            if (threeRiversTeam) {
-                const pointsBehindLeader = teams[0].points - threeRiversTeam.points;
+            // School stats card
+            if (mySchoolTeam) {
+                const pointsBehindLeader = teams[0].points - mySchoolTeam.points;
 
                 dashboardHTML += `
-                    <div class="three-rivers-card">
-                        <h3>⭐ Three Rivers Performance</h3>
-                        <div class="three-rivers-stats">
-                            <div class="three-rivers-stat">
-                                <div class="value">#${threeRiversRank}</div>
+                    <div class="school-card">
+                        <h3><i class="fas fa-school me-2"></i>${mySchoolTeam.name} Performance</h3>
+                        <div class="school-stats">
+                            <div class="school-stat">
+                                <div class="value">#${mySchoolRank}</div>
                                 <div class="label">Current Rank</div>
                             </div>
-                            <div class="three-rivers-stat">
-                                <div class="value">${threeRiversTeam.points}</div>
+                            <div class="school-stat">
+                                <div class="value">${mySchoolTeam.points}</div>
                                 <div class="label">Total Points</div>
                             </div>
-                            <div class="three-rivers-stat">
+                            <div class="school-stat">
                                 <div class="value">${pointsBehindLeader === 0 ? '🏆' : '-' + pointsBehindLeader}</div>
                                 <div class="label">${pointsBehindLeader === 0 ? 'Leading!' : 'From Leader'}</div>
                             </div>
-                            <div class="three-rivers-stat">
+                            <div class="school-stat">
                                 <div class="value">${teams.length}</div>
                                 <div class="label">Total Teams</div>
                             </div>
