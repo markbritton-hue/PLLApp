@@ -212,10 +212,12 @@
                     // Use ALL athletes to determine current column and overall platform positions
                     const currentColumn = getCurrentAttemptColumn(athletes);
 
+                    const pendingFilter = currentColumn
+                        ? (athlete) => hasPendingInColumn(athlete, currentColumn)
+                        : (athlete) => hasAnyPendingAttempt(athlete);
+
                     // Sort ALL athletes to get true platform position
-                    const allSorted = sortAthletesByLiftingOrder(athletes).filter(athlete =>
-                        hasPendingInColumn(athlete, currentColumn)
-                    );
+                    const allSorted = sortAthletesByLiftingOrder(athletes).filter(pendingFilter);
 
                     // Build map of sheetOrder -> overall platform position
                     const platformPositionMap = {};
@@ -224,20 +226,7 @@
                     });
 
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
-                    const athletesToShow = sortedAthletes.filter(athlete =>
-                        hasPendingInColumn(athlete, currentColumn)
-                    );
-
-                    // Find the last completed attempt in the CURRENT column in the FULL platform sheet
-                    let lastCompletedRow = -1;
-                    for (const athlete of athletes) {
-                        if (currentColumn && athlete[currentColumn]) {
-                            const lower = athlete[currentColumn].toLowerCase();
-                            if (lower.includes('g') || lower.includes('x')) {
-                                if (athlete.sheetOrder > lastCompletedRow) lastCompletedRow = athlete.sheetOrder;
-                            }
-                        }
-                    }
+                    const athletesToShow = sortedAthletes.filter(pendingFilter);
 
                     // Attach overall platform position to each school athlete
                     athletesToShow.forEach(athlete => {
@@ -245,7 +234,7 @@
                     });
 
                     if (athletesToShow.length > 0) {
-                        renderPlatformSection(platform.name, athletesToShow, lastCompletedRow);
+                        renderPlatformSection(platform.name, athletesToShow);
                     }
 
                 } catch (error) {
@@ -449,7 +438,17 @@
             return !lower.includes('g') && !lower.includes('x');
         }
 
-        function renderPlatformSection(platformName, athletes, lastCompletedRow) {
+        function hasAnyPendingAttempt(athlete) {
+            const cols = ['squat1', 'squat2', 'squat3', 'bench1', 'bench2', 'bench3', 'dead1', 'dead2', 'dead3'];
+            return cols.some(col => {
+                const val = athlete[col];
+                if (!val) return false;
+                const lower = val.toLowerCase();
+                return !lower.includes('g') && !lower.includes('x');
+            });
+        }
+
+        function renderPlatformSection(platformName, athletes) {
             const container = document.getElementById('displayContainer');
 
             const section = document.createElement('div');
@@ -463,8 +462,6 @@
             athletes.forEach((athlete, index) => {
                 // Overall platform position across ALL athletes
                 const overallPosition = athlete.platformPosition || 0;
-                // How many rows down from last completed attempt in full platform sheet
-                const rowsDown = lastCompletedRow >= 0 ? athlete.sheetOrder - lastCompletedRow : 0;
 
                 let status = '';
                 let statusClass = '';
@@ -499,7 +496,7 @@
                             ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            ${rowsDown > 0 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${rowsDown}</div>` : ''}
+                            ${overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
                             ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                         </div>
                     </div>

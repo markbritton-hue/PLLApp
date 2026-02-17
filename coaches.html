@@ -235,6 +235,7 @@
                 autoRefreshInterval = null;
                 btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF';
                 btn.style.background = 'rgba(96, 165, 250, 0.8)';
+                localStorage.setItem('coachesAutoRefresh', 'off');
             } else {
                 const cfg = JSON.parse(localStorage.getItem('trplConfig') || '{}');
                 const intervalMs = (cfg.autoRefreshSeconds || 20) * 1000;
@@ -243,6 +244,7 @@
                 }, intervalMs);
                 btn.innerHTML = `<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON (${cfg.autoRefreshSeconds || 20}s)`;
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
+                localStorage.setItem('coachesAutoRefresh', 'on');
                 loadAllPlatforms();
             }
         }
@@ -250,6 +252,10 @@
         // Load all platforms on page load
         window.addEventListener('DOMContentLoaded', function() {
             loadAllPlatforms();
+            // Restore auto-refresh state
+            if (localStorage.getItem('coachesAutoRefresh') === 'on') {
+                toggleAutoRefresh();
+            }
         });
 
         // Load all platform sheets
