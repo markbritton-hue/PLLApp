@@ -255,9 +255,11 @@
                         if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2' || cell === 'dead lift 2') && dl2 === -1) dl2 = j;
                         if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3' || cell === 'dead lift 3') && dl3 === -1) dl3 = j;
                         if (cell === 'total' && totalCol === -1) totalCol = j;
-                        if (cell === 'squat' && squatCol === -1) squatCol = j;
-                        if ((cell === 'bench' || cell === 'bench press') && benchCol === -1) benchCol = j;
-                        if ((cell === 'deadlift' || cell === 'dead lift') && deadCol === -1) deadCol = j;
+                        // When seeing a single "Squat"/"Bench"/"Dead Lift" header, the block is
+                        // [attempt1, attempt2, attempt3, best] — point to best (j+3)
+                        if (cell === 'squat' && squatCol === -1) { sq1 = j; sq2 = j+1; sq3 = j+2; squatCol = j+3; }
+                        if ((cell === 'bench' || cell === 'bench press') && benchCol === -1) { bp1 = j; bp2 = j+1; bp3 = j+2; benchCol = j+3; }
+                        if ((cell === 'deadlift' || cell === 'dead lift') && deadCol === -1) { dl1 = j; dl2 = j+1; dl3 = j+2; deadCol = j+3; }
                         if ((cell === 'place' || cell === 'pl' || cell === 'rank') && placeCol === -1) placeCol = j;
                     }
                     if (nameCol !== -1 && schoolCol !== -1) { headerRow = i; break; }
@@ -268,48 +270,27 @@
                     return;
                 }
 
-                // Known powerlifting weight classes — only match these for grouping
-                const knownWC = new Set(['114','123','132','145','155','165','181','194','207','220','242','275','SHW']);
-
-                // Fallback: scan data rows for a column containing only known weight class values
-                if (wcCol === -1) {
-                    for (let j = 0; j < (csvData[headerRow + 1] || []).length; j++) {
-                        if (j === placeCol) continue; // skip place column
-                        let matches = 0;
-                        for (let i = headerRow + 1; i < Math.min(headerRow + 10, csvData.length); i++) {
-                            const val = csvData[i][j]?.trim().toUpperCase().replace(/\s*(LBS?|#)/i, '');
-                            if (knownWC.has(val)) matches++;
-                        }
-                        if (matches > 0) { wcCol = j; break; }
-                    }
-                }
+                // Always use column A (index 0) as the weight class source
+                wcCol = 0;
 
                 const configuredSchool = getConfiguredSchool();
                 const grouped = {};
-                let currentWC = ''; // track weight class from section-header rows
+                let currentWC = ''; // tracks weight class across athletes in the same class
 
                 for (let i = headerRow + 1; i < csvData.length; i++) {
                     const row = csvData[i];
-                    const name = nameCol !== -1 ? row[nameCol]?.trim() : '';
 
-                    // If no name, check if this row is a weight class section header
-                    if (!name) {
-                        for (const cell of row) {
-                            const v = cell?.trim().toUpperCase().replace(/\s*(LBS?|#)/i, '');
-                            if (knownWC.has(v) || /^\d{3}$/.test(v)) { currentWC = v; break; }
-                        }
-                        continue;
+                    // Update currentWC whenever col A has a numeric value
+                    const colAVal = row[0]?.trim();
+                    if (colAVal && /^\d+$/.test(colAVal)) {
+                        currentWC = colAVal;
                     }
+
+                    const name = nameCol !== -1 ? row[nameCol]?.trim() : '';
+                    if (!name) continue;
 
                     const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
-
-                    // Get weight class: from column, or extracted from column value, or from section tracking
-                    let wc = wcCol !== -1 ? row[wcCol]?.trim().toUpperCase().replace(/\s*(LBS?|#)/i, '') : '';
-                    if (!knownWC.has(wc)) {
-                        const m = wc.match(/(\d{3}|shw)/i);
-                        wc = m ? m[1].toUpperCase() : '';
-                    }
-                    if (!wc) wc = currentWC; // fall back to section header tracking
+                    const wc = currentWC;
 
                     const bw = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
 
