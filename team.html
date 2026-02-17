@@ -384,23 +384,8 @@
             </a>
         </div>
 
-        <div class="load-section">
-            <h3>Load Team Data</h3>
-            <div class="input-group">
-                <input type="text" id="sheetUrl" placeholder="Paste Mens Varsity Team sheet URL here...">
-                <button onclick="loadTeamData()">Load Data</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <button onclick="loadMensVarsityTeamResults()" style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    📊 Load Mens Varsity Team
-                </button>
-            </div>
-            <p style="margin-top: 10px; color: #666; font-size: 12px;">
-                ⚠️ <strong>Important:</strong> Use the button above or paste the URL for the <strong>"Mens Varsity Team"</strong> sheet tab.
-                Rankings will be based on the <strong>Total</strong> column.
-            </p>
-            <div id="loadingStatus"></div>
-        </div>
+        <input type="hidden" id="sheetUrl">
+        <div id="loadingStatus" style="display: none;"></div>
 
         <div id="dashboard"></div>
         <div id="statsContainer" class="stats-container"></div>
