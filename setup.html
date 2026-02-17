@@ -518,16 +518,14 @@
             <h2>📊 Main Google Sheet</h2>
             <div class="form-group">
                 <label for="spreadsheetUrl">Google Sheet URL:</label>
-                <div class="url-input-group">
-                    <input
-                        type="text"
-                        id="spreadsheetUrl"
-                        placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit..."
-                        value="">
-                    <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code">
-                        📷 Scan QR
-                    </button>
-                </div>
+                <input
+                    type="text"
+                    id="spreadsheetUrl"
+                    placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit..."
+                    value="">
+                <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code" style="margin-left: 0; margin-top: 10px; display: block;">
+                    📷 Scan QR Code
+                </button>
                 <p class="help-text">Paste the URL from your browser or scan a QR code</p>
             </div>
 
