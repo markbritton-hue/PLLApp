@@ -395,54 +395,22 @@
     <script>
         let autoRefreshInterval = null;
 
-        // Quick load function for Mens Varsity Team
-        function loadMensVarsityTeamResults() {
-            const configStr = localStorage.getItem('trplConfig');
-            if (configStr) {
-                try {
-                    const config = JSON.parse(configStr);
-                    const varsityTeamSheet = config.sheets.find(s =>
-                        s.name.toLowerCase().includes('mens') &&
-                        s.name.toLowerCase().includes('varsity') &&
-                        s.name.toLowerCase().includes('team')
-                    );
-
-                    if (varsityTeamSheet) {
-                        const sheetUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${varsityTeamSheet.gid}`;
-                        document.getElementById('sheetUrl').value = sheetUrl;
-                        console.log(`Loading ${varsityTeamSheet.name} sheet...`);
-                        loadTeamData();
-                    } else {
-                        alert('Mens Varsity Team sheet not found in configuration. Please check your setup.');
-                    }
-                } catch (error) {
-                    console.error('Error loading configuration:', error);
-                    alert('Error loading configuration. Please check your setup.');
-                }
-            } else {
-                alert('No configuration found. Please complete setup first.');
-            }
-        }
-
-        // On page load, auto-load from configuration
+        // On page load, auto-load from configuration using the last sheet
         window.addEventListener('DOMContentLoaded', function() {
-            // Try to load from saved configuration
             const configStr = localStorage.getItem('trplConfig');
             if (configStr) {
                 try {
                     const config = JSON.parse(configStr);
 
-                    // Find "Mens Varsity Team Results" sheet (or any Mens Varsity Team sheet)
-                    const varsityTeamSheet = config.sheets.find(s =>
-                        s.name.toLowerCase().includes('mens') &&
-                        s.name.toLowerCase().includes('varsity') &&
-                        s.name.toLowerCase().includes('team')
-                    );
+                    // Use the last sheet in the configuration for team totals
+                    const teamSheet = config.sheets && config.sheets.length > 0
+                        ? config.sheets[config.sheets.length - 1]
+                        : null;
 
-                    if (varsityTeamSheet) {
-                        const sheetUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${varsityTeamSheet.gid}`;
+                    if (teamSheet) {
+                        const sheetUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${teamSheet.gid}`;
                         document.getElementById('sheetUrl').value = sheetUrl;
-                        console.log(`Auto-loading ${varsityTeamSheet.name} sheet...`);
+                        console.log(`Auto-loading last sheet: ${teamSheet.name}...`);
                         loadTeamData();
 
                         // Start auto-refresh every 15 seconds
@@ -457,7 +425,7 @@
                         console.log('Auto-refresh enabled (every 15 seconds)');
                         document.getElementById('autoRefreshStatus').style.display = 'block';
                     } else {
-                        console.log('Mens Varsity Team sheet not found in configuration');
+                        console.log('No sheets found in configuration');
                     }
                 } catch (error) {
                     console.error('Error loading configuration:', error);
