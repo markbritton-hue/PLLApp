@@ -303,7 +303,7 @@
                         : bestLift(dl1 !== -1 ? row[dl1] : '', dl2 !== -1 ? row[dl2] : '', dl3 !== -1 ? row[dl3] : '');
                     const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
 
-                    if (!total) continue;
+                    if (!wc) continue; // skip rows with no weight class
 
                     if (!grouped[wc]) grouped[wc] = [];
                     grouped[wc].push({ name, school, bw, squat, bench, deadlift, total,
