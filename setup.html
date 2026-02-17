@@ -497,6 +497,18 @@
                     value="">
                 <p class="help-text">If you have a direct link to your school logo, paste it here. Otherwise, we'll use the website's favicon.</p>
             </div>
+
+            <div class="form-group">
+                <label for="autoRefreshSeconds">Auto-Refresh Interval (seconds):</label>
+                <input
+                    type="number"
+                    id="autoRefreshSeconds"
+                    min="5"
+                    max="300"
+                    value="20"
+                    style="width: 120px;">
+                <p class="help-text">How often the platform, coaches, and display pages refresh when auto-refresh is enabled.</p>
+            </div>
         </div>
 
         <!-- Main Spreadsheet URL -->
@@ -852,6 +864,7 @@
             const schoolName = document.getElementById('schoolName').value.trim();
             const schoolWebsite = document.getElementById('schoolWebsite').value.trim();
             const schoolLogoUrl = document.getElementById('schoolLogoUrl').value.trim();
+            const autoRefreshSeconds = parseInt(document.getElementById('autoRefreshSeconds').value) || 20;
             const spreadsheetUrl = document.getElementById('spreadsheetUrl').value.trim();
 
             if (!schoolName) {
@@ -891,6 +904,7 @@
                 schoolName,
                 schoolWebsite,
                 schoolLogoUrl,
+                autoRefreshSeconds,
                 spreadsheetId,
                 spreadsheetUrl,
                 sheets,
@@ -949,6 +963,7 @@
                 document.getElementById('schoolName').value = config.schoolName || 'Three Rivers';
                 document.getElementById('schoolWebsite').value = config.schoolWebsite || '';
                 document.getElementById('schoolLogoUrl').value = config.schoolLogoUrl || '';
+                document.getElementById('autoRefreshSeconds').value = config.autoRefreshSeconds || 20;
                 document.getElementById('spreadsheetUrl').value = config.spreadsheetUrl || '';
 
                 // Clear existing sheets
