@@ -127,10 +127,11 @@
     </style>
 </head>
 <body>
-    <a href="coaches.html" class="btn-back">← Back to Coaches View</a>
-
-    <div class="auto-refresh">
-        🔄 Auto-refresh: 15s
+    <div style="display: flex; gap: 12px; margin-bottom: 15px; align-items: center;">
+        <a href="coaches.html" class="btn-back" style="margin-bottom: 0;">← Back to Coaches View</a>
+        <button id="refreshToggle" onclick="toggleAutoRefresh()" style="background: rgba(96, 165, 250, 0.8); border: 2px solid rgba(96, 165, 250, 0.3); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+            🔄 Auto-Refresh: OFF
+        </button>
     </div>
 
     <div id="displayContainer"></div>
@@ -138,6 +139,23 @@
     <script>
         let autoRefreshInterval = null;
         let schoolName = '';
+
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('refreshToggle');
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                btn.innerHTML = '🔄 Auto-Refresh: OFF';
+                btn.style.background = 'rgba(96, 165, 250, 0.8)';
+            } else {
+                autoRefreshInterval = setInterval(function() {
+                    loadDisplay(true);
+                }, 20000);
+                btn.innerHTML = '🔄 Auto-Refresh: ON';
+                btn.style.background = 'rgba(16, 185, 129, 0.8)';
+                loadDisplay();
+            }
+        }
 
         window.addEventListener('DOMContentLoaded', function() {
             loadDisplay();
@@ -165,11 +183,6 @@
 
                 await loadPlatformsData(config, platforms);
 
-                if (!autoRefreshInterval) {
-                    autoRefreshInterval = setInterval(function() {
-                        loadDisplay(true);
-                    }, 15000);
-                }
 
                 if (preserveScroll && scrollPosition > 0) {
                     setTimeout(() => {
