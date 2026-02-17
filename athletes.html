@@ -611,7 +611,7 @@
 
                 // Common format: Place, Points, Weight Class, Division, School, Body Weight, Name, Sq1, Sq2, Sq3, Best Sq, ...
                 // Force override all columns with position-based values
-                headerRow = dataStartRow - 1; // Set header to one before data
+                headerRow = -1; // Start from row 0 — school filter skips non-data rows
                 nameCol = 7;
                 schoolCol = 5;
                 weightClassCol = 3; // Contains "114 JV" format
