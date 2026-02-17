@@ -242,7 +242,7 @@
                         const cell = row[j].toLowerCase().trim();
                         if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
                         if (cell === 'school' && schoolCol === -1) schoolCol = j;
-                        if ((cell === 'weight class' || cell === 'wt class' || cell === 'class') && wcCol === -1) wcCol = j;
+                        if ((cell === 'weight class' || cell === 'wt class' || cell === 'wt. class' || cell === 'class' || cell === 'weightclass' || cell === 'weight cls' || cell === 'wt cls') && wcCol === -1) wcCol = j;
                         if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bwCol === -1) bwCol = j;
                         if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1') && sq1 === -1) sq1 = j;
                         if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && sq2 === -1) sq2 = j;
@@ -264,6 +264,16 @@
                 if (headerRow === -1) {
                     statusDiv.innerHTML = '<div class="status-msg">Could not detect header row in results sheet.</div>';
                     return;
+                }
+
+                // Fallback: if weight class column not found, scan data rows for a column with wt class values
+                const knownWC = new Set(['114','123','132','145','155','165','181','194','207','220','242','275','SHW']);
+                if (wcCol === -1 && csvData.length > headerRow + 1) {
+                    const sampleRow = csvData[headerRow + 1];
+                    for (let j = 0; j < sampleRow.length; j++) {
+                        const val = sampleRow[j]?.trim().toUpperCase();
+                        if (knownWC.has(val) || /^\d{3}$/.test(val)) { wcCol = j; break; }
+                    }
                 }
 
                 const configuredSchool = getConfiguredSchool();
