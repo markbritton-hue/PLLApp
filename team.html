@@ -526,17 +526,27 @@
             const cfgStr = localStorage.getItem('trplConfig');
             const configuredSchool = cfgStr ? (JSON.parse(cfgStr).schoolName || '').toLowerCase() : '';
 
+            const seenTeams = {};
             for (let i = startRow; i < csvData.length; i++) {
                 const row = csvData[i];
                 if (!row.some(cell => cell && cell.trim())) continue;
 
+                const teamName = teamCol !== -1 ? (row[teamCol] || '').trim() : '';
+                if (!teamName) continue;
+
                 const totalPoints = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
-                teamsData.push({
-                    row: row,
-                    total: totalPoints,
-                    isMySchool: configuredSchool && row.some(cell => cell && cell.toLowerCase().includes(configuredSchool))
-                });
+
+                // Deduplicate — keep the entry with the highest total for each team name
+                const key = teamName.toLowerCase();
+                if (!seenTeams[key] || totalPoints > seenTeams[key].total) {
+                    seenTeams[key] = {
+                        row: row,
+                        total: totalPoints,
+                        isMySchool: configuredSchool && teamName.toLowerCase().includes(configuredSchool)
+                    };
+                }
             }
+            teamsData = Object.values(seenTeams);
 
             // Sort by total points (descending)
             teamsData.sort((a, b) => b.total - a.total);
