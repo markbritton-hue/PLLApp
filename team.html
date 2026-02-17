@@ -365,6 +365,11 @@
 </head>
 <body>
     <div class="container">
+        <!-- Auto-refresh indicator -->
+        <div id="autoRefreshStatus" style="display: block; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
+            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 10 seconds)
+        </div>
+
         <header>
             <div style="font-size: 4rem; color: #60a5fa; margin-bottom: 20px;">
                 <i class="fas fa-dumbbell"></i>
@@ -395,7 +400,6 @@
                 Rankings will be based on the <strong>Total</strong> column.
             </p>
             <div id="loadingStatus"></div>
-            <div id="autoRefreshStatus">🔄 Auto-refresh enabled (every 10 seconds)</div>
         </div>
 
         <div id="dashboard"></div>

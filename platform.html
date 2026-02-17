@@ -215,6 +215,11 @@
 </head>
 <body>
     <div class="container">
+        <!-- Auto-refresh indicator -->
+        <div id="autoRefreshStatus" style="display: none; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
+            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 10 seconds)
+        </div>
+
         <!-- Home Button -->
         <div class="mb-4">
             <a href="index.html" class="btn-home">
@@ -238,11 +243,6 @@
 
         <!-- Status Message -->
         <div id="statusMessage" style="display: none;"></div>
-
-        <!-- Auto-refresh indicator -->
-        <div id="autoRefreshStatus" style="display: none; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
-            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 10 seconds)
-        </div>
 
         <!-- Athletes Container -->
         <div id="athletesContainer"></div>
