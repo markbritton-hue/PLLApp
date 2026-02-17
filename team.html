@@ -557,7 +557,9 @@
             console.log('Teams sorted by total:', teamsData.map(t => ({name: t.row[teamCol], total: t.total})));
 
             // Build standings table
-            let tableHTML = '<div class="team-table"><h3>Mens Varsity Team Standings (Sorted by Total Points)</h3><table>';
+            const pageHeading = document.querySelector('.page-header h1');
+            const sheetTitle = pageHeading ? pageHeading.textContent.trim() : 'Team Standings';
+            let tableHTML = `<div class="team-table"><h3>${sheetTitle} (Sorted by Total Points)</h3><table>`;
             tableHTML += '<thead><tr>';
 
             // Add rank column
