@@ -458,16 +458,14 @@
 
         function renderTeamStats(csvData) {
             const dashboard = document.getElementById('dashboard');
-            const statsContainer = document.getElementById('statsContainer');
             const tableContainer = document.getElementById('tableContainer');
 
             // Clear existing content
             dashboard.innerHTML = '';
-            statsContainer.innerHTML = '';
             tableContainer.innerHTML = '';
 
             if (csvData.length < 2) {
-                statsContainer.innerHTML = '<p>No team data found</p>';
+                tableContainer.innerHTML = '<p style="color: rgba(255,255,255,0.7); text-align: center; padding: 20px;">No team data found</p>';
                 return;
             }
 
