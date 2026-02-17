@@ -367,7 +367,7 @@
     <div class="container">
         <!-- Auto-refresh indicator -->
         <div id="autoRefreshStatus" style="display: block; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
-            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 10 seconds)
+            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 15 seconds)
         </div>
 
         <header>
@@ -404,8 +404,7 @@
                     const varsityTeamSheet = config.sheets.find(s =>
                         s.name.toLowerCase().includes('mens') &&
                         s.name.toLowerCase().includes('varsity') &&
-                        s.name.toLowerCase().includes('team') &&
-                        !s.name.toLowerCase().includes('results')
+                        s.name.toLowerCase().includes('team')
                     );
 
                     if (varsityTeamSheet) {
@@ -433,12 +432,11 @@
                 try {
                     const config = JSON.parse(configStr);
 
-                    // Find "Mens Varsity Team" sheet
+                    // Find "Mens Varsity Team Results" sheet (or any Mens Varsity Team sheet)
                     const varsityTeamSheet = config.sheets.find(s =>
                         s.name.toLowerCase().includes('mens') &&
                         s.name.toLowerCase().includes('varsity') &&
-                        s.name.toLowerCase().includes('team') &&
-                        !s.name.toLowerCase().includes('results')
+                        s.name.toLowerCase().includes('team')
                     );
 
                     if (varsityTeamSheet) {
@@ -447,16 +445,16 @@
                         console.log(`Auto-loading ${varsityTeamSheet.name} sheet...`);
                         loadTeamData();
 
-                        // Start auto-refresh every 10 seconds
+                        // Start auto-refresh every 15 seconds
                         if (autoRefreshInterval) {
                             clearInterval(autoRefreshInterval);
                         }
                         autoRefreshInterval = setInterval(function() {
                             console.log('Auto-refreshing team data...');
                             loadTeamData(true);
-                        }, 10000);
+                        }, 15000);
 
-                        console.log('Auto-refresh enabled (every 10 seconds)');
+                        console.log('Auto-refresh enabled (every 15 seconds)');
                         document.getElementById('autoRefreshStatus').style.display = 'block';
                     } else {
                         console.log('Mens Varsity Team sheet not found in configuration');
@@ -530,8 +528,8 @@
                 autoRefreshInterval = setInterval(function() {
                     console.log('Auto-refreshing team data...');
                     loadTeamData(true);
-                }, 10000);
-                console.log('Auto-refresh enabled (every 10 seconds)');
+                }, 15000);
+                console.log('Auto-refresh enabled (every 15 seconds)');
                 document.getElementById('autoRefreshStatus').style.display = 'block';
             }
 
@@ -639,14 +637,15 @@
                 for (let j = 0; j < row.length; j++) {
                     const cell = row[j].toLowerCase().trim();
 
-                    // Team/School column
-                    if (cell === 'team' || cell === 'school' || cell === 'place') {
+                    // Team/School column - prefer "team" or "school", not "place" (that's a rank)
+                    if (cell === 'team' || cell === 'school' || cell === 'school name') {
                         teamCol = j;
                         console.log(`Found Team/School column at index ${j}: "${row[j]}"`);
                     }
 
-                    // Total column - be very specific
-                    if (cell === 'total') {
+                    // Total column - keep overwriting so we end up with the RIGHTMOST "Total"
+                    // (team points total, not an individual lift total that may appear earlier)
+                    if (cell === 'total' || cell === 'total pts' || cell === 'team total' || cell === 'total points') {
                         totalCol = j;
                         console.log(`Found Total column at index ${j}: "${row[j]}"`);
                     }
