@@ -130,7 +130,7 @@
     <a href="coaches.html" class="btn-back">← Back to Coaches View</a>
 
     <div class="auto-refresh">
-        🔄 Auto-refresh: 10s
+        🔄 Auto-refresh: 15s
     </div>
 
     <div id="displayContainer"></div>
@@ -168,7 +168,7 @@
                 if (!autoRefreshInterval) {
                     autoRefreshInterval = setInterval(function() {
                         loadDisplay(true);
-                    }, 10000);
+                    }, 15000);
                 }
 
                 if (preserveScroll && scrollPosition > 0) {
@@ -213,13 +213,24 @@
                         hasPendingInColumn(athlete, currentColumn)
                     );
 
+                    // Find the last completed attempt in the CURRENT column in the FULL platform sheet
+                    let lastCompletedRow = -1;
+                    for (const athlete of athletes) {
+                        if (currentColumn && athlete[currentColumn]) {
+                            const lower = athlete[currentColumn].toLowerCase();
+                            if (lower.includes('g') || lower.includes('x')) {
+                                if (athlete.sheetOrder > lastCompletedRow) lastCompletedRow = athlete.sheetOrder;
+                            }
+                        }
+                    }
+
                     // Attach overall platform position to each school athlete
                     athletesToShow.forEach(athlete => {
                         athlete.platformPosition = platformPositionMap[athlete.sheetOrder] || 0;
                     });
 
                     if (athletesToShow.length > 0) {
-                        renderPlatformSection(platform.name, athletesToShow);
+                        renderPlatformSection(platform.name, athletesToShow, lastCompletedRow);
                     }
 
                 } catch (error) {
@@ -423,7 +434,7 @@
             return !lower.includes('g') && !lower.includes('x');
         }
 
-        function renderPlatformSection(platformName, athletes) {
+        function renderPlatformSection(platformName, athletes, lastCompletedRow) {
             const container = document.getElementById('displayContainer');
 
             const section = document.createElement('div');
@@ -435,10 +446,10 @@
             const currentColumn = getCurrentAttemptColumn(athletes);
 
             athletes.forEach((athlete, index) => {
-                // Position number in school list (1-indexed)
-                const position = index + 1;
                 // Overall platform position across ALL athletes
                 const overallPosition = athlete.platformPosition || 0;
+                // How many rows down from last completed attempt in full platform sheet
+                const rowsDown = lastCompletedRow >= 0 ? athlete.sheetOrder - lastCompletedRow : 0;
 
                 let status = '';
                 let statusClass = '';
@@ -473,7 +484,7 @@
                             ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${position}</div>
+                            ${rowsDown > 0 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${rowsDown}</div>` : ''}
                             ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                         </div>
                     </div>
