@@ -61,14 +61,6 @@
             transform: translateX(5px);
         }
 
-        .athlete-position {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #60a5fa;
-            margin-right: 15px;
-            min-width: 35px;
-        }
-
         .athlete-name {
             font-size: 1.3rem;
             font-weight: 700;
@@ -456,17 +448,16 @@
                 // Default background for rows without status
                 const rowClass = statusClass || 'default';
 
-                // Position in lifting order (recalculated each refresh based on weights)
-                const position = index + 1;
-
                 html += `
                     <div class="athlete-row ${rowClass}">
-                        <div class="athlete-position">${position}</div>
                         <div class="athlete-name">
                             ${athlete.name}
                             ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
                         </div>
-                        ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="color: #60a5fa; font-size: 0.85rem; font-weight: 700; white-space: nowrap;">Position ${position}</div>
+                            ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
+                        </div>
                     </div>
                 `;
             });
