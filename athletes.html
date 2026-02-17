@@ -317,6 +317,7 @@
     <script>
         let athleteData = [];
         let autoRefreshInterval = null;
+        let platformMap = {}; // name (lowercase) -> platform name
 
         function toggleAutoRefresh() {
             const btn = document.getElementById('refreshToggle');
@@ -340,6 +341,48 @@
         }
 
         // Toggle manual load section
+        // Load platform sheets and build a name -> platform map
+        async function loadPlatformAssignments() {
+            const configStr = localStorage.getItem('trplConfig');
+            if (!configStr) return;
+            const config = JSON.parse(configStr);
+            const platforms = (config.sheets || []).filter(s => s.name.toLowerCase().startsWith('platform'));
+            if (platforms.length === 0) return;
+
+            const newMap = {};
+            for (const platform of platforms) {
+                try {
+                    const timestamp = new Date().getTime();
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${platform.gid}&t=${timestamp}`;
+                    let response;
+                    try {
+                        response = await fetch(csvUrl, { cache: 'no-store' });
+                        if (!response.ok) throw new Error('direct failed');
+                    } catch {
+                        response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
+                    }
+                    const text = await response.text();
+                    const lines = text.split('\n');
+                    let nameCol = -1;
+                    for (let i = 0; i < Math.min(10, lines.length); i++) {
+                        const cells = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim().toLowerCase());
+                        const idx = cells.findIndex(c => c === 'name' || c === 'lifter');
+                        if (idx !== -1) { nameCol = idx; break; }
+                    }
+                    if (nameCol === -1) continue;
+                    for (const line of lines) {
+                        const cells = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                        const name = cells[nameCol];
+                        if (name) newMap[name.toLowerCase()] = platform.name;
+                    }
+                } catch (e) {
+                    console.error(`Error loading platform ${platform.name}:`, e);
+                }
+            }
+            platformMap = newMap;
+            renderAthletes(); // re-render with platform badges
+        }
+
         function toggleManualLoad() {
             const section = document.getElementById('manualLoadSection');
             section.style.display = section.style.display === 'none' ? 'block' : 'none';
@@ -394,6 +437,7 @@
                 // Update athlete data and display
                 athleteData = allAthletes;
                 renderAthletes();
+                loadPlatformAssignments();
 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
@@ -770,7 +814,10 @@
                         ${athletesInClass.map(athlete => `
                             <div class="col-lg-4 col-md-6">
                                 <div class="athlete-card" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4);">
-                                    <div class="athlete-name">${athlete.name}</div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                        <div class="athlete-name" style="margin-bottom: 0;">${athlete.name}</div>
+                                        ${platformMap[athlete.name.toLowerCase()] ? `<div style="background: rgba(167, 139, 250, 0.8); color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">${platformMap[athlete.name.toLowerCase()]}</div>` : ''}
+                                    </div>
                                     <span class="designation-badge ${athlete.designation === 'V' ? 'varsity' : 'jv'}">
                                         ${athlete.designation === 'V' ? 'Varsity' : 'JV'}
                                     </span>
