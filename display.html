@@ -194,13 +194,29 @@
                         a.school && a.school.toLowerCase().includes(schoolName.toLowerCase())
                     );
 
-                    const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
+                    // Use ALL athletes to determine current column and overall platform positions
+                    const currentColumn = getCurrentAttemptColumn(athletes);
 
-                    // Show all athletes with pending attempts
-                    const currentColumn = getCurrentAttemptColumn(schoolAthletes);
+                    // Sort ALL athletes to get true platform position
+                    const allSorted = sortAthletesByLiftingOrder(athletes).filter(athlete =>
+                        hasPendingInColumn(athlete, currentColumn)
+                    );
+
+                    // Build map of sheetOrder -> overall platform position
+                    const platformPositionMap = {};
+                    allSorted.forEach((athlete, idx) => {
+                        platformPositionMap[athlete.sheetOrder] = idx + 1;
+                    });
+
+                    const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
                     const athletesToShow = sortedAthletes.filter(athlete =>
                         hasPendingInColumn(athlete, currentColumn)
                     );
+
+                    // Attach overall platform position to each school athlete
+                    athletesToShow.forEach(athlete => {
+                        athlete.platformPosition = platformPositionMap[athlete.sheetOrder] || 0;
+                    });
 
                     if (athletesToShow.length > 0) {
                         renderPlatformSection(platform.name, athletesToShow);
@@ -419,17 +435,19 @@
             const currentColumn = getCurrentAttemptColumn(athletes);
 
             athletes.forEach((athlete, index) => {
-                // Position number (1-indexed)
+                // Position number in school list (1-indexed)
                 const position = index + 1;
+                // Overall platform position across ALL athletes
+                const overallPosition = athlete.platformPosition || 0;
 
                 let status = '';
                 let statusClass = '';
 
-                // Only show LIFTING badge for position 1, ON DECK for position 2
-                if (position === 1) {
+                // Only show LIFTING badge for overall position 1, ON DECK for position 2
+                if (overallPosition === 1) {
                     status = 'LIFTING';
                     statusClass = 'lifting';
-                } else if (position === 2) {
+                } else if (overallPosition === 2) {
                     status = 'ON DECK';
                     statusClass = 'on-deck';
                 }
