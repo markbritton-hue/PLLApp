@@ -162,9 +162,11 @@
         }
 
         window.addEventListener('DOMContentLoaded', function() {
-            loadDisplay();
+            // Restore auto-refresh state (toggleAutoRefresh calls loadDisplay internally)
             if (localStorage.getItem('displayAutoRefresh') === 'on') {
                 toggleAutoRefresh();
+            } else {
+                loadDisplay();
             }
         });
 

@@ -251,10 +251,11 @@
 
         // Load all platforms on page load
         window.addEventListener('DOMContentLoaded', function() {
-            loadAllPlatforms();
-            // Restore auto-refresh state
+            // Restore auto-refresh state (toggleAutoRefresh calls loadAllPlatforms internally)
             if (localStorage.getItem('coachesAutoRefresh') === 'on') {
                 toggleAutoRefresh();
+            } else {
+                loadAllPlatforms();
             }
         });
 
