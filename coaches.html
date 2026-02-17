@@ -205,8 +205,8 @@
             <a href="display.html" class="btn-home" style="background: rgba(16, 185, 129, 0.8);">
                 <i class="fas fa-tv me-2"></i>Simple Display
             </a>
-            <button onclick="loadAllPlatforms()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
-                <i class="fas fa-sync-alt me-2"></i>Refresh
+            <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
+                <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
             </button>
         </div>
 
@@ -226,6 +226,24 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let schoolName = '';
+        let autoRefreshInterval = null;
+
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('refreshToggle');
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF';
+                btn.style.background = 'rgba(96, 165, 250, 0.8)';
+            } else {
+                autoRefreshInterval = setInterval(function() {
+                    loadAllPlatforms(true);
+                }, 20000);
+                btn.innerHTML = '<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON';
+                btn.style.background = 'rgba(16, 185, 129, 0.8)';
+                loadAllPlatforms();
+            }
+        }
 
         // Load all platforms on page load
         window.addEventListener('DOMContentLoaded', function() {
