@@ -315,15 +315,21 @@
                 try {
                     const config = JSON.parse(configStr);
 
-                    // Use the last sheet in the configuration for team totals
-                    const teamSheet = config.sheets && config.sheets.length > 0
+                    // Use sheet containing "varsity team", fallback to last sheet
+                    const teamSheet = (config.sheets && config.sheets.find(s =>
+                        s.name.toLowerCase().includes('varsity team')
+                    )) || (config.sheets && config.sheets.length > 0
                         ? config.sheets[config.sheets.length - 1]
-                        : null;
+                        : null);
 
                     if (teamSheet) {
                         const sheetUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${teamSheet.gid}`;
                         document.getElementById('sheetUrl').value = sheetUrl;
-                        console.log(`Auto-loading last sheet: ${teamSheet.name}...`);
+                        // Update heading with full sheet name
+                        document.querySelector('.page-header h1').innerHTML =
+                            `<i class="fas fa-trophy me-3"></i>${teamSheet.name}`;
+                        document.querySelector('.page-header p').textContent = 'Team Rankings by Total Points';
+                        console.log(`Auto-loading sheet: ${teamSheet.name}...`);
                         loadTeamData();
                     } else {
                         console.log('No sheets found in configuration');
