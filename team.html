@@ -480,7 +480,8 @@
                 let foundTotal = -1, foundTeam = -1;
                 const foundPoints = [];
 
-                for (let j = 0; j < row.length; j++) {
+                // Start from column G (index 6) - skip columns A-F
+                for (let j = 6; j < row.length; j++) {
                     const cell = (row[j] || '').toLowerCase().trim();
 
                     if (cell === 'team' || cell === 'school' || cell === 'school name' || cell === 'team name') foundTeam = j;
@@ -496,9 +497,9 @@
                     if (foundTeam !== -1) {
                         teamCol = foundTeam;
                     } else {
-                        // Find team col by scanning data rows for first non-numeric column
+                        // Find team col by scanning data rows for first non-numeric column (from col G)
                         for (let dr = i + 1; dr < Math.min(i + 4, csvData.length); dr++) {
-                            for (let j = 0; j < csvData[dr].length; j++) {
+                            for (let j = 6; j < csvData[dr].length; j++) {
                                 const val = (csvData[dr][j] || '').trim();
                                 if (val && isNaN(val) && j !== totalCol) { teamCol = j; break; }
                             }
@@ -549,10 +550,10 @@
             // Add rank column
             tableHTML += '<th>Rank</th>';
 
-            // Add headers
+            // Add headers — only columns G (index 6) onwards
             if (headerRow !== -1) {
                 csvData[headerRow].forEach((header, idx) => {
-                    tableHTML += `<th>${header || ''}</th>`;
+                    if (idx >= 6) tableHTML += `<th>${header || ''}</th>`;
                 });
             }
             tableHTML += '</tr></thead><tbody>';
@@ -560,25 +561,16 @@
             // Add sorted data rows
             teamsData.forEach((teamData, rank) => {
                 const row = teamData.row;
-                const isThreeRivers = teamData.isThreeRivers;
 
                 tableHTML += teamData.isMySchool ? '<tr class="school-row">' : '<tr>';
-
-                // Add rank
                 tableHTML += `<td class="rank-column">${rank + 1}</td>`;
 
+                // Only render columns G (index 6) onwards
                 row.forEach((cell, idx) => {
+                    if (idx < 6) return;
                     let cellClass = '';
-
-                    // Style total column
-                    if (totalCol !== -1 && idx === totalCol) {
-                        cellClass = 'total-column';
-                    }
-                    // Style points columns
-                    else if (pointCols.includes(idx) && cell && !isNaN(cell)) {
-                        cellClass = 'points-column';
-                    }
-
+                    if (totalCol !== -1 && idx === totalCol) cellClass = 'total-column';
+                    else if (pointCols.includes(idx) && cell && !isNaN(cell)) cellClass = 'points-column';
                     tableHTML += `<td class="${cellClass}">${cell || ''}</td>`;
                 });
 
