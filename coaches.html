@@ -197,19 +197,17 @@
 </head>
 <body>
     <div class="container">
-        <!-- Auto-refresh indicator -->
-        <div id="autoRefreshStatus" style="display: none; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
-            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 15 seconds)
-        </div>
-
         <!-- Navigation Buttons -->
-        <div class="mb-4" style="display: flex; gap: 15px;">
+        <div class="mb-4" style="display: flex; gap: 15px; align-items: center;">
             <a href="index.html" class="btn-home">
                 <i class="fas fa-home me-2"></i>Home
             </a>
             <a href="display.html" class="btn-home" style="background: rgba(16, 185, 129, 0.8);">
                 <i class="fas fa-tv me-2"></i>Simple Display
             </a>
+            <button onclick="loadAllPlatforms()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
+                <i class="fas fa-sync-alt me-2"></i>Refresh
+            </button>
         </div>
 
         <!-- Page Header -->
@@ -227,7 +225,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let autoRefreshInterval = null;
         let schoolName = '';
 
         // Load all platforms on page load
@@ -272,15 +269,6 @@
 
                 // Load all platforms
                 await loadPlatformsData(config, platforms);
-
-                // Start auto-refresh
-                if (!autoRefreshInterval) {
-                    autoRefreshInterval = setInterval(function() {
-                        console.log('Auto-refreshing platforms...');
-                        loadAllPlatforms(true);
-                    }, 15000);
-                    document.getElementById('autoRefreshStatus').style.display = 'block';
-                }
 
                 // Restore scroll position if this is a refresh
                 if (preserveScroll && scrollPosition > 0) {
