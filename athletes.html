@@ -787,16 +787,19 @@
             console.log('Weight classes found:', Object.keys(groupedData));
             console.log('Athletes per weight class:', Object.entries(groupedData).map(([wc, athletes]) => `${wc}: ${athletes.length}`));
 
-            const weightClassOrder = ["114", "123", "132", "145", "155", "165", "181", "194", "207", "220", "242", "275", "SHW"];
             const container = document.getElementById('weightClassContainer');
             container.innerHTML = '';
 
-            // Add all weight classes found (including empty ones)
-            const allWeightClasses = [...weightClassOrder];
-            Object.keys(groupedData).forEach(wc => {
-                if (!allWeightClasses.includes(wc)) {
-                    allWeightClasses.push(wc);
-                }
+            // Sort weight classes numerically, SHW/Unclassified at end
+            const allWeightClasses = Object.keys(groupedData).sort((a, b) => {
+                if (a === 'Unclassified') return 1;
+                if (b === 'Unclassified') return -1;
+                if (a === 'SHW') return 1;
+                if (b === 'SHW') return -1;
+                const numA = parseFloat(a);
+                const numB = parseFloat(b);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return a.localeCompare(b);
             });
 
             allWeightClasses.forEach(weightClass => {
@@ -984,14 +987,12 @@
             // Update school name display
             updateSchoolNameDisplay();
 
-            if (configStr) {
-                console.log('Auto-loading from configuration...');
-                loadConfiguredSheets();
-            }
-
-            // Restore auto-refresh state
+            // Restore auto-refresh state (toggleAutoRefresh will trigger initial load if ON)
             if (localStorage.getItem('athletesAutoRefresh') === 'on') {
                 toggleAutoRefresh();
+            } else if (configStr) {
+                console.log('Auto-loading from configuration...');
+                loadConfiguredSheets();
             }
         });
     </script>
