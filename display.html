@@ -76,9 +76,9 @@
         }
 
         .status-badge {
-            padding: 6px 18px;
+            padding: 8px 20px;
             border-radius: 10px;
-            font-size: 0.85rem;
+            font-size: 1rem;
             font-weight: 800;
             letter-spacing: 1px;
             color: white;
@@ -425,9 +425,9 @@
                 let status = '';
                 let statusClass = '';
 
-                // Only show NEXT badge for position 1, ON DECK for position 2
+                // Only show LIFTING badge for position 1, ON DECK for position 2
                 if (position === 1) {
-                    status = 'NEXT';
+                    status = 'LIFTING';
                     statusClass = 'lifting';
                 } else if (position === 2) {
                     status = 'ON DECK';
@@ -454,8 +454,8 @@
                             ${athlete.name}
                             ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
                         </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="color: #60a5fa; font-size: 0.85rem; font-weight: 700; white-space: nowrap;">Position ${position}</div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${position}</div>
                             ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                         </div>
                     </div>
