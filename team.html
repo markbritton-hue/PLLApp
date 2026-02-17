@@ -474,99 +474,42 @@
             let teamCol = -1, totalCol = -1;
             let pointCols = [];
 
-            // Look for headers in first few rows
-            console.log('Searching for headers in first 10 rows...');
-            console.log('Total columns in data:', csvData[0]?.length || 0);
+            // Scan rows to find header - only needs Total column to identify it
             for (let i = 0; i < Math.min(10, csvData.length); i++) {
                 const row = csvData[i];
-                console.log(`Row ${i} (${row.length} columns):`, row); // Show ALL columns
+                let foundTotal = -1, foundTeam = -1;
+                const foundPoints = [];
 
-                // Check if this row looks like a header
-                const hasTeamHeader = row.some(cell => {
-                    const c = cell.toLowerCase().trim();
-                    return c === 'team' || c === 'school' || c === 'place';
-                });
-
-                if (!hasTeamHeader) {
-                    console.log(`Row ${i} - No team/school/place header found, skipping`);
-                    continue;
-                }
-
-                console.log(`Row ${i} - Potential header row found, analyzing columns...`);
-
-                // Found potential header row, identify columns
                 for (let j = 0; j < row.length; j++) {
-                    const cell = row[j].toLowerCase().trim();
+                    const cell = (row[j] || '').toLowerCase().trim();
 
-                    // Team/School column - prefer "team" or "school", not "place" (that's a rank)
-                    if (cell === 'team' || cell === 'school' || cell === 'school name') {
-                        teamCol = j;
-                        console.log(`Found Team/School column at index ${j}: "${row[j]}"`);
-                    }
-
-                    // Total column - keep overwriting so we end up with the RIGHTMOST "Total"
-                    // (team points total, not an individual lift total that may appear earlier)
-                    if (cell === 'total' || cell === 'total pts' || cell === 'team total' || cell === 'total points') {
-                        totalCol = j;
-                        console.log(`Found Total column at index ${j}: "${row[j]}"`);
-                    }
-
-                    // Point columns (weight classes like 114, 123, etc.)
-                    if (cell.match(/^\d{3}$/) || (cell.includes('point') && cell !== 'total')) {
-                        pointCols.push(j);
-                    }
+                    if (cell === 'team' || cell === 'school' || cell === 'school name' || cell === 'team name') foundTeam = j;
+                    if (cell === 'total' || cell === 'total pts' || cell === 'team total' || cell === 'total points') foundTotal = j;
+                    if (cell.match(/^\d{3}$/) || cell.match(/^\d{3}\/\d{3}$/)) foundPoints.push(j);
                 }
 
-                if (teamCol !== -1 && totalCol !== -1) {
+                // Only need Total column to identify a valid header row
+                if (foundTotal !== -1) {
                     headerRow = i;
-                    console.log(`✓ Header row identified at row ${i} - Team col: ${teamCol}, Total col: ${totalCol}`);
-                    break;
-                } else {
-                    console.log(`Row ${i} - Missing required columns (Team: ${teamCol}, Total: ${totalCol}), continuing search...`);
-                }
-            }
-
-            console.log('Detected columns - Team:', teamCol, 'Total:', totalCol, 'Points cols:', pointCols);
-
-            // Fallback: If no headers found, try to detect based on data patterns
-            if (headerRow === -1 && csvData.length > 0) {
-                console.log('No header row found. Attempting to detect columns from data patterns...');
-
-                // Look for a row with team names in it
-                for (let i = 0; i < Math.min(5, csvData.length); i++) {
-                    const row = csvData[i];
-
-                    // Check each cell for team-like content
-                    for (let j = 0; j < row.length; j++) {
-                        const cell = (row[j] || '').toLowerCase();
-
-                        // If we find "three rivers", assume that column is the team column
-                        if (cell.includes('three rivers') && teamCol === -1) {
-                            teamCol = j;
-                            headerRow = 0; // No real header, data starts at row 0
-                            console.log(`Found team column at index ${j} (contains "Three Rivers")`);
-                        }
-
-                        // Look for "total" in the data
-                        if (cell === 'total' && totalCol === -1) {
-                            totalCol = j;
-                            console.log(`Found total column header at index ${j}`);
+                    totalCol = foundTotal;
+                    pointCols = foundPoints;
+                    if (foundTeam !== -1) {
+                        teamCol = foundTeam;
+                    } else {
+                        // Find team col by scanning data rows for first non-numeric column
+                        for (let dr = i + 1; dr < Math.min(i + 4, csvData.length); dr++) {
+                            for (let j = 0; j < csvData[dr].length; j++) {
+                                const val = (csvData[dr][j] || '').trim();
+                                if (val && isNaN(val) && j !== totalCol) { teamCol = j; break; }
+                            }
+                            if (teamCol !== -1) break;
                         }
                     }
-                }
-
-                // If still not found, try common column positions for Mens Varsity Team Results sheet
-                if (teamCol === -1 || totalCol === -1) {
-                    console.log('Using fallback column positions...');
-                    // Based on the sheet structure, team is often around column 2-6, total around column 20
-                    if (teamCol === -1) teamCol = 2; // Common position for team name
-                    if (totalCol === -1) totalCol = 20; // Common position for total column
-                    headerRow = 0;
-                    console.log(`Fallback: Using Team col ${teamCol}, Total col ${totalCol}`);
+                    break;
                 }
             }
 
-            console.log('Final detected columns - Team:', teamCol, 'Total:', totalCol, 'Header row:', headerRow);
+            console.log('Final - Team:', teamCol, 'Total:', totalCol, 'Header row:', headerRow);
 
             // Validation
             if (teamCol === -1 || totalCol === -1) {
@@ -579,20 +522,18 @@
             // Extract and sort teams by Total column
             const startRow = headerRow !== -1 ? headerRow + 1 : 1;
             let teamsData = [];
+            const cfgStr = localStorage.getItem('trplConfig');
+            const configuredSchool = cfgStr ? (JSON.parse(cfgStr).schoolName || '').toLowerCase() : '';
 
             for (let i = startRow; i < csvData.length; i++) {
                 const row = csvData[i];
-                // Skip completely empty rows
                 if (!row.some(cell => cell && cell.trim())) continue;
 
                 const totalPoints = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
-
-                const configStr = localStorage.getItem('trplConfig');
-                const configuredSchool = configStr ? (JSON.parse(configStr).schoolName || '').toLowerCase() : 'three rivers';
                 teamsData.push({
                     row: row,
                     total: totalPoints,
-                    isMySchool: row.some(cell => cell && cell.toLowerCase().includes(configuredSchool))
+                    isMySchool: configuredSchool && row.some(cell => cell && cell.toLowerCase().includes(configuredSchool))
                 });
             }
 
