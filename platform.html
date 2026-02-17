@@ -215,16 +215,14 @@
 </head>
 <body>
     <div class="container">
-        <!-- Auto-refresh indicator -->
-        <div id="autoRefreshStatus" style="display: none; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; color: #10b981; margin-bottom: 20px; text-align: center;">
-            <i class="fas fa-sync-alt me-2"></i>Auto-refresh enabled (every 10 seconds)
-        </div>
-
-        <!-- Home Button -->
-        <div class="mb-4">
+        <!-- Navigation Buttons -->
+        <div class="mb-4" style="display: flex; gap: 15px; align-items: center;">
             <a href="index.html" class="btn-home">
                 <i class="fas fa-home me-2"></i>Home
             </a>
+            <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
+                <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
+            </button>
         </div>
 
         <!-- Page Header -->
@@ -252,6 +250,23 @@
     <script>
         let autoRefreshInterval = null;
         let currentPlatformGid = null;
+
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('refreshToggle');
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF';
+                btn.style.background = 'rgba(96, 165, 250, 0.8)';
+            } else {
+                autoRefreshInterval = setInterval(function() {
+                    loadPlatformData();
+                }, 20000);
+                btn.innerHTML = '<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON';
+                btn.style.background = 'rgba(16, 185, 129, 0.8)';
+                loadPlatformData();
+            }
+        }
 
         // Load platforms on page load
         window.addEventListener('DOMContentLoaded', function() {
@@ -314,15 +329,6 @@
             const selectedName = platformSelect.options[platformSelect.selectedIndex].text;
             showStatus(`Loading ${selectedName}...`, 'info');
 
-            // Start auto-refresh if not already running
-            if (!autoRefreshInterval) {
-                autoRefreshInterval = setInterval(function() {
-                    console.log('Auto-refreshing platform data...');
-                    loadPlatformData();
-                }, 10000); // 10 seconds
-                document.getElementById('autoRefreshStatus').style.display = 'block';
-                console.log('✅ Auto-refresh enabled (every 10 seconds)');
-            }
 
             // Load the actual data
             await loadPlatformData();
