@@ -612,25 +612,30 @@
             const configStr = localStorage.getItem('trplConfig');
             const schoolName = configStr ? (JSON.parse(configStr).schoolName || '') : '';
 
-            // Extract team data
-            const teams = [];
+            // Extract team data — deduplicate by team name, keep highest total
+            const seenDash = {};
             const startRow = headerRow + 1;
 
             for (let i = startRow; i < csvData.length; i++) {
                 const row = csvData[i];
                 if (!row.some(cell => cell && cell.trim())) continue;
 
-                const teamName = row[teamCol] || '';
+                const teamName = (row[teamCol] || '').trim();
                 const totalPoints = parseFloat(row[totalCol]) || 0;
 
-                if (teamName && totalPoints > 0) {
-                    teams.push({
+                if (!teamName || totalPoints <= 0) continue;
+
+                const key = teamName.toLowerCase();
+                if (!seenDash[key] || totalPoints > seenDash[key].points) {
+                    seenDash[key] = {
                         name: teamName,
                         points: totalPoints,
                         isMySchool: schoolName && teamName.toLowerCase().includes(schoolName.toLowerCase())
-                    });
+                    };
                 }
             }
+
+            const teams = Object.values(seenDash);
 
             // Sort by points descending
             teams.sort((a, b) => b.points - a.points);
