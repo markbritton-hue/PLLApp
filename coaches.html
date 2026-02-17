@@ -332,8 +332,11 @@
                     // Sort athletes (same as platform page)
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
 
-                    // Only show first 2 (lifting and on deck)
-                    const athletesToShow = sortedAthletes.slice(0, 2);
+                    // Show all athletes with pending attempts
+                    const currentColumn = getCurrentAttemptColumn(schoolAthletes);
+                    const athletesToShow = sortedAthletes.filter(athlete =>
+                        hasPendingInColumn(athlete, currentColumn)
+                    );
 
                     if (athletesToShow.length > 0) {
                         renderPlatformSection(platform.name, athletesToShow, lastCompletedRow);
@@ -605,13 +608,14 @@
                 let statusLabel = '';
                 let statusColor = '';
 
-                // Only show status if athlete has pending attempt in current column
-                const hasPending = hasPendingInColumn(athlete, currentColumn);
+                // Position number (1-indexed)
+                const position = index + 1;
 
-                if (index === 0 && hasPending) {
+                // Only show NEXT badge for position 1, ON DECK for position 2
+                if (position === 1) {
                     statusLabel = 'NEXT';
                     statusColor = '#ef4444';
-                } else if (index === 1 && hasPending) {
+                } else if (position === 2) {
                     statusLabel = 'ON DECK';
                     statusColor = '#10b981';
                 }
@@ -624,7 +628,7 @@
                         <div class="athlete-card" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4);">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                                 <div>
-                                    <div class="athlete-name">${rowsDown > 0 ? `${rowsDown} -` : ''} ${athlete.name}</div>
+                                    <div class="athlete-name">${position} ${rowsDown > 0 ? `(${rowsDown})` : ''} - ${athlete.name}</div>
                                 </div>
                                 ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
                             </div>

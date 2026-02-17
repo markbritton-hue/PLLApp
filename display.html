@@ -203,7 +203,12 @@
                     );
 
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
-                    const athletesToShow = sortedAthletes.slice(0, 2);
+
+                    // Show all athletes with pending attempts
+                    const currentColumn = getCurrentAttemptColumn(schoolAthletes);
+                    const athletesToShow = sortedAthletes.filter(athlete =>
+                        hasPendingInColumn(athlete, currentColumn)
+                    );
 
                     if (athletesToShow.length > 0) {
                         renderPlatformSection(platform.name, athletesToShow);
@@ -422,16 +427,17 @@
             const currentColumn = getCurrentAttemptColumn(athletes);
 
             athletes.forEach((athlete, index) => {
-                // Only show status if athlete has pending attempt in current column
-                const hasPending = hasPendingInColumn(athlete, currentColumn);
+                // Position number (1-indexed)
+                const position = index + 1;
 
                 let status = '';
                 let statusClass = '';
 
-                if (index === 0 && hasPending) {
+                // Only show NEXT badge for position 1, ON DECK for position 2
+                if (position === 1) {
                     status = 'NEXT';
                     statusClass = 'lifting';
-                } else if (index === 1 && hasPending) {
+                } else if (position === 2) {
                     status = 'ON DECK';
                     statusClass = 'on-deck';
                 }
