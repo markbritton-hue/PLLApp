@@ -317,30 +317,17 @@
                     // Determine current attempt column from all athletes
                     const currentColumn = getCurrentAttemptColumn(athletes);
 
-                    // Find the last completed attempt in the CURRENT column in the FULL platform sheet
-                    let lastCompletedRow = -1;
-                    for (const athlete of athletes) {
-                        if (currentColumn && athlete[currentColumn]) {
-                            const attemptValue = athlete[currentColumn];
-                            const lower = attemptValue.toLowerCase();
-                            // Check if this attempt is completed (has g or x)
-                            if (lower.includes('g') || lower.includes('x')) {
-                                if (athlete.sheetOrder > lastCompletedRow) {
-                                    lastCompletedRow = athlete.sheetOrder;
-                                }
-                            }
-                        }
-                    }
-
                     // Filter for school's athletes only
                     const schoolAthletes = athletes.filter(a =>
                         a.school && a.school.toLowerCase().includes(schoolName.toLowerCase())
                     );
 
                     // Sort ALL athletes to get their true platform position
-                    const allSorted = sortAthletesByLiftingOrder(athletes).filter(athlete =>
-                        hasPendingInColumn(athlete, currentColumn)
-                    );
+                    const pendingFilter = currentColumn
+                        ? (athlete) => hasPendingInColumn(athlete, currentColumn)
+                        : (athlete) => hasAnyPendingAttempt(athlete);
+
+                    const allSorted = sortAthletesByLiftingOrder(athletes).filter(pendingFilter);
 
                     // Build a map of sheetOrder -> overall platform position
                     const platformPositionMap = {};
@@ -350,9 +337,7 @@
 
                     // Sort school athletes and filter to pending only
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
-                    const athletesToShow = sortedAthletes.filter(athlete =>
-                        hasPendingInColumn(athlete, currentColumn)
-                    );
+                    const athletesToShow = sortedAthletes.filter(pendingFilter);
 
                     // Attach overall platform position to each school athlete
                     athletesToShow.forEach(athlete => {
@@ -360,7 +345,7 @@
                     });
 
                     if (athletesToShow.length > 0) {
-                        renderPlatformSection(platform.name, athletesToShow, lastCompletedRow);
+                        renderPlatformSection(platform.name, athletesToShow);
                         totalAthletesShown += athletesToShow.length;
                     }
 
@@ -612,8 +597,19 @@
             return !lower.includes('g') && !lower.includes('x');
         }
 
+        // Returns true if the athlete has any lift entered but not yet judged (used between flights)
+        function hasAnyPendingAttempt(athlete) {
+            const cols = ['squat1', 'squat2', 'squat3', 'bench1', 'bench2', 'bench3', 'dead1', 'dead2', 'dead3'];
+            return cols.some(col => {
+                const val = athlete[col];
+                if (!val) return false;
+                const lower = val.toLowerCase();
+                return !lower.includes('g') && !lower.includes('x');
+            });
+        }
+
         // Render platform section with athletes
-        function renderPlatformSection(platformName, athletes, lastCompletedRow) {
+        function renderPlatformSection(platformName, athletes) {
             const container = document.getElementById('platformsContainer');
 
             const section = document.createElement('div');
@@ -634,7 +630,7 @@
                 // Overall platform position across ALL athletes
                 const overallPosition = athlete.platformPosition || 0;
 
-                // Only show LIFTING badge for overall position 1, ON DECK for position 2
+                // Use overallPosition for both badge and position number
                 if (overallPosition === 1) {
                     statusLabel = 'LIFTING';
                     statusColor = '#ef4444';
@@ -643,16 +639,13 @@
                     statusColor = '#10b981';
                 }
 
-                // Calculate rows down from last completed attempt in full platform sheet
-                const rowsDown = lastCompletedRow >= 0 ? athlete.sheetOrder - lastCompletedRow : 0;
-
                 sectionHTML += `
                     <div class="col-lg-6 col-md-12">
                         <div class="athlete-card" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4);">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                                 <div class="athlete-name">${athlete.name}</div>
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    ${rowsDown > 0 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800;">Position ${rowsDown}</div>` : ''}
+                                    ${overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800;">Position ${overallPosition}</div>` : ''}
                                     ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 6px 16px; border-radius: 12px; font-size: 1rem; font-weight: 800; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
                                 </div>
                             </div>
