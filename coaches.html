@@ -332,8 +332,7 @@
                     // Sort athletes (same as platform page)
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
 
-                    // Show all athletes with pending attempts
-                    const currentColumn = getCurrentAttemptColumn(schoolAthletes);
+                    // Show all school athletes with pending attempts in the current column
                     const athletesToShow = sortedAthletes.filter(athlete =>
                         hasPendingInColumn(athlete, currentColumn)
                     );
