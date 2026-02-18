@@ -1,5 +1,9 @@
 # PowerLift Live — User & Coach Guide
 
+> **Disclaimer:** PowerLift Live (PLL App) is an unofficial, independent tool and is **not the official scoring app** for any competition. It is **not affiliated with, endorsed by, or supported by the Michigan High School Powerlifting Association (MHSPL)**. For official results, always refer to the meet director or official MHSPL resources.
+
+---
+
 **PowerLift Live** is a free web app that lets coaches, athletes, and families follow a powerlifting meet in real time — right from their phone or any browser. No app download needed.
 
 ---
