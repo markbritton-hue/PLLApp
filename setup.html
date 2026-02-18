@@ -524,9 +524,14 @@
                     id="spreadsheetUrl"
                     placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit..."
                     value="">
-                <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code" style="margin-left: 0; margin-top: 10px; display: block;">
-                    📷 Scan QR Code
-                </button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code" style="margin: 0;">
+                        📷 Scan QR Code
+                    </button>
+                    <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1mEubp4_lKmxKgJVc_wEcrDaFJNGL22RUdvRgruqKbQw/edit?usp=sharing'" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
+                        📋 Sample Sheet
+                    </button>
+                </div>
                 <p class="help-text">Paste the URL from your browser or scan a QR code</p>
             </div>
 
