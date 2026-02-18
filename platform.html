@@ -217,13 +217,20 @@
 <body>
     <div class="container">
         <!-- Navigation Buttons -->
-        <div class="mb-4" style="display: flex; gap: 15px; align-items: center;">
+        <div class="mb-4" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
             <a href="index.html" class="btn-home">
                 <i class="fas fa-home me-2"></i>Home
             </a>
             <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
                 <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
             </button>
+            <a href="https://venmo.com/u/Mark-Britton-18" target="_blank" rel="noopener noreferrer"
+               style="display: inline-flex; align-items: center; gap: 8px; background: #008CFF; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,140,255,0.4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 111 111" fill="white">
+                    <path d="M90.5 8.5c3.9 6.4 5.7 13 5.7 21.4 0 26.7-22.8 61.4-41.3 85.8H15.7L1 10.9l38-3.6 7.9 63.7C55.1 55.4 64 30.1 64 16.1c0-8.1-1.4-13.6-3.6-18.1L90.5 8.5z"/>
+                </svg>
+                Donate
+            </a>
         </div>
 
         <!-- Page Header -->
@@ -246,18 +253,6 @@
         <!-- Athletes Container -->
         <div id="athletesContainer"></div>
 
-        <!-- Donation Card -->
-        <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(96, 165, 250, 0.4); border-radius: 15px; padding: 30px; text-align: center; margin-top: 40px; box-shadow: 0 8px 20px rgba(0,0,0,0.5);">
-            <h3 style="color: #60a5fa; font-weight: 700; margin-bottom: 10px;"><i class="fas fa-heart me-2" style="color: #ec4899;"></i>Support PowerLift Live</h3>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Donations help cover hosting and keep live results running.</p>
-            <a href="https://venmo.com/u/Mark-Britton-18" target="_blank" rel="noopener noreferrer"
-               style="display: inline-flex; align-items: center; gap: 12px; background: #008CFF; color: white; text-decoration: none; padding: 14px 30px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 4px 15px rgba(0,140,255,0.4);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 111 111" fill="white">
-                    <path d="M90.5 8.5c3.9 6.4 5.7 13 5.7 21.4 0 26.7-22.8 61.4-41.3 85.8H15.7L1 10.9l38-3.6 7.9 63.7C55.1 55.4 64 30.1 64 16.1c0-8.1-1.4-13.6-3.6-18.1L90.5 8.5z"/>
-                </svg>
-                Donate via Venmo
-            </a>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
