@@ -726,8 +726,8 @@
                 // Check if this athlete's school matches configured school
                 const isMySchool = configuredSchool && athlete.school &&
                     athlete.school.toLowerCase().includes(configuredSchool.toLowerCase());
-                const cardBgColor = isMySchool ? 'rgba(251, 146, 60, 0.15)' : 'rgba(30, 41, 59, 0.9)';
-                const cardBorderColor = isMySchool ? 'rgba(251, 146, 60, 0.5)' : 'rgba(96, 165, 250, 0.2)';
+                const cardBgColor = isMySchool ? 'rgba(255, 115, 0, 0.15)' : 'rgba(30, 41, 59, 0.9)';
+                const cardBorderColor = isMySchool ? 'rgba(255, 115, 0, 0.5)' : 'rgba(96, 165, 250, 0.2)';
 
                 col.innerHTML = `
                     <div class="athlete-card" style="background: ${cardBgColor}; border-color: ${cardBorderColor};">
