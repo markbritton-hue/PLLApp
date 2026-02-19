@@ -320,6 +320,9 @@
                     return;
                 }
 
+                // Clear existing options and re-add placeholder before populating
+                platformSelect.innerHTML = '<option value="">-- Choose a platform --</option>';
+
                 // Add platforms to dropdown
                 platforms.forEach(platform => {
                     const option = document.createElement('option');
