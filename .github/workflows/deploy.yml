@@ -1,0 +1,21 @@
+name: Deploy to IONOS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: home176860600.1and1-data.host
+          username: acc2057534952
+          password: ${{ secrets.SFTP_PASSWORD }}
+          server-dir: /pllapp/
