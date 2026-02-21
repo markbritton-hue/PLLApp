@@ -12,10 +12,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: home176860600.1and1-data.host
           username: acc2057534952
           password: ${{ secrets.SFTP_PASSWORD }}
-          server-dir: /pllapp/
+          local_path: './*'
+          remote_path: '/pllapp/'
+          sftp_only: true
