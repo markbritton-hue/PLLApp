@@ -486,7 +486,7 @@
                             <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code" style="margin: 0;">
                                 📷 Scan QR Code
                             </button>
-                            <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1mEubp4_lKmxKgJVc_wEcrDaFJNGL22RUdvRgruqKbQw/edit?usp=sharing'; document.getElementById('schoolName').value='Three Rivers'; document.getElementById('schoolWebsite').value='trschools.org'; onQRScanned(document.getElementById('spreadsheetUrl').value);" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
+                            <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1mEubp4_lKmxKgJVc_wEcrDaFJNGL22RUdvRgruqKbQw/edit?usp=sharing'; document.getElementById('schoolName').value='Three Rivers'; onQRScanned(document.getElementById('spreadsheetUrl').value);" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
                                 📋 Sample Sheet
                             </button>
                         </div>
@@ -509,19 +509,9 @@
             </ol>
         </div>
 
-        <!-- School Configuration -->
+        <!-- Auto-Refresh -->
         <div class="setup-section">
-            <h2>🏫 School Configuration</h2>
-            <div class="form-group">
-                <label for="schoolWebsite">School Website URL:</label>
-                <input
-                    type="text"
-                    id="schoolWebsite"
-                    placeholder="e.g., https://www.yourschool.edu"
-                    value="">
-                <p class="help-text">Enter your school's website URL - we'll automatically fetch the logo/favicon</p>
-            </div>
-
+            <h2>🔄 Auto-Refresh</h2>
             <div class="form-group">
                 <label for="autoRefreshSeconds">Auto-Refresh Interval (seconds):</label>
                 <input
@@ -876,7 +866,6 @@
 
         function saveConfiguration() {
             const schoolName = document.getElementById('schoolName').value.trim();
-            const schoolWebsite = document.getElementById('schoolWebsite').value.trim();
             const autoRefreshSeconds = parseInt(document.getElementById('autoRefreshSeconds').value) || 20;
             const spreadsheetUrl = document.getElementById('spreadsheetUrl').value.trim();
 
@@ -915,7 +904,6 @@
 
             const config = {
                 schoolName,
-                schoolWebsite,
                 autoRefreshSeconds,
                 spreadsheetId,
                 spreadsheetUrl,
@@ -973,7 +961,6 @@
 
                 // Load school configuration and spreadsheet URL
                 document.getElementById('schoolName').value = config.schoolName || 'Three Rivers';
-                document.getElementById('schoolWebsite').value = config.schoolWebsite || '';
                 document.getElementById('autoRefreshSeconds').value = config.autoRefreshSeconds || 20;
                 document.getElementById('spreadsheetUrl').value = config.spreadsheetUrl || '';
 
