@@ -934,7 +934,9 @@
             if (!configStr) {
                 // Load default configuration
                 document.getElementById('schoolName').value = 'Three Rivers';
-                document.getElementById('spreadsheetUrl').value = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?usp=sharing';
+                const sampleUrl = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?usp=sharing';
+                document.getElementById('spreadsheetUrl').value = sampleUrl;
+                onQRScanned(sampleUrl);
 
                 // Pre-populate with actual sheets from the Google Sheet (with real GIDs)
                 const defaultSheets = [
