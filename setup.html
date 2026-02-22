@@ -1118,9 +1118,23 @@
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line) {
-                    // Simple CSV parsing (handles quoted fields)
-                    const row = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-                    result.push(row.map(field => field.replace(/^"|"$/g, '')));
+                    // Proper CSV parsing that preserves empty fields
+                    const row = [];
+                    let current = '';
+                    let inQuotes = false;
+                    for (let j = 0; j < line.length; j++) {
+                        const ch = line[j];
+                        if (ch === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (ch === ',' && !inQuotes) {
+                            row.push(current.trim());
+                            current = '';
+                        } else {
+                            current += ch;
+                        }
+                    }
+                    row.push(current.trim()); // last field
+                    result.push(row);
                 }
             }
 
