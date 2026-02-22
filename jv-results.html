@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerLift Live | Results</title>
+    <title>PowerLift Live | JV Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
@@ -123,8 +123,8 @@
             <a href="index.html" class="btn-home">
                 <i class="fas fa-home me-2"></i>Home
             </a>
-            <a href="jv-results.html" class="btn-home" style="background: rgba(16, 185, 129, 0.8); border: none; color: white;">
-                <i class="fas fa-trophy me-2"></i>JV Results
+            <a href="results.html" class="btn-home">
+                <i class="fas fa-trophy me-2"></i>Varsity Results
             </a>
             <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
                 <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
@@ -140,8 +140,8 @@
             <div style="font-size: 4rem; color: #60a5fa; margin-bottom: 20px;">
                 <i class="fas fa-dumbbell"></i>
             </div>
-            <h1 id="pageTitle"><i class="fas fa-trophy me-2"></i>All Schools Results</h1>
-            <p>Competition Results by Weight Class</p>
+            <h1 id="pageTitle"><i class="fas fa-trophy me-2"></i>Men's JV Results</h1>
+            <p>JV Competition Results by Weight Class</p>
         </header>
 
         <div id="statusMsg"></div>
@@ -169,14 +169,14 @@
                 autoRefreshInterval = null;
                 btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF';
                 btn.style.background = 'rgba(96, 165, 250, 0.8)';
-                localStorage.setItem('resultsAutoRefresh', 'off');
+                localStorage.setItem('jvResultsAutoRefresh', 'off');
             } else {
                 const cfg = JSON.parse(localStorage.getItem('trplConfig') || '{}');
                 const intervalMs = (cfg.autoRefreshSeconds || 20) * 1000;
                 autoRefreshInterval = setInterval(loadResults, intervalMs);
                 btn.innerHTML = `<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON (${cfg.autoRefreshSeconds || 20}s)`;
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
-                localStorage.setItem('resultsAutoRefresh', 'on');
+                localStorage.setItem('jvResultsAutoRefresh', 'on');
                 loadResults();
             }
         }
@@ -223,15 +223,17 @@
             }
 
             const config = JSON.parse(configStr);
-            const sheet = (config.sheets || []).find(s => s.name.toLowerCase().includes('varsity results'))
-                || (config.sheets || [])[0];
+
+            // Find the JV results sheet by name
+            const sheet = (config.sheets || []).find(s => s.name.toLowerCase().includes('jv results'))
+                || (config.sheets || []).find(s => s.name.toLowerCase().includes('jv'));
 
             if (!sheet) {
-                statusDiv.innerHTML = '<div class="status-msg">No results sheet found in configuration.</div>';
+                statusDiv.innerHTML = '<div class="status-msg">No JV results sheet found in configuration. Make sure a sheet with "JV" in the name is configured in Setup.</div>';
                 return;
             }
 
-            // Update heading
+            // Update heading with actual sheet name
             document.getElementById('pageTitle').innerHTML = `<i class="fas fa-trophy me-2"></i>${sheet.name}`;
 
             try {
@@ -274,8 +276,6 @@
                         if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2' || cell === 'dead lift 2') && dl2 === -1) dl2 = j;
                         if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3' || cell === 'dead lift 3') && dl3 === -1) dl3 = j;
                         if (cell === 'total' && totalCol === -1) totalCol = j;
-                        // When seeing a single "Squat"/"Bench"/"Dead Lift" header, the block is
-                        // [attempt1, attempt2, attempt3, best] — point to best (j+3)
                         if (cell === 'squat' && squatCol === -1) { sq1 = j; sq2 = j+1; sq3 = j+2; squatCol = j+3; }
                         if ((cell === 'bench' || cell === 'bench press') && benchCol === -1) { bp1 = j; bp2 = j+1; bp3 = j+2; benchCol = j+3; }
                         if ((cell === 'deadlift' || cell === 'dead lift') && deadCol === -1) { dl1 = j; dl2 = j+1; dl3 = j+2; deadCol = j+3; }
@@ -285,7 +285,7 @@
                 }
 
                 if (headerRow === -1) {
-                    statusDiv.innerHTML = '<div class="status-msg">Could not detect header row in results sheet.</div>';
+                    statusDiv.innerHTML = '<div class="status-msg">Could not detect header row in JV results sheet.</div>';
                     return;
                 }
 
@@ -294,7 +294,7 @@
 
                 const configuredSchool = getConfiguredSchool();
                 const grouped = {};
-                let currentWC = ''; // tracks weight class across athletes in the same class
+                let currentWC = '';
 
                 for (let i = headerRow + 1; i < csvData.length; i++) {
                     const row = csvData[i];
@@ -313,7 +313,6 @@
 
                     const bw = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
 
-                    // Compute best lifts from attempts or use direct columns
                     const squat = squatCol !== -1
                         ? parseFloat(row[squatCol]) || 0
                         : bestLift(sq1 !== -1 ? row[sq1] : '', sq2 !== -1 ? row[sq2] : '', sq3 !== -1 ? row[sq3] : '');
@@ -325,14 +324,13 @@
                         : bestLift(dl1 !== -1 ? row[dl1] : '', dl2 !== -1 ? row[dl2] : '', dl3 !== -1 ? row[dl3] : '');
                     const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
 
-                    if (!wc) continue; // skip rows with no weight class
+                    if (!wc) continue;
 
                     if (!grouped[wc]) grouped[wc] = [];
                     grouped[wc].push({ name, school, bw, squat, bench, deadlift, total,
                         isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool.toLowerCase()) });
                 }
 
-                // Sort weight classes numerically then SHW
                 const sortedClasses = Object.keys(grouped).sort((a, b) => {
                     const an = parseInt(a) || 9999;
                     const bn = parseInt(b) || 9999;
@@ -400,13 +398,13 @@
                 </div>`;
 
             } catch (error) {
-                console.error('Error loading results:', error);
+                console.error('Error loading JV results:', error);
                 statusDiv.innerHTML = `<div class="status-msg" style="color: #ef4444; border-color: #ef4444;">Error: ${error.message}</div>`;
             }
         }
 
         window.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('resultsAutoRefresh') === 'on') {
+            if (localStorage.getItem('jvResultsAutoRefresh') === 'on') {
                 toggleAutoRefresh();
             } else {
                 loadResults();
