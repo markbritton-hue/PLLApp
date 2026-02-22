@@ -462,22 +462,7 @@
             <h2>📋 Setup Instructions</h2>
             <ol style="font-size: 1.1rem; line-height: 1.6; color: rgba(255, 255, 255, 0.9);">
                 <li style="margin-bottom: 20px;">
-                    <strong>Step 1:</strong> Select or enter your high school name
-                    <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
-                        <label for="schoolName">Your School Name:</label>
-                        <select id="schoolNameSelect" style="display: none; width: 100%; padding: 12px; border: 2px solid rgba(96, 165, 250, 0.3); border-radius: 5px; font-size: 14px; background: rgba(15, 23, 42, 0.6); color: white;" onchange="document.getElementById('schoolName').value = this.value">
-                            <option value="">-- Select your school --</option>
-                        </select>
-                        <input
-                            type="text"
-                            id="schoolName"
-                            placeholder="e.g., Three Rivers, Lincoln High, Washington Academy"
-                            value="Three Rivers">
-                        <p class="help-text" id="schoolNameHelp">Complete Step 3 (Auto-Detect) to get a dropdown list of schools, or type your school name above</p>
-                    </div>
-                </li>
-                <li style="margin-bottom: 20px;">
-                    <strong>Step 2:</strong> SCAN the QR CODE found on the poster at the competition, or paste the Google Sheet URL below
+                    <strong>Step 1:</strong> SCAN the QR CODE found on the poster at the competition, or paste the Google Sheet URL below
                     <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
                         <label for="spreadsheetUrl">Google Sheet URL:</label>
                         <input
@@ -497,10 +482,25 @@
                     </div>
                 </li>
                 <li style="margin-bottom: 20px;">
-                    <strong>Step 3:</strong> Auto-detect your competition sheets
+                    <strong>Step 2:</strong> Auto-detect your competition sheets
                     <div style="margin-top: 10px;">
                         <button class="btn btn-primary" onclick="autoDetectSheets()">🔍 Auto-Detect All Sheets</button>
                         <div id="step3Check" style="display: none; margin-top: 12px; font-weight: 600; font-size: 1rem;"></div>
+                    </div>
+                </li>
+                <li style="margin-bottom: 20px;">
+                    <strong>Step 3:</strong> Select your high school
+                    <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+                        <label for="schoolName">Your School Name:</label>
+                        <select id="schoolNameSelect" style="display: none; width: 100%; padding: 12px; border: 2px solid rgba(96, 165, 250, 0.3); border-radius: 5px; font-size: 14px; background: rgba(15, 23, 42, 0.6); color: white;" onchange="document.getElementById('schoolName').value = this.value">
+                            <option value="">-- Select your school --</option>
+                        </select>
+                        <input
+                            type="text"
+                            id="schoolName"
+                            placeholder="Will be populated after Auto-Detect"
+                            value="">
+                        <p class="help-text" id="schoolNameHelp">Complete Step 2 (Auto-Detect) to populate the school dropdown</p>
                     </div>
                 </li>
                 <li style="margin-bottom: 20px;">
@@ -975,7 +975,6 @@
 
             if (!configStr) {
                 // Load default configuration
-                document.getElementById('schoolName').value = 'Three Rivers';
                 const sampleUrl = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?usp=sharing';
                 document.getElementById('spreadsheetUrl').value = sampleUrl;
                 onQRScanned(sampleUrl);
@@ -1178,12 +1177,14 @@
         }
 
         async function loadSchoolNames(spreadsheetId, sheets) {
-            // Find the first results sheet to pull school names from
-            const resultsSheet = sheets.find(s => s.name.toLowerCase().includes('results')) || sheets[0];
-            if (!resultsSheet) return;
+            // Use the varsity team standings sheet to get school names
+            const teamSheet = sheets.find(s => s.name.toLowerCase().includes('varsity team'))
+                || sheets.find(s => s.name.toLowerCase().includes('team'))
+                || sheets[0];
+            if (!teamSheet) return;
 
             try {
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${resultsSheet.gid}`;
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${teamSheet.gid}`;
                 let response;
                 try {
                     response = await fetch(csvUrl);
@@ -1195,25 +1196,41 @@
 
                 const csvData = parseCSV(await response.text());
 
-                // Find the School column
-                let schoolCol = -1, headerRow = -1;
-                for (let i = 0; i < Math.min(15, csvData.length); i++) {
-                    for (let j = 0; j < csvData[i].length; j++) {
-                        if (csvData[i][j].toLowerCase().trim() === 'school') {
-                            schoolCol = j;
+                // Find the Team/School column (starts from col G / index 6, matching team.html logic)
+                let teamCol = -1, headerRow = -1;
+                for (let i = 0; i < Math.min(10, csvData.length); i++) {
+                    for (let j = 6; j < csvData[i].length; j++) {
+                        const cell = csvData[i][j].toLowerCase().trim();
+                        if (cell === 'team' || cell === 'school' || cell === 'school name' || cell === 'team name') {
+                            teamCol = j;
                             headerRow = i;
                             break;
                         }
                     }
-                    if (schoolCol !== -1) break;
+                    if (teamCol !== -1) break;
                 }
-                if (schoolCol === -1) return;
+
+                // Fallback: if no header found with col >= 6, search all columns
+                if (teamCol === -1) {
+                    for (let i = 0; i < Math.min(10, csvData.length); i++) {
+                        for (let j = 0; j < csvData[i].length; j++) {
+                            const cell = csvData[i][j].toLowerCase().trim();
+                            if (cell === 'team' || cell === 'school') {
+                                teamCol = j;
+                                headerRow = i;
+                                break;
+                            }
+                        }
+                        if (teamCol !== -1) break;
+                    }
+                }
+                if (teamCol === -1) return;
 
                 // Collect unique, non-empty school names
                 const schools = new Set();
                 for (let i = headerRow + 1; i < csvData.length; i++) {
-                    const school = csvData[i][schoolCol]?.trim();
-                    if (school) schools.add(school);
+                    const school = csvData[i][teamCol]?.trim();
+                    if (school && isNaN(school)) schools.add(school);
                 }
                 if (schools.size === 0) return;
 
@@ -1232,10 +1249,9 @@
 
                 // Try to pre-select if input already has a matching value
                 const current = input.value.toLowerCase();
-                const match = [...schools].find(s => s.toLowerCase().includes(current) || current.includes(s.toLowerCase()));
-                if (match) {
-                    select.value = match;
-                    input.value = match;
+                if (current) {
+                    const match = [...schools].find(s => s.toLowerCase().includes(current) || current.includes(s.toLowerCase()));
+                    if (match) { select.value = match; input.value = match; }
                 }
 
                 // Show dropdown, hide text input
