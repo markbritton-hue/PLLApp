@@ -1207,13 +1207,18 @@
 
                     const csvData = parseCSV(await response.text());
                     console.log(`Trying sheet "${sheet.name}" for school names, ${csvData.length} rows`);
+                    // Log first few rows so we can see actual header names
+                    for (let dbg = 0; dbg < Math.min(6, csvData.length); dbg++) {
+                        console.log(`  row[${dbg}]:`, csvData[dbg]);
+                    }
 
-                    // Search all columns across first 15 rows for a school/team header
+                    // Search all columns across first 25 rows for a school/team header
+                    // Uses includes() so "High School", "School Name", etc. all match
                     let col = -1, headerRow = -1;
-                    for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                    for (let i = 0; i < Math.min(25, csvData.length); i++) {
                         for (let j = 0; j < csvData[i].length; j++) {
                             const cell = csvData[i][j].toLowerCase().trim();
-                            if (cell === 'school' || cell === 'team' || cell === 'school name' || cell === 'team name') {
+                            if (cell.includes('school') || cell === 'team' || cell === 'team name' || cell === 'club' || cell === 'organization') {
                                 col = j;
                                 headerRow = i;
                                 break;
