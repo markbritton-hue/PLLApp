@@ -474,7 +474,7 @@
                     </div>
                 </li>
                 <li style="margin-bottom: 20px;">
-                    <strong>Step 2:</strong> Enter the Google Sheet URL or scan a QR code
+                    <strong>Step 2:</strong> SCAN the QR CODE found on the poster at the competition, or paste the Google Sheet URL below
                     <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
                         <label for="spreadsheetUrl">Google Sheet URL:</label>
                         <input
@@ -486,15 +486,26 @@
                             <button class="btn-qr" onclick="openQRScanner()" title="Scan QR Code" style="margin: 0;">
                                 📷 Scan QR Code
                             </button>
-                            <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1mEubp4_lKmxKgJVc_wEcrDaFJNGL22RUdvRgruqKbQw/edit?usp=sharing'; document.getElementById('schoolName').value='Three Rivers'; document.getElementById('schoolWebsite').value='trschools.org';" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
+                            <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1mEubp4_lKmxKgJVc_wEcrDaFJNGL22RUdvRgruqKbQw/edit?usp=sharing'; document.getElementById('schoolName').value='Three Rivers'; document.getElementById('schoolWebsite').value='trschools.org'; onQRScanned(document.getElementById('spreadsheetUrl').value);" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
                                 📋 Sample Sheet
                             </button>
                         </div>
-                        <p class="help-text">Paste the URL from your browser or scan a QR code</p>
+                        <div id="step2Check" style="display: none; margin-top: 12px; font-weight: 600; font-size: 1rem;"></div>
                     </div>
                 </li>
-                <li style="margin-bottom: 10px;"><strong>Step 3:</strong> Click the <strong>🔍 Auto-Detect All Sheets</strong> button (optional but recommended)</li>
-                <li><strong>Step 4:</strong> Click the <strong>💾 Save Configuration</strong> button</li>
+                <li style="margin-bottom: 20px;">
+                    <strong>Step 3:</strong> Auto-detect your competition sheets
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-primary" onclick="autoDetectSheets()">🔍 Auto-Detect All Sheets</button>
+                        <div id="step3Check" style="display: none; margin-top: 12px; font-weight: 600; font-size: 1rem;"></div>
+                    </div>
+                </li>
+                <li>
+                    <strong>Step 4:</strong> Save your configuration
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-success" onclick="saveConfiguration()">💾 Save Configuration</button>
+                    </div>
+                </li>
             </ol>
         </div>
 
@@ -524,13 +535,11 @@
             </div>
         </div>
 
-        <!-- Main Spreadsheet URL -->
+        <!-- Reload Configuration -->
         <div class="setup-section">
-            <h2>📊 Main Google Sheet</h2>
+            <h2>⚙️ Advanced</h2>
             <div class="button-group">
-                <button class="btn btn-primary" onclick="autoDetectSheets()">🔍 Auto-Detect All Sheets</button>
-                <button class="btn btn-success" onclick="saveConfiguration()">💾 Save Configuration</button>
-                <button class="btn btn-secondary" onclick="loadConfiguration()">🔄 Reload Configuration</button>
+                <button class="btn btn-secondary" onclick="loadConfiguration()">🔄 Reload Saved Configuration</button>
             </div>
         </div>
 
@@ -675,6 +684,14 @@
                 });
 
                 showStatus(`✓ Success! Auto-detected ${sheets.length} sheet(s) (no API key needed!)`, 'success');
+
+                // Show checkmark under step 3
+                const step3Check = document.getElementById('step3Check');
+                if (step3Check) {
+                    step3Check.innerHTML = `✅ &nbsp;<span style="color: white;">${sheets.length} sheet${sheets.length !== 1 ? 's' : ''} detected successfully</span>`;
+                    step3Check.style.color = '#10b981';
+                    step3Check.style.display = 'block';
+                }
 
             } catch (error) {
                 console.error('HTML auto-detect error:', error);
@@ -1123,6 +1140,37 @@
             modal.style.display = 'none';
         }
 
+        async function onQRScanned(url) {
+            const step2Check = document.getElementById('step2Check');
+            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (!match) {
+                step2Check.innerHTML = '✅ Sheet URL loaded';
+                step2Check.style.color = '#10b981';
+                step2Check.style.display = 'block';
+                return;
+            }
+            const spreadsheetId = match[1];
+            step2Check.innerHTML = '⏳ Loading sheet name...';
+            step2Check.style.color = 'rgba(255,255,255,0.6)';
+            step2Check.style.display = 'block';
+            try {
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/htmlview`);
+                if (response.ok) {
+                    const html = await response.text();
+                    const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+                    const title = titleMatch
+                        ? titleMatch[1].replace(' - Google Sheets', '').trim()
+                        : 'Sheet loaded';
+                    step2Check.innerHTML = `✅ &nbsp;<span style="color: white;">${title}</span>`;
+                } else {
+                    step2Check.innerHTML = '✅ Sheet URL loaded successfully';
+                }
+            } catch (e) {
+                step2Check.innerHTML = '✅ Sheet URL loaded successfully';
+            }
+            step2Check.style.color = '#10b981';
+        }
+
         function scanQRCode() {
             const video = document.getElementById('qrVideo');
             const canvas = document.createElement('canvas');
@@ -1146,6 +1194,9 @@
 
                     // Close scanner after 1 second
                     setTimeout(closeQRScanner, 1000);
+
+                    // Show sheet name with checkmark under step 2
+                    onQRScanned(url);
                 }
             }
         }
