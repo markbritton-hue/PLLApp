@@ -1177,91 +1177,97 @@
         }
 
         async function loadSchoolNames(spreadsheetId, sheets) {
-            // Use the varsity team standings sheet to get school names
-            const teamSheet = sheets.find(s => s.name.toLowerCase().includes('varsity team'))
-                || sheets.find(s => s.name.toLowerCase().includes('team'))
-                || sheets[0];
-            if (!teamSheet) return;
+            const select = document.getElementById('schoolNameSelect');
+            const input = document.getElementById('schoolName');
+            const helpText = document.getElementById('schoolNameHelp');
 
-            try {
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${teamSheet.gid}`;
-                let response;
+            // Try these sheet types in order of preference
+            const candidates = [
+                sheets.find(s => s.name.toLowerCase().includes('varsity team')),
+                sheets.find(s => s.name.toLowerCase().includes('jv team')),
+                sheets.find(s => s.name.toLowerCase().includes('team')),
+                sheets.find(s => s.name.toLowerCase().includes('varsity results')),
+                sheets.find(s => s.name.toLowerCase().includes('results')),
+                sheets[0]
+            ].filter(Boolean);
+
+            let schools = new Set();
+
+            for (const sheet of candidates) {
                 try {
-                    response = await fetch(csvUrl);
-                    if (!response.ok) throw new Error('direct failed');
-                } catch {
-                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
-                }
-                if (!response.ok) return;
-
-                const csvData = parseCSV(await response.text());
-
-                // Find the Team/School column (starts from col G / index 6, matching team.html logic)
-                let teamCol = -1, headerRow = -1;
-                for (let i = 0; i < Math.min(10, csvData.length); i++) {
-                    for (let j = 6; j < csvData[i].length; j++) {
-                        const cell = csvData[i][j].toLowerCase().trim();
-                        if (cell === 'team' || cell === 'school' || cell === 'school name' || cell === 'team name') {
-                            teamCol = j;
-                            headerRow = i;
-                            break;
-                        }
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${sheet.gid}`;
+                    let response;
+                    try {
+                        response = await fetch(csvUrl);
+                        if (!response.ok) throw new Error('direct failed');
+                    } catch {
+                        response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
+                        if (!response.ok) continue;
                     }
-                    if (teamCol !== -1) break;
-                }
 
-                // Fallback: if no header found with col >= 6, search all columns
-                if (teamCol === -1) {
-                    for (let i = 0; i < Math.min(10, csvData.length); i++) {
+                    const csvData = parseCSV(await response.text());
+                    console.log(`Trying sheet "${sheet.name}" for school names, ${csvData.length} rows`);
+
+                    // Search all columns across first 15 rows for a school/team header
+                    let col = -1, headerRow = -1;
+                    for (let i = 0; i < Math.min(15, csvData.length); i++) {
                         for (let j = 0; j < csvData[i].length; j++) {
                             const cell = csvData[i][j].toLowerCase().trim();
-                            if (cell === 'team' || cell === 'school') {
-                                teamCol = j;
+                            if (cell === 'school' || cell === 'team' || cell === 'school name' || cell === 'team name') {
+                                col = j;
                                 headerRow = i;
                                 break;
                             }
                         }
-                        if (teamCol !== -1) break;
+                        if (col !== -1) break;
                     }
+
+                    console.log(`Sheet "${sheet.name}": headerRow=${headerRow}, col=${col}`);
+
+                    if (col === -1) continue;
+
+                    for (let i = headerRow + 1; i < csvData.length; i++) {
+                        const val = csvData[i][col]?.trim();
+                        if (val && isNaN(val) && val.length > 1) schools.add(val);
+                    }
+
+                    if (schools.size > 0) {
+                        console.log(`✅ Found ${schools.size} schools from "${sheet.name}"`);
+                        break;
+                    }
+                } catch (e) {
+                    console.warn(`Failed to load school names from sheet "${sheet.name}":`, e);
                 }
-                if (teamCol === -1) return;
-
-                // Collect unique, non-empty school names
-                const schools = new Set();
-                for (let i = headerRow + 1; i < csvData.length; i++) {
-                    const school = csvData[i][teamCol]?.trim();
-                    if (school && isNaN(school)) schools.add(school);
-                }
-                if (schools.size === 0) return;
-
-                // Populate the dropdown
-                const select = document.getElementById('schoolNameSelect');
-                const input = document.getElementById('schoolName');
-                const helpText = document.getElementById('schoolNameHelp');
-
-                select.innerHTML = '<option value="">-- Select your school --</option>';
-                [...schools].sort().forEach(school => {
-                    const opt = document.createElement('option');
-                    opt.value = school;
-                    opt.textContent = school;
-                    select.appendChild(opt);
-                });
-
-                // Try to pre-select if input already has a matching value
-                const current = input.value.toLowerCase();
-                if (current) {
-                    const match = [...schools].find(s => s.toLowerCase().includes(current) || current.includes(s.toLowerCase()));
-                    if (match) { select.value = match; input.value = match; }
-                }
-
-                // Show dropdown, hide text input
-                select.style.display = 'block';
-                input.style.display = 'none';
-                if (helpText) helpText.textContent = 'Select your school from the list';
-
-            } catch (e) {
-                console.error('Error loading school names:', e);
             }
+
+            if (schools.size === 0) {
+                // Fallback: show text input so user can still type
+                input.style.display = 'block';
+                input.placeholder = 'e.g., Three Rivers, Lincoln High';
+                if (helpText) helpText.textContent = 'Type your school name exactly as it appears in the sheet';
+                console.warn('Could not load school names — showing text input fallback');
+                return;
+            }
+
+            // Populate and show the dropdown
+            select.innerHTML = '<option value="">-- Select your school --</option>';
+            [...schools].sort().forEach(school => {
+                const opt = document.createElement('option');
+                opt.value = school;
+                opt.textContent = school;
+                select.appendChild(opt);
+            });
+
+            // Pre-select if input already has a matching value
+            const current = input.value.toLowerCase();
+            if (current) {
+                const match = [...schools].find(s => s.toLowerCase().includes(current) || current.includes(s.toLowerCase()));
+                if (match) { select.value = match; input.value = match; }
+            }
+
+            select.style.display = 'block';
+            input.style.display = 'none';
+            if (helpText) helpText.textContent = 'Select your school from the list';
         }
 
         async function onQRScanned(url) {
