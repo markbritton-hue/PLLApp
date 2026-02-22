@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerLift Live | Team Standings</title>
+    <title>PowerLift Live | JV Team Standings</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
@@ -268,8 +268,8 @@
             <a href="index.html" class="btn-home">
                 <i class="fas fa-home me-2"></i>Home
             </a>
-            <a href="jv-team.html" class="btn-home" style="background: rgba(16, 185, 129, 0.8); border: none; color: white;">
-                <i class="fas fa-trophy me-2"></i>JV Team
+            <a href="team.html" class="btn-home">
+                <i class="fas fa-trophy me-2"></i>Varsity Team
             </a>
             <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
                 <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
@@ -283,8 +283,8 @@
 
         <!-- Page Header -->
         <div class="page-header">
-            <h1><i class="fas fa-trophy me-3"></i>PowerLift Live — Team Standings</h1>
-            <p>Team Rankings by Total Points</p>
+            <h1><i class="fas fa-trophy me-3"></i>PowerLift Live — JV Team Standings</h1>
+            <p>JV Team Rankings by Total Points</p>
         </div>
 
         <input type="hidden" id="sheetUrl">
@@ -315,6 +315,7 @@
                 autoRefreshInterval = null;
                 btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF';
                 btn.style.background = 'rgba(96, 165, 250, 0.8)';
+                localStorage.setItem('jvTeamAutoRefresh', 'off');
             } else {
                 const cfg = JSON.parse(localStorage.getItem('trplConfig') || '{}');
                 const intervalMs = (cfg.autoRefreshSeconds || 20) * 1000;
@@ -323,39 +324,44 @@
                 }, intervalMs);
                 btn.innerHTML = `<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON (${cfg.autoRefreshSeconds || 20}s)`;
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
+                localStorage.setItem('jvTeamAutoRefresh', 'on');
                 loadTeamData();
             }
         }
 
-        // On page load, auto-load from configuration using the last sheet
+        // On page load, auto-load from configuration using the JV team sheet
         window.addEventListener('DOMContentLoaded', function() {
             const configStr = localStorage.getItem('trplConfig');
             if (configStr) {
                 try {
                     const config = JSON.parse(configStr);
 
-                    // Use sheet containing "varsity team", fallback to last sheet
+                    // Use sheet containing "jv team", fallback to sheet containing "mens jv team"
                     const teamSheet = (config.sheets && config.sheets.find(s =>
-                        s.name.toLowerCase().includes('varsity team')
-                    )) || (config.sheets && config.sheets.length > 0
-                        ? config.sheets[config.sheets.length - 1]
-                        : null);
+                        s.name.toLowerCase().includes('jv team')
+                    )) || null;
 
                     if (teamSheet) {
                         const sheetUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/edit#gid=${teamSheet.gid}`;
                         document.getElementById('sheetUrl').value = sheetUrl;
-                        // Update heading with full sheet name
                         document.querySelector('.page-header h1').innerHTML =
                             `<i class="fas fa-trophy me-3"></i>${teamSheet.name}`;
-                        document.querySelector('.page-header p').textContent = 'Team Rankings by Total Points';
-                        console.log(`Auto-loading sheet: ${teamSheet.name}...`);
+                        document.querySelector('.page-header p').textContent = 'JV Team Rankings by Total Points';
+                        console.log(`Auto-loading JV team sheet: ${teamSheet.name}...`);
                         loadTeamData();
                     } else {
-                        console.log('No sheets found in configuration');
+                        const statusDiv = document.getElementById('loadingStatus');
+                        statusDiv.textContent = 'No JV team sheet found in configuration. Make sure a sheet with "JV Team" in the name is configured in Setup.';
+                        statusDiv.style.color = '#ff9800';
+                        statusDiv.style.display = 'block';
                     }
                 } catch (error) {
                     console.error('Error loading configuration:', error);
                 }
+            }
+
+            if (localStorage.getItem('jvTeamAutoRefresh') === 'on') {
+                toggleAutoRefresh();
             }
         });
 
@@ -411,15 +417,15 @@
             const scrollPosition = preserveScroll ? window.pageYOffset || document.documentElement.scrollTop : 0;
 
             if (!url) {
-                statusDiv.textContent = 'Please enter a Google Sheet URL';
+                statusDiv.textContent = 'No JV team sheet URL found. Please configure the JV team sheet in Setup.';
                 statusDiv.style.color = '#d32f2f';
+                statusDiv.style.display = 'block';
                 return;
             }
 
-            localStorage.setItem('trplTeamSheetUrl', url);
-
-            statusDiv.textContent = 'Loading team data...';
+            statusDiv.textContent = 'Loading JV team data...';
             statusDiv.style.color = '#667eea';
+            statusDiv.style.display = 'block';
 
             try {
                 const parsed = parseSheetUrl(url);
@@ -430,7 +436,6 @@
                 const csvUrl = `https://docs.google.com/spreadsheets/d/${parsed.spreadsheetId}/export?format=csv&gid=${parsed.gid}`;
 
                 let response;
-                let usedProxy = false;
 
                 try {
                     response = await fetch(csvUrl);
@@ -439,7 +444,6 @@
                         throw new Error('Direct fetch returned error status');
                     }
                 } catch (directError) {
-                    usedProxy = true;
                     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
                     response = await fetch(proxyUrl);
 
@@ -455,14 +459,13 @@
                 const csvText = await response.text();
                 const csvData = parseCSV(csvText);
 
-                console.log('Team data loaded:', csvData.length, 'rows');
+                console.log('JV team data loaded:', csvData.length, 'rows');
 
-                // Render the team stats
                 renderTeamStats(csvData);
 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
-                statusDiv.innerHTML = `✓ Loaded <strong>Mens Varsity Team</strong> (Last updated: ${timeStr})`;
+                statusDiv.innerHTML = `✓ Loaded <strong>Mens JV Team</strong> (Last updated: ${timeStr})`;
                 statusDiv.style.color = '#4caf50';
 
                 if (preserveScroll && scrollPosition > 0) {
@@ -474,7 +477,7 @@
             } catch (error) {
                 statusDiv.textContent = `Error: ${error.message}`;
                 statusDiv.style.color = '#d32f2f';
-                console.error('Error loading team data:', error);
+                console.error('Error loading JV team data:', error);
             }
         }
 
@@ -482,7 +485,6 @@
             const dashboard = document.getElementById('dashboard');
             const tableContainer = document.getElementById('tableContainer');
 
-            // Clear existing content
             dashboard.innerHTML = '';
             tableContainer.innerHTML = '';
 
@@ -491,18 +493,15 @@
                 return;
             }
 
-            // Find the header row and identify columns
             let headerRow = -1;
             let teamCol = -1, totalCol = -1;
             let pointCols = [];
 
-            // Scan rows to find header - only needs Total column to identify it
             for (let i = 0; i < Math.min(10, csvData.length); i++) {
                 const row = csvData[i];
                 let foundTotal = -1, foundTeam = -1;
                 const foundPoints = [];
 
-                // Start from column G (index 6) - skip columns A-F
                 for (let j = 6; j < row.length; j++) {
                     const cell = (row[j] || '').toLowerCase().trim();
 
@@ -511,7 +510,6 @@
                     if (cell.match(/^\d{3}$/) || cell.match(/^\d{3}\/\d{3}$/)) foundPoints.push(j);
                 }
 
-                // Only need Total column to identify a valid header row
                 if (foundTotal !== -1) {
                     headerRow = i;
                     totalCol = foundTotal;
@@ -519,7 +517,6 @@
                     if (foundTeam !== -1) {
                         teamCol = foundTeam;
                     } else {
-                        // Find team col by scanning data rows for first non-numeric column (from col G)
                         for (let dr = i + 1; dr < Math.min(i + 4, csvData.length); dr++) {
                             for (let j = 6; j < csvData[dr].length; j++) {
                                 const val = (csvData[dr][j] || '').trim();
@@ -534,15 +531,13 @@
 
             console.log('Final - Team:', teamCol, 'Total:', totalCol, 'Header row:', headerRow);
 
-            // Validation
             if (teamCol === -1 || totalCol === -1) {
                 const statusDiv = document.getElementById('loadingStatus');
                 statusDiv.innerHTML = `⚠️ Warning: Could not find Team (${teamCol}) or Total (${totalCol}) column.
-                    Make sure you're loading the "Mens Varsity Team" sheet.`;
+                    Make sure you're loading the "Mens JV Team" sheet.`;
                 statusDiv.style.color = '#ff9800';
             }
 
-            // Extract and sort teams by Total column
             const startRow = headerRow !== -1 ? headerRow + 1 : 1;
             let teamsData = [];
             const cfgStr = localStorage.getItem('trplConfig');
@@ -558,7 +553,6 @@
 
                 const totalPoints = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0;
 
-                // Deduplicate — keep the entry with the highest total for each team name
                 const key = teamName.toLowerCase();
                 if (!seenTeams[key] || totalPoints > seenTeams[key].total) {
                     seenTeams[key] = {
@@ -570,21 +564,17 @@
             }
             teamsData = Object.values(seenTeams);
 
-            // Sort by total points (descending)
             teamsData.sort((a, b) => b.total - a.total);
 
-            console.log('Teams sorted by total:', teamsData.map(t => ({name: t.row[teamCol], total: t.total})));
+            console.log('JV teams sorted by total:', teamsData.map(t => ({name: t.row[teamCol], total: t.total})));
 
-            // Build standings table
             const pageHeading = document.querySelector('.page-header h1');
-            const sheetTitle = pageHeading ? pageHeading.textContent.trim() : 'Team Standings';
+            const sheetTitle = pageHeading ? pageHeading.textContent.trim() : 'JV Team Standings';
             let tableHTML = `<div class="team-table"><h3>${sheetTitle} (Sorted by Total Points)</h3><table>`;
             tableHTML += '<thead><tr>';
 
-            // Add rank column
             tableHTML += '<th>Rank</th>';
 
-            // Add headers — only columns G (index 6) onwards
             if (headerRow !== -1) {
                 csvData[headerRow].forEach((header, idx) => {
                     if (idx >= 6) tableHTML += `<th>${header || ''}</th>`;
@@ -592,14 +582,12 @@
             }
             tableHTML += '</tr></thead><tbody>';
 
-            // Add sorted data rows
             teamsData.forEach((teamData, rank) => {
                 const row = teamData.row;
 
                 tableHTML += teamData.isMySchool ? '<tr class="school-row">' : '<tr>';
                 tableHTML += `<td class="rank-column">${rank + 1}</td>`;
 
-                // Only render columns G (index 6) onwards
                 row.forEach((cell, idx) => {
                     if (idx < 6) return;
                     let cellClass = '';
@@ -614,7 +602,6 @@
             tableHTML += '</tbody></table></div>';
             tableContainer.innerHTML = tableHTML;
 
-            // Build dashboard/leaderboard
             buildDashboard(csvData, headerRow, teamCol, totalCol);
         }
 
@@ -632,11 +619,9 @@
                 return;
             }
 
-            // Get configured school name
             const configStr = localStorage.getItem('trplConfig');
             const schoolName = configStr ? (JSON.parse(configStr).schoolName || '') : '';
 
-            // Extract team data — deduplicate by team name, keep highest total
             const seenDash = {};
             const startRow = headerRow + 1;
 
@@ -661,17 +646,14 @@
 
             const teams = Object.values(seenDash);
 
-            // Sort by points descending
             teams.sort((a, b) => b.points - a.points);
 
-            // Find configured school
             const mySchoolTeam = teams.find(t => t.isMySchool);
             const mySchoolRank = teams.findIndex(t => t.isMySchool) + 1;
 
             let dashboardHTML = '<div class="dashboard">';
             dashboardHTML += '<h2><i class="fas fa-trophy me-2"></i>Leaderboard</h2>';
 
-            // Top 3 Podium
             dashboardHTML += '<div class="podium">';
             const medals = ['🥇', '🥈', '🥉'];
             const podiumClasses = ['first', 'second', 'third'];
@@ -690,7 +672,6 @@
 
             dashboardHTML += '</div>';
 
-            // School stats card
             if (mySchoolTeam) {
                 const pointsBehindLeader = teams[0].points - mySchoolTeam.points;
 
