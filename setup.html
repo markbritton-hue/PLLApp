@@ -1229,6 +1229,13 @@
 
                     console.log(`Sheet "${sheet.name}": headerRow=${headerRow}, col=${col}`);
 
+                    // Fallback: if no header found in a team sheet, use column G (index 6)
+                    if (col === -1 && sheet.name.toLowerCase().includes('team') && csvData[0]?.length > 6) {
+                        col = 6;
+                        headerRow = 0; // start collecting from row 1
+                        console.log(`Using column G (index 6) fallback for team sheet`);
+                    }
+
                     if (col === -1) continue;
 
                     for (let i = headerRow + 1; i < csvData.length; i++) {
