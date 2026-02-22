@@ -462,15 +462,18 @@
             <h2>📋 Setup Instructions</h2>
             <ol style="font-size: 1.1rem; line-height: 1.6; color: rgba(255, 255, 255, 0.9);">
                 <li style="margin-bottom: 20px;">
-                    <strong>Step 1:</strong> Enter your high school name
+                    <strong>Step 1:</strong> Select or enter your high school name
                     <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
                         <label for="schoolName">Your School Name:</label>
+                        <select id="schoolNameSelect" style="display: none; width: 100%; padding: 12px; border: 2px solid rgba(96, 165, 250, 0.3); border-radius: 5px; font-size: 14px; background: rgba(15, 23, 42, 0.6); color: white;" onchange="document.getElementById('schoolName').value = this.value">
+                            <option value="">-- Select your school --</option>
+                        </select>
                         <input
                             type="text"
                             id="schoolName"
                             placeholder="e.g., Three Rivers, Lincoln High, Washington Academy"
                             value="Three Rivers">
-                        <p class="help-text">Enter your school name exactly as it appears in the Google Sheet</p>
+                        <p class="help-text" id="schoolNameHelp">Complete Step 3 (Auto-Detect) to get a dropdown list of schools, or type your school name above</p>
                     </div>
                 </li>
                 <li style="margin-bottom: 20px;">
@@ -716,6 +719,9 @@
                     step3Check.style.color = '#10b981';
                     step3Check.style.display = 'block';
                 }
+
+                // Populate school name dropdown from results sheet
+                loadSchoolNames(spreadsheetId, sheets);
 
             } catch (error) {
                 console.error('HTML auto-detect error:', error);
@@ -1169,6 +1175,77 @@
 
             video.srcObject = null;
             modal.style.display = 'none';
+        }
+
+        async function loadSchoolNames(spreadsheetId, sheets) {
+            // Find the first results sheet to pull school names from
+            const resultsSheet = sheets.find(s => s.name.toLowerCase().includes('results')) || sheets[0];
+            if (!resultsSheet) return;
+
+            try {
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${resultsSheet.gid}`;
+                let response;
+                try {
+                    response = await fetch(csvUrl);
+                    if (!response.ok) throw new Error('direct failed');
+                } catch {
+                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
+                }
+                if (!response.ok) return;
+
+                const csvData = parseCSV(await response.text());
+
+                // Find the School column
+                let schoolCol = -1, headerRow = -1;
+                for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                    for (let j = 0; j < csvData[i].length; j++) {
+                        if (csvData[i][j].toLowerCase().trim() === 'school') {
+                            schoolCol = j;
+                            headerRow = i;
+                            break;
+                        }
+                    }
+                    if (schoolCol !== -1) break;
+                }
+                if (schoolCol === -1) return;
+
+                // Collect unique, non-empty school names
+                const schools = new Set();
+                for (let i = headerRow + 1; i < csvData.length; i++) {
+                    const school = csvData[i][schoolCol]?.trim();
+                    if (school) schools.add(school);
+                }
+                if (schools.size === 0) return;
+
+                // Populate the dropdown
+                const select = document.getElementById('schoolNameSelect');
+                const input = document.getElementById('schoolName');
+                const helpText = document.getElementById('schoolNameHelp');
+
+                select.innerHTML = '<option value="">-- Select your school --</option>';
+                [...schools].sort().forEach(school => {
+                    const opt = document.createElement('option');
+                    opt.value = school;
+                    opt.textContent = school;
+                    select.appendChild(opt);
+                });
+
+                // Try to pre-select if input already has a matching value
+                const current = input.value.toLowerCase();
+                const match = [...schools].find(s => s.toLowerCase().includes(current) || current.includes(s.toLowerCase()));
+                if (match) {
+                    select.value = match;
+                    input.value = match;
+                }
+
+                // Show dropdown, hide text input
+                select.style.display = 'block';
+                input.style.display = 'none';
+                if (helpText) helpText.textContent = 'Select your school from the list';
+
+            } catch (e) {
+                console.error('Error loading school names:', e);
+            }
         }
 
         async function onQRScanned(url) {
