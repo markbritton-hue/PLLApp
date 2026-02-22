@@ -529,7 +529,7 @@
                         nameCol = j;
                         foundName = true;
                     }
-                    if (cell === 'school' && schoolCol === -1) {
+                    if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) {
                         schoolCol = j;
                         foundSchool = true;
                     }

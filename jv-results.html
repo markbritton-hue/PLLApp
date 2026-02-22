@@ -263,7 +263,7 @@
                     for (let j = 0; j < row.length; j++) {
                         const cell = row[j].toLowerCase().trim();
                         if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
-                        if (cell === 'school' && schoolCol === -1) schoolCol = j;
+                        if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) schoolCol = j;
                         if ((cell === 'weight class' || cell === 'wt class' || cell === 'wt. class' || cell === 'class' || cell === 'weightclass' || cell === 'weight cls' || cell === 'wt cls') && wcCol === -1) wcCol = j;
                         if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bwCol === -1) bwCol = j;
                         if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1') && sq1 === -1) sq1 = j;
