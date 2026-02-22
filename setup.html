@@ -504,6 +504,7 @@
                     <strong>Step 4:</strong> Save your configuration
                     <div style="margin-top: 10px;">
                         <button class="btn btn-success" onclick="saveConfiguration()">💾 Save Configuration</button>
+                        <div id="step4Check" style="display: none; margin-top: 12px; font-weight: 600; font-size: 1rem;"></div>
                     </div>
                 </li>
                 <li style="margin-bottom: 20px;">
@@ -949,6 +950,14 @@
 
             showStatus(`✓ Configuration saved for ${schoolName}! ${sheets.length} sheet(s) configured.`, 'success');
             displayCurrentConfig();
+
+            // Show checkmark under step 4
+            const step4Check = document.getElementById('step4Check');
+            if (step4Check) {
+                step4Check.innerHTML = `✅ &nbsp;<span style="color: white;">Configuration saved for ${schoolName}</span>`;
+                step4Check.style.color = '#10b981';
+                step4Check.style.display = 'block';
+            }
 
             // Show popup and scroll to top
             alert(`✓ Configuration saved successfully!\n\nYour ${schoolName} setup is complete with ${sheets.length} sheet(s).\n\nScroll to the top of the page to continue.`);
