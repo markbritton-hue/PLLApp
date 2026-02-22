@@ -594,8 +594,8 @@
                 // Find the first row with actual athlete data (has school name in it)
                 // Search across all columns, not just column 5
                 let dataStartRow = -1;
-                const searchRows = Math.min(100, csvData.length); // Search first 100 rows instead of 20
-                console.log(`🔍 Searching for "${configuredSchool}" in first ${searchRows} rows...`);
+                const searchRows = csvData.length;
+                console.log(`🔍 Searching for "${configuredSchool}" in all ${searchRows} rows...`);
 
                 for (let i = 0; i < searchRows; i++) {
                     const row = csvData[i];
@@ -613,7 +613,7 @@
                 }
 
                 if (dataStartRow === -1) {
-                    console.log(`❌ Could not find "${configuredSchool}" in any of the first ${searchRows} rows`);
+                    console.log(`❌ Could not find "${configuredSchool}" in any of the ${searchRows} rows`);
                     console.log('First 10 rows of data:');
                     csvData.slice(0, 10).forEach((row, idx) => {
                         console.log(`Row ${idx}:`, row);
