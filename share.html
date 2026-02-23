@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerLift Live | Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .btn-home {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .btn-home:hover {
+            background: rgba(30, 41, 59, 1);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .share-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 15px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .share-card h2 {
+            color: #60a5fa;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .share-card p {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .copy-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .copy-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .btn-copy {
+            background: #60a5fa;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(96,165,250,0.3);
+        }
+
+        .btn-copy:hover {
+            background: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .btn-copy.copied {
+            background: #10b981;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+
+        .btn-share-native {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #a78bfa;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(167,139,250,0.3);
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-share-native:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        #qrcode canvas, #qrcode img {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container px-4" style="max-width: 700px;">
+        <!-- Navigation -->
+        <div class="mb-4">
+            <a href="index.html" class="btn-home">
+                <i class="fas fa-home me-2"></i>Home
+            </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-share-alt me-3"></i>Share</h1>
+            <p>Share PowerLift Live or this competition with others</p>
+        </div>
+
+        <!-- Share App -->
+        <div class="share-card">
+            <h2><i class="fas fa-mobile-alt me-2"></i>Share the App</h2>
+            <p>Send others a link to PowerLift Live so they can follow along live</p>
+            <div class="copy-row" style="margin-bottom: 16px;">
+                <input class="copy-input" id="appUrl" readonly>
+                <button class="btn-copy" onclick="copyText('appUrl', this)">
+                    <i class="fas fa-copy me-1"></i> Copy
+                </button>
+            </div>
+            <button class="btn-share-native" id="nativeShareBtn" onclick="nativeShare()" style="display: none;">
+                <i class="fas fa-share-alt"></i> Share via...
+            </button>
+        </div>
+
+        <!-- Share Competition Sheet -->
+        <div class="share-card" id="sheetShareCard" style="display: none;">
+            <h2><i class="fas fa-table me-2"></i>Share This Competition</h2>
+            <p>Share the live results Google Sheet URL with coaches, athletes, and families</p>
+            <div class="copy-row">
+                <input class="copy-input" id="sheetUrl" readonly>
+                <button class="btn-copy" onclick="copyText('sheetUrl', this)">
+                    <i class="fas fa-copy me-1"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="share-card" style="text-align: center;">
+            <h2><i class="fas fa-qrcode me-2"></i>QR Code</h2>
+            <p>Let someone scan this to open the app directly on their phone</p>
+            <div style="display: flex; justify-content: center;">
+                <div class="qr-container">
+                    <div id="qrcode"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set app URL
+            const appUrl = window.location.origin + window.location.pathname.replace('share.html', 'index.html');
+            document.getElementById('appUrl').value = appUrl;
+
+            // Generate QR code
+            new QRCode(document.getElementById('qrcode'), {
+                text: appUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Show competition sheet URL if configured
+            const configStr = localStorage.getItem('trplConfig');
+            if (configStr) {
+                try {
+                    const config = JSON.parse(configStr);
+                    if (config.spreadsheetUrl) {
+                        document.getElementById('sheetUrl').value = config.spreadsheetUrl;
+                        document.getElementById('sheetShareCard').style.display = 'block';
+                    }
+                } catch (e) {}
+            }
+
+            // Show native share button if supported
+            if (navigator.share) {
+                document.getElementById('nativeShareBtn').style.display = 'inline-flex';
+            }
+        });
+
+        function copyText(inputId, btn) {
+            const input = document.getElementById(inputId);
+            navigator.clipboard.writeText(input.value).then(() => {
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                input.select();
+                document.execCommand('copy');
+            });
+        }
+
+        function nativeShare() {
+            navigator.share({
+                title: 'PowerLift Live',
+                text: 'Follow live powerlifting competition results!',
+                url: document.getElementById('appUrl').value
+            }).catch(() => {});
+        }
+    </script>
+</body>
+</html>
