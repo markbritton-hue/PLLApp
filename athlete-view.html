@@ -556,9 +556,10 @@
                 const diffDead  = athlete.deadlift - leaderDead;
                 const diffTotal = athlete.total - leaderTotal;
 
-                function diffHtml(val, isLift = true) {
-                    if (val === 0) return `<div class="lift-diff leader">★ Leader</div>`;
-                    return `<div class="lift-diff behind">${val} lbs</div>`;
+                function diffHtml(best, diff) {
+                    const bestStr = best ? `<span style="color:#60a5fa; font-weight:800;">${best} lbs</span>` : '';
+                    if (diff === 0) return `<div class="lift-diff leader" style="display:flex;justify-content:space-between;align-items:center;">${bestStr}<span>★ Leader</span></div>`;
+                    return `<div class="lift-diff behind" style="display:flex;justify-content:space-between;align-items:center;">${bestStr}<span>${diff} lbs</span></div>`;
                 }
 
                 function totalDiffHtml(val) {
@@ -582,7 +583,7 @@
                                 ${renderAttempt(athlete.sq2, '2')}
                                 ${renderAttempt(athlete.sq3, '3')}
                             </div>
-                            ${diffHtml(diffSquat)}
+                            ${diffHtml(athlete.squat, diffSquat)}
                         </div>
                         <div class="event-section">
                             <div class="event-header"><i class="fas fa-hands me-1"></i>Bench</div>
@@ -591,7 +592,7 @@
                                 ${renderAttempt(athlete.bp2, '2')}
                                 ${renderAttempt(athlete.bp3, '3')}
                             </div>
-                            ${diffHtml(diffBench)}
+                            ${diffHtml(athlete.bench, diffBench)}
                         </div>
                         <div class="event-section">
                             <div class="event-header"><i class="fas fa-weight-hanging me-1"></i>Deadlift</div>
@@ -600,7 +601,7 @@
                                 ${renderAttempt(athlete.dl2, '2')}
                                 ${renderAttempt(athlete.dl3, '3')}
                             </div>
-                            ${diffHtml(diffDead)}
+                            ${diffHtml(athlete.deadlift, diffDead)}
                         </div>
                         <div class="total-box">
                             <div>
