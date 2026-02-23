@@ -153,6 +153,11 @@
             text-align: center;
         }
 
+        .lift-box.done {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.45);
+        }
+
         .lift-label {
             font-size: 0.65rem;
             color: rgba(255,255,255,0.5);
@@ -373,71 +378,80 @@
                 const csv = await response.text();
                 const csvData = parseCSV(csv);
 
-                // Detect columns
+                // Detect columns — same approach as team athletes page
                 let headerRow = -1;
-                let nameCol = -1, schoolCol = -1;
+                let nameCol = -1, schoolCol = -1, weightClassCol = -1;
                 let sq1 = -1, sq2 = -1, sq3 = -1;
                 let bp1 = -1, bp2 = -1, bp3 = -1;
                 let dl1 = -1, dl2 = -1, dl3 = -1;
-                let totalCol = -1, squatCol = -1, benchCol = -1, deadCol = -1;
+                let totalCol = -1;
 
                 for (let i = 0; i < Math.min(15, csvData.length); i++) {
                     const row = csvData[i];
+                    let foundName = false, foundSchool = false;
                     for (let j = 0; j < row.length; j++) {
                         const cell = row[j].toLowerCase().trim();
-                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
-                        if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) schoolCol = j;
-                        if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1') && sq1 === -1) sq1 = j;
-                        if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && sq2 === -1) sq2 = j;
-                        if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && sq3 === -1) sq3 = j;
-                        if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bp1 === -1) bp1 = j;
-                        if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bp2 === -1) bp2 = j;
-                        if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bp3 === -1) bp3 = j;
-                        if ((cell === 'deadlift 1' || cell === 'dl1' || cell === 'dead 1') && dl1 === -1) dl1 = j;
-                        if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2') && dl2 === -1) dl2 = j;
-                        if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3') && dl3 === -1) dl3 = j;
+                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) { nameCol = j; foundName = true; }
+                        if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) { schoolCol = j; foundSchool = true; }
+                        if ((cell === 'weight class' || cell === 'wt class' || cell === 'class' || cell === 'weightclass' || cell === 'wt. class') && weightClassCol === -1) weightClassCol = j;
+                        if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 's1') && sq1 === -1) sq1 = j;
+                        if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2' || cell === 's2') && sq2 === -1) sq2 = j;
+                        if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3' || cell === 's3') && sq3 === -1) sq3 = j;
+                        if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1' || cell === 'b1' || cell === 'bench press 1') && bp1 === -1) bp1 = j;
+                        if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2' || cell === 'b2' || cell === 'bench press 2') && bp2 === -1) bp2 = j;
+                        if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3' || cell === 'b3' || cell === 'bench press 3') && bp3 === -1) bp3 = j;
+                        if ((cell === 'deadlift 1' || cell === 'dl1' || cell === 'dead 1' || cell === 'd1' || cell === 'deadlift1') && dl1 === -1) dl1 = j;
+                        if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2' || cell === 'd2' || cell === 'deadlift2') && dl2 === -1) dl2 = j;
+                        if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3' || cell === 'd3' || cell === 'deadlift3') && dl3 === -1) dl3 = j;
                         if (cell === 'total' && totalCol === -1) totalCol = j;
-                        if (cell === 'squat' && squatCol === -1) { sq1 = j; sq2 = j+1; sq3 = j+2; squatCol = j+3; }
-                        if ((cell === 'bench' || cell === 'bench press') && benchCol === -1) { bp1 = j; bp2 = j+1; bp3 = j+2; benchCol = j+3; }
-                        if ((cell === 'deadlift' || cell === 'dead lift') && deadCol === -1) { dl1 = j; dl2 = j+1; dl3 = j+2; deadCol = j+3; }
                     }
-                    if (nameCol !== -1 && schoolCol !== -1) { headerRow = i; break; }
+                    if (foundName && foundSchool) { headerRow = i; break; }
                 }
 
-                if (headerRow === -1) {
-                    statusDiv.innerHTML = '<div class="status-msg">Could not detect header row in results sheet.</div>';
-                    return;
+                // Position-based fallback (same as team athletes page)
+                if (headerRow === -1 || nameCol === -1 || weightClassCol === -1 || sq1 === -1) {
+                    headerRow = -1;
+                    nameCol = 7; schoolCol = 5; weightClassCol = 3;
+                    sq1 = 8;  sq2 = 9;  sq3 = 10;
+                    bp1 = 12; bp2 = 13; bp3 = 14;
+                    dl1 = 16; dl2 = 17; dl3 = 18;
+                    totalCol = 20;
                 }
 
                 const configuredSchool = (config.schoolName || '').toLowerCase();
                 const grouped = {};
-                let currentWC = '';
 
                 for (let i = headerRow + 1; i < csvData.length; i++) {
                     const row = csvData[i];
-                    const colAVal = row[0]?.trim();
-                    if (colAVal && /^\d+$/.test(colAVal)) currentWC = colAVal;
+                    if (row.length <= nameCol) continue;
 
-                    const name = nameCol !== -1 ? row[nameCol]?.trim() : '';
+                    const name = row[nameCol]?.trim();
                     if (!name) continue;
 
                     const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
-                    const squat = squatCol !== -1
-                        ? parseFloat(row[squatCol]) || 0
-                        : bestLift(sq1 !== -1 ? row[sq1] : '', sq2 !== -1 ? row[sq2] : '', sq3 !== -1 ? row[sq3] : '');
-                    const bench = benchCol !== -1
-                        ? parseFloat(row[benchCol]) || 0
-                        : bestLift(bp1 !== -1 ? row[bp1] : '', bp2 !== -1 ? row[bp2] : '', bp3 !== -1 ? row[bp3] : '');
-                    const deadlift = deadCol !== -1
-                        ? parseFloat(row[deadCol]) || 0
-                        : bestLift(dl1 !== -1 ? row[dl1] : '', dl2 !== -1 ? row[dl2] : '', dl3 !== -1 ? row[dl3] : '');
-                    const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
 
-                    if (!currentWC) continue;
+                    let wc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                    // Extract just the number from weight class (e.g., "114 JV" -> "114")
+                    if (wc) {
+                        const match = wc.match(/(\d+)/);
+                        if (match) wc = match[1];
+                    }
+                    if (!wc) continue;
 
-                    if (!grouped[currentWC]) grouped[currentWC] = [];
-                    grouped[currentWC].push({
+                    const squat   = bestLift(row[sq1] || '', row[sq2] || '', row[sq3] || '');
+                    const bench   = bestLift(row[bp1] || '', row[bp2] || '', row[bp3] || '');
+                    const deadlift = bestLift(row[dl1] || '', row[dl2] || '', row[dl3] || '');
+                    const total   = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
+
+                    const filled = v => v !== undefined && (v + '').trim() !== '';
+                    const squatDone = filled(row[sq1]) && filled(row[sq2]) && filled(row[sq3]);
+                    const benchDone = filled(row[bp1]) && filled(row[bp2]) && filled(row[bp3]);
+                    const deadDone  = filled(row[dl1]) && filled(row[dl2]) && filled(row[dl3]);
+
+                    if (!grouped[wc]) grouped[wc] = [];
+                    grouped[wc].push({
                         name, school, squat, bench, deadlift, total,
+                        squatDone, benchDone, deadDone,
                         isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool)
                     });
                 }
@@ -530,17 +544,17 @@
                         <div class="card-name">${athlete.name}</div>
                         <div class="card-school">${athlete.school || '—'}</div>
                         <div class="lift-grid">
-                            <div class="lift-box">
+                            <div class="lift-box ${athlete.squatDone ? 'done' : ''}">
                                 <div class="lift-label">Squat</div>
                                 <div class="lift-value">${athlete.squat || '—'}</div>
                                 ${diffHtml(diffSquat)}
                             </div>
-                            <div class="lift-box">
+                            <div class="lift-box ${athlete.benchDone ? 'done' : ''}">
                                 <div class="lift-label">Bench</div>
                                 <div class="lift-value">${athlete.bench || '—'}</div>
                                 ${diffHtml(diffBench)}
                             </div>
-                            <div class="lift-box">
+                            <div class="lift-box ${athlete.deadDone ? 'done' : ''}">
                                 <div class="lift-label">Deadlift</div>
                                 <div class="lift-value">${athlete.deadlift || '—'}</div>
                                 ${diffHtml(diffDead)}
