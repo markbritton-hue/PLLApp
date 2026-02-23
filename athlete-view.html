@@ -382,7 +382,7 @@
 
                 // Detect columns — same approach as team athletes page
                 let headerRow = -1;
-                let nameCol = -1, schoolCol = -1, weightClassCol = -1;
+                let nameCol = -1, schoolCol = -1, weightClassCol = -1, bwCol = -1;
                 let sq1 = -1, sq2 = -1, sq3 = -1;
                 let bp1 = -1, bp2 = -1, bp3 = -1;
                 let dl1 = -1, dl2 = -1, dl3 = -1;
@@ -396,6 +396,7 @@
                         if ((cell === 'name' || cell === 'lifter') && nameCol === -1) { nameCol = j; foundName = true; }
                         if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) { schoolCol = j; foundSchool = true; }
                         if ((cell === 'weight class' || cell === 'wt class' || cell === 'class' || cell === 'weightclass' || cell === 'wt. class') && weightClassCol === -1) weightClassCol = j;
+                        if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'body wt') && bwCol === -1) bwCol = j;
                         if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 's1') && sq1 === -1) sq1 = j;
                         if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2' || cell === 's2') && sq2 === -1) sq2 = j;
                         if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3' || cell === 's3') && sq3 === -1) sq3 = j;
@@ -413,7 +414,7 @@
                 // Position-based fallback (same as team athletes page)
                 if (headerRow === -1 || nameCol === -1 || weightClassCol === -1 || sq1 === -1) {
                     headerRow = -1;
-                    nameCol = 7; schoolCol = 5; weightClassCol = 3;
+                    nameCol = 7; schoolCol = 5; weightClassCol = 3; bwCol = 6;
                     sq1 = 8;  sq2 = 9;  sq3 = 10;
                     bp1 = 12; bp2 = 13; bp3 = 14;
                     dl1 = 16; dl2 = 17; dl3 = 18;
@@ -450,9 +451,11 @@
                     const benchDone = filled(row[bp1]) && filled(row[bp2]) && filled(row[bp3]);
                     const deadDone  = filled(row[dl1]) && filled(row[dl2]) && filled(row[dl3]);
 
+                    const bodyWeight = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
+
                     if (!grouped[wc]) grouped[wc] = [];
                     grouped[wc].push({
-                        name, school, squat, bench, deadlift, total,
+                        name, school, squat, bench, deadlift, total, bodyWeight,
                         squatDone, benchDone, deadDone,
                         sq1: row[sq1] || '', sq2: row[sq2] || '', sq3: row[sq3] || '',
                         bp1: row[bp1] || '', bp2: row[bp2] || '', bp3: row[bp3] || '',
@@ -567,7 +570,10 @@
                 <div class="col-12 col-sm-6 col-xl-4">
                     <div class="athlete-card ${rankClass} ${mySchoolClass}">
                         <div class="card-rank">${medal} Rank #${rank}</div>
-                        <div class="card-name">${athlete.name}</div>
+                        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+                            <div class="card-name">${athlete.name}</div>
+                            ${athlete.bodyWeight ? `<div style="color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 600; white-space: nowrap;">${athlete.bodyWeight} lbs</div>` : ''}
+                        </div>
                         <div class="card-school">${athlete.school || '—'}</div>
                         <div class="event-section">
                             <div class="event-header"><i class="fas fa-compress-arrows-alt me-1"></i>Squat</div>
