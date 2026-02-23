@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerLift Live | Athlete View</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #8b5cf6;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .filter-section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section label {
+            color: #60a5fa;
+            font-weight: 700;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .form-select {
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 1rem;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-select:focus {
+            background: rgba(15, 23, 42, 0.9);
+            color: white;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            outline: none;
+        }
+
+        .form-select option {
+            background: #1e293b;
+            color: white;
+        }
+
+        .athlete-card {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            border-left: 5px solid rgba(96, 165, 250, 0.4);
+            height: 100%;
+            transition: transform 0.2s;
+        }
+
+        .athlete-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .athlete-card.rank-1 {
+            border-left-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.06);
+        }
+
+        .athlete-card.rank-2 {
+            border-left-color: #94a3b8;
+            background: rgba(148, 163, 184, 0.06);
+        }
+
+        .athlete-card.rank-3 {
+            border-left-color: #cd7f32;
+            background: rgba(205, 127, 50, 0.06);
+        }
+
+        .athlete-card.my-school {
+            border-color: rgba(255, 115, 0, 0.5);
+            background: rgba(255, 115, 0, 0.08);
+        }
+
+        .card-rank {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .card-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .card-school {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 14px;
+        }
+
+        .lift-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .lift-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.15);
+            border-radius: 10px;
+            padding: 8px 6px;
+            text-align: center;
+        }
+
+        .lift-label {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .lift-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin: 2px 0;
+        }
+
+        .lift-diff {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .lift-diff.leader {
+            color: #fbbf24;
+        }
+
+        .lift-diff.behind {
+            color: #f87171;
+        }
+
+        .total-box {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .total-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .total-diff {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .total-diff.leader {
+            color: #fbbf24;
+        }
+
+        .total-diff.behind {
+            color: #fca5a5;
+        }
+
+        .status-msg {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="mb-4" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <a href="index.html" class="btn btn-lg" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(96, 165, 250, 0.2); color: white; text-decoration: none;">
+                <i class="fas fa-home me-2"></i>Home
+            </a>
+            <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn btn-lg" style="background: rgba(96, 165, 250, 0.8); border: none; color: white; cursor: pointer;">
+                <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
+            </button>
+            <a href="share.html" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(167, 139, 250, 0.8); color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(167,139,250,0.3);">
+                <i class="fas fa-share-alt"></i> Share
+            </a>
+            <a href="https://venmo.com/u/Mark-Britton-18" target="_blank" rel="noopener noreferrer"
+               style="display: inline-flex; align-items: center; gap: 8px; background: #008CFF; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,140,255,0.4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 111 111" fill="white"><path d="M90.5 8.5c3.9 6.4 5.7 13 5.7 21.4 0 26.7-22.8 61.4-41.3 85.8H15.7L1 10.9l38-3.6 7.9 63.7C55.1 55.4 64 30.1 64 16.1c0-8.1-1.4-13.6-3.6-18.1L90.5 8.5z"/></svg>
+                Donate
+            </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-user-circle me-3"></i>Athlete View</h1>
+            <p>Detailed athlete stats with gap to leader by weight class</p>
+        </div>
+
+        <!-- Status -->
+        <div id="statusMsg"></div>
+
+        <!-- Weight Class Filter -->
+        <div class="filter-section">
+            <label><i class="fas fa-filter me-2"></i>Weight Class</label>
+            <select id="wcSelect" class="form-select" onchange="renderWeightClass()">
+                <option value="">-- Select a weight class --</option>
+            </select>
+        </div>
+
+        <!-- Cards Container -->
+        <div id="athleteCards">
+            <div class="empty-state"><i class="fas fa-dumbbell me-2"></i>Select a weight class to view athletes</div>
+        </div>
+
+        <!-- Donation Card -->
+        <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(96, 165, 250, 0.4); border-radius: 15px; padding: 25px 30px; text-align: center; margin-top: 40px; box-shadow: 0 8px 20px rgba(0,0,0,0.5);">
+            <h3 style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;"><i class="fas fa-heart me-2" style="color: #ec4899;"></i>Support PowerLift Live</h3>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 16px;">Donations help cover hosting and keep live results running.</p>
+            <a href="https://venmo.com/u/Mark-Britton-18" target="_blank" rel="noopener noreferrer"
+               style="display: inline-flex; align-items: center; gap: 12px; background: #008CFF; color: white; text-decoration: none; padding: 14px 30px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 4px 15px rgba(0,140,255,0.4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 111 111" fill="white"><path d="M90.5 8.5c3.9 6.4 5.7 13 5.7 21.4 0 26.7-22.8 61.4-41.3 85.8H15.7L1 10.9l38-3.6 7.9 63.7C55.1 55.4 64 30.1 64 16.1c0-8.1-1.4-13.6-3.6-18.1L90.5 8.5z"/></svg>
+                Donate via Venmo
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allGrouped = {};
+        let autoRefreshInterval = null;
+
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('refreshToggle');
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF';
+                btn.style.background = 'rgba(96, 165, 250, 0.8)';
+                localStorage.setItem('athleteViewAutoRefresh', 'off');
+            } else {
+                const cfg = JSON.parse(localStorage.getItem('trplConfig') || '{}');
+                const intervalMs = (cfg.autoRefreshSeconds || 20) * 1000;
+                autoRefreshInterval = setInterval(loadData, intervalMs);
+                btn.innerHTML = `<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON (${cfg.autoRefreshSeconds || 20}s)`;
+                btn.style.background = 'rgba(16, 185, 129, 0.8)';
+                localStorage.setItem('athleteViewAutoRefresh', 'on');
+                loadData();
+            }
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const result = [];
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const values = [];
+                let current = '', inQuotes = false;
+                for (const char of line) {
+                    if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === ',' && !inQuotes) { values.push(current.trim().replace(/^"|"$/g, '')); current = ''; }
+                    else { current += char; }
+                }
+                values.push(current.trim().replace(/^"|"$/g, ''));
+                result.push(values);
+            }
+            return result;
+        }
+
+        function bestLift(a, b, c) {
+            return Math.max(...[a, b, c].map(v => {
+                if (!v) return 0;
+                if (v.toLowerCase().includes('x')) return 0;
+                return parseFloat(v.replace(/[xgXG]/g, '')) || 0;
+            }));
+        }
+
+        async function loadData() {
+            const statusDiv = document.getElementById('statusMsg');
+            const configStr = localStorage.getItem('trplConfig');
+            if (!configStr) {
+                statusDiv.innerHTML = '<div class="status-msg">No configuration found. Please go to Setup first.</div>';
+                return;
+            }
+
+            const config = JSON.parse(configStr);
+            const sheet = (config.sheets || []).find(s => s.name.toLowerCase().includes('varsity results'))
+                || (config.sheets || [])[0];
+
+            if (!sheet) {
+                statusDiv.innerHTML = '<div class="status-msg">No results sheet found in configuration.</div>';
+                return;
+            }
+
+            try {
+                const timestamp = new Date().getTime();
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${sheet.gid}&t=${timestamp}`;
+                let response;
+                try {
+                    response = await fetch(csvUrl, { cache: 'no-store' });
+                    if (!response.ok) throw new Error('direct failed');
+                } catch {
+                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
+                }
+
+                const csv = await response.text();
+                const csvData = parseCSV(csv);
+
+                // Detect columns
+                let headerRow = -1;
+                let nameCol = -1, schoolCol = -1;
+                let sq1 = -1, sq2 = -1, sq3 = -1;
+                let bp1 = -1, bp2 = -1, bp3 = -1;
+                let dl1 = -1, dl2 = -1, dl3 = -1;
+                let totalCol = -1, squatCol = -1, benchCol = -1, deadCol = -1;
+
+                for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                    const row = csvData[i];
+                    for (let j = 0; j < row.length; j++) {
+                        const cell = row[j].toLowerCase().trim();
+                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
+                        if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) schoolCol = j;
+                        if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1') && sq1 === -1) sq1 = j;
+                        if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && sq2 === -1) sq2 = j;
+                        if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && sq3 === -1) sq3 = j;
+                        if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bp1 === -1) bp1 = j;
+                        if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bp2 === -1) bp2 = j;
+                        if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bp3 === -1) bp3 = j;
+                        if ((cell === 'deadlift 1' || cell === 'dl1' || cell === 'dead 1') && dl1 === -1) dl1 = j;
+                        if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2') && dl2 === -1) dl2 = j;
+                        if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3') && dl3 === -1) dl3 = j;
+                        if (cell === 'total' && totalCol === -1) totalCol = j;
+                        if (cell === 'squat' && squatCol === -1) { sq1 = j; sq2 = j+1; sq3 = j+2; squatCol = j+3; }
+                        if ((cell === 'bench' || cell === 'bench press') && benchCol === -1) { bp1 = j; bp2 = j+1; bp3 = j+2; benchCol = j+3; }
+                        if ((cell === 'deadlift' || cell === 'dead lift') && deadCol === -1) { dl1 = j; dl2 = j+1; dl3 = j+2; deadCol = j+3; }
+                    }
+                    if (nameCol !== -1 && schoolCol !== -1) { headerRow = i; break; }
+                }
+
+                if (headerRow === -1) {
+                    statusDiv.innerHTML = '<div class="status-msg">Could not detect header row in results sheet.</div>';
+                    return;
+                }
+
+                const configuredSchool = (config.schoolName || '').toLowerCase();
+                const grouped = {};
+                let currentWC = '';
+
+                for (let i = headerRow + 1; i < csvData.length; i++) {
+                    const row = csvData[i];
+                    const colAVal = row[0]?.trim();
+                    if (colAVal && /^\d+$/.test(colAVal)) currentWC = colAVal;
+
+                    const name = nameCol !== -1 ? row[nameCol]?.trim() : '';
+                    if (!name) continue;
+
+                    const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
+                    const squat = squatCol !== -1
+                        ? parseFloat(row[squatCol]) || 0
+                        : bestLift(sq1 !== -1 ? row[sq1] : '', sq2 !== -1 ? row[sq2] : '', sq3 !== -1 ? row[sq3] : '');
+                    const bench = benchCol !== -1
+                        ? parseFloat(row[benchCol]) || 0
+                        : bestLift(bp1 !== -1 ? row[bp1] : '', bp2 !== -1 ? row[bp2] : '', bp3 !== -1 ? row[bp3] : '');
+                    const deadlift = deadCol !== -1
+                        ? parseFloat(row[deadCol]) || 0
+                        : bestLift(dl1 !== -1 ? row[dl1] : '', dl2 !== -1 ? row[dl2] : '', dl3 !== -1 ? row[dl3] : '');
+                    const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
+
+                    if (!currentWC) continue;
+
+                    if (!grouped[currentWC]) grouped[currentWC] = [];
+                    grouped[currentWC].push({
+                        name, school, squat, bench, deadlift, total,
+                        isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool)
+                    });
+                }
+
+                allGrouped = grouped;
+
+                // Populate dropdown, preserving current selection
+                const select = document.getElementById('wcSelect');
+                const prevVal = select.value;
+                select.innerHTML = '<option value="">-- Select a weight class --</option>';
+
+                const sortedClasses = Object.keys(grouped).sort((a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999));
+                sortedClasses.forEach(wc => {
+                    const opt = document.createElement('option');
+                    opt.value = wc;
+                    opt.textContent = `${wc} lbs (${grouped[wc].length} athletes)`;
+                    select.appendChild(opt);
+                });
+
+                // Restore selection or default to first class
+                if (prevVal && grouped[prevVal]) {
+                    select.value = prevVal;
+                } else if (sortedClasses.length > 0) {
+                    select.value = sortedClasses[0];
+                }
+
+                renderWeightClass();
+
+                const total = Object.values(grouped).flat().length;
+                const now = new Date();
+                statusDiv.innerHTML = `<div class="status-msg" style="color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.1);">
+                    <i class="fas fa-check-circle me-2"></i>Loaded ${total} athletes — Last updated: ${now.toLocaleTimeString()}
+                </div>`;
+
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status-msg" style="color: #ef4444; border-color: #ef4444;">Error loading data: ${error.message}</div>`;
+            }
+        }
+
+        function renderWeightClass() {
+            const wc = document.getElementById('wcSelect').value;
+            const container = document.getElementById('athleteCards');
+
+            if (!wc || !allGrouped[wc]) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-dumbbell me-2"></i>Select a weight class to view athletes</div>';
+                return;
+            }
+
+            const athletes = [...allGrouped[wc]].sort((a, b) => b.total - a.total);
+            if (athletes.length === 0) {
+                container.innerHTML = '<div class="empty-state">No athletes found in this weight class</div>';
+                return;
+            }
+
+            // Leader values
+            const leaderSquat = Math.max(...athletes.map(a => a.squat));
+            const leaderBench = Math.max(...athletes.map(a => a.bench));
+            const leaderDead  = Math.max(...athletes.map(a => a.deadlift));
+            const leaderTotal = athletes[0].total;
+
+            const medals = ['🥇', '🥈', '🥉'];
+
+            let html = `<div class="row g-3">`;
+
+            athletes.forEach((athlete, idx) => {
+                const rank = idx + 1;
+                const medal = medals[idx] || '';
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const mySchoolClass = athlete.isMySchool ? 'my-school' : '';
+
+                const diffSquat = athlete.squat - leaderSquat;
+                const diffBench = athlete.bench - leaderBench;
+                const diffDead  = athlete.deadlift - leaderDead;
+                const diffTotal = athlete.total - leaderTotal;
+
+                function diffHtml(val, isLift = true) {
+                    if (val === 0) return `<div class="lift-diff leader">★ Leader</div>`;
+                    return `<div class="lift-diff behind">${val} lbs</div>`;
+                }
+
+                function totalDiffHtml(val) {
+                    if (val === 0) return `<span class="total-diff leader">★ Leader</span>`;
+                    return `<span class="total-diff behind">${val} lbs</span>`;
+                }
+
+                html += `
+                <div class="col-12 col-sm-6 col-xl-4">
+                    <div class="athlete-card ${rankClass} ${mySchoolClass}">
+                        <div class="card-rank">${medal} Rank #${rank}</div>
+                        <div class="card-name">${athlete.name}</div>
+                        <div class="card-school">${athlete.school || '—'}</div>
+                        <div class="lift-grid">
+                            <div class="lift-box">
+                                <div class="lift-label">Squat</div>
+                                <div class="lift-value">${athlete.squat || '—'}</div>
+                                ${diffHtml(diffSquat)}
+                            </div>
+                            <div class="lift-box">
+                                <div class="lift-label">Bench</div>
+                                <div class="lift-value">${athlete.bench || '—'}</div>
+                                ${diffHtml(diffBench)}
+                            </div>
+                            <div class="lift-box">
+                                <div class="lift-label">Deadlift</div>
+                                <div class="lift-value">${athlete.deadlift || '—'}</div>
+                                ${diffHtml(diffDead)}
+                            </div>
+                        </div>
+                        <div class="total-box">
+                            <div>
+                                <div class="total-label">Total</div>
+                                <div class="total-value">${athlete.total} lbs</div>
+                            </div>
+                            ${totalDiffHtml(diffTotal)}
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('athleteViewAutoRefresh') === 'on') {
+                toggleAutoRefresh();
+            } else {
+                loadData();
+            }
+        });
+    </script>
+</body>
+</html>
