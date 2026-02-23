@@ -138,53 +138,55 @@
             margin-bottom: 14px;
         }
 
-        .lift-grid {
+        .event-section {
+            margin-bottom: 10px;
+        }
+
+        .event-header {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .attempts-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 5px;
+            margin-bottom: 5px;
         }
 
         .lift-box {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(96, 165, 250, 0.15);
-            border-radius: 10px;
-            padding: 8px 6px;
+            border-radius: 8px;
+            padding: 6px 4px;
             text-align: center;
         }
 
-        .lift-box.done {
-            background: rgba(16, 185, 129, 0.18);
-            border-color: rgba(16, 185, 129, 0.45);
-        }
-
-        .lift-label {
-            font-size: 0.65rem;
+        .lift-name {
+            font-size: 0.6rem;
             color: rgba(255,255,255,0.5);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             font-weight: 600;
         }
 
         .lift-value {
-            font-size: 1.05rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            color: #60a5fa;
-            margin: 2px 0;
+            margin-top: 2px;
         }
 
         .lift-diff {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
+            margin-bottom: 4px;
         }
 
-        .lift-diff.leader {
-            color: #fbbf24;
-        }
-
-        .lift-diff.behind {
-            color: #f87171;
-        }
+        .lift-diff.leader { color: #fbbf24; }
+        .lift-diff.behind { color: #f87171; }
 
         .total-box {
             background: linear-gradient(135deg, #8b5cf6, #6366f1);
@@ -452,6 +454,9 @@
                     grouped[wc].push({
                         name, school, squat, bench, deadlift, total,
                         squatDone, benchDone, deadDone,
+                        sq1: row[sq1] || '', sq2: row[sq2] || '', sq3: row[sq3] || '',
+                        bp1: row[bp1] || '', bp2: row[bp2] || '', bp3: row[bp3] || '',
+                        dl1: row[dl1] || '', dl2: row[dl2] || '', dl3: row[dl3] || '',
                         isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool)
                     });
                 }
@@ -489,6 +494,27 @@
             } catch (error) {
                 statusDiv.innerHTML = `<div class="status-msg" style="color: #ef4444; border-color: #ef4444;">Error loading data: ${error.message}</div>`;
             }
+        }
+
+        function renderAttempt(attempt, attemptNum) {
+            if (!attempt) {
+                return `<div class="lift-box" style="opacity: 0.3;"><div class="lift-name">Att ${attemptNum}</div><div class="lift-value" style="color:rgba(255,255,255,0.4);">-</div></div>`;
+            }
+            const isFailed = attempt.toLowerCase().includes('x');
+            const isGood   = attempt.toLowerCase().includes('g');
+            const value    = attempt.replace(/[xgXG]/g, '');
+            let bg, border, textColor;
+            if (isFailed) {
+                bg = '#ef4444'; border = '#dc2626'; textColor = 'white';
+            } else if (isGood) {
+                bg = 'rgba(16,185,129,0.2)'; border = '#10b981'; textColor = '#60a5fa';
+            } else {
+                bg = '#000000'; border = 'rgba(96,165,250,0.2)'; textColor = 'white';
+            }
+            return `<div class="lift-box" style="background:${bg}; border-color:${border};">
+                <div class="lift-name" style="color:rgba(255,255,255,0.7);">Att ${attemptNum}</div>
+                <div class="lift-value" style="color:${textColor};">${value}${isFailed ? '<i class="fas fa-times ms-1" style="font-size:0.7rem;"></i>' : ''}${isGood ? '<i class="fas fa-check ms-1" style="color:#10b981;font-size:0.7rem;"></i>' : ''}</div>
+            </div>`;
         }
 
         function renderWeightClass() {
@@ -543,22 +569,32 @@
                         <div class="card-rank">${medal} Rank #${rank}</div>
                         <div class="card-name">${athlete.name}</div>
                         <div class="card-school">${athlete.school || '—'}</div>
-                        <div class="lift-grid">
-                            <div class="lift-box ${athlete.squatDone ? 'done' : ''}">
-                                <div class="lift-label">Squat</div>
-                                <div class="lift-value">${athlete.squat || '—'}</div>
-                                ${diffHtml(diffSquat)}
+                        <div class="event-section">
+                            <div class="event-header"><i class="fas fa-compress-arrows-alt me-1"></i>Squat</div>
+                            <div class="attempts-row">
+                                ${renderAttempt(athlete.sq1, '1')}
+                                ${renderAttempt(athlete.sq2, '2')}
+                                ${renderAttempt(athlete.sq3, '3')}
                             </div>
-                            <div class="lift-box ${athlete.benchDone ? 'done' : ''}">
-                                <div class="lift-label">Bench</div>
-                                <div class="lift-value">${athlete.bench || '—'}</div>
-                                ${diffHtml(diffBench)}
+                            ${diffHtml(diffSquat)}
+                        </div>
+                        <div class="event-section">
+                            <div class="event-header"><i class="fas fa-hands me-1"></i>Bench</div>
+                            <div class="attempts-row">
+                                ${renderAttempt(athlete.bp1, '1')}
+                                ${renderAttempt(athlete.bp2, '2')}
+                                ${renderAttempt(athlete.bp3, '3')}
                             </div>
-                            <div class="lift-box ${athlete.deadDone ? 'done' : ''}">
-                                <div class="lift-label">Deadlift</div>
-                                <div class="lift-value">${athlete.deadlift || '—'}</div>
-                                ${diffHtml(diffDead)}
+                            ${diffHtml(diffBench)}
+                        </div>
+                        <div class="event-section">
+                            <div class="event-header"><i class="fas fa-weight-hanging me-1"></i>Deadlift</div>
+                            <div class="attempts-row">
+                                ${renderAttempt(athlete.dl1, '1')}
+                                ${renderAttempt(athlete.dl2, '2')}
+                                ${renderAttempt(athlete.dl3, '3')}
                             </div>
+                            ${diffHtml(diffDead)}
                         </div>
                         <div class="total-box">
                             <div>
