@@ -157,6 +157,26 @@
             color: white;
         }
 
+        .btn-all-results {
+            background: #f97316;
+            border: none;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-all-results:hover {
+            background: #ea6c0a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+            color: white;
+        }
+
         .btn-setup {
             background: #ef4444;
             border: none;
@@ -328,11 +348,11 @@
                 <div class="col-lg-3 col-md-6">
                     <div class="feature-card" onclick="window.location.href='results.html'">
                         <div class="feature-icon">
-                            <i class="fas fa-chart-bar" style="color: #8b5cf6;"></i>
+                            <i class="fas fa-chart-bar" style="color: #f97316;"></i>
                         </div>
                         <h2>All Results</h2>
                         <p>Browse complete competition results from all schools</p>
-                        <a href="results.html" class="btn-results">
+                        <a href="results.html" class="btn-all-results">
                             <i class="fas fa-arrow-right me-2"></i>View Results
                         </a>
                     </div>
