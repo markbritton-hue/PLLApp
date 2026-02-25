@@ -135,7 +135,35 @@
         .card-school {
             font-size: 0.85rem;
             color: rgba(255,255,255,0.55);
+            margin-bottom: 6px;
+        }
+
+        .designation-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .designation-badge.varsity {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .designation-badge.jv {
+            background: #10b981;
+            color: white;
+        }
+
+        .group-header {
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding-bottom: 8px;
             margin-bottom: 14px;
+            border-bottom-width: 2px;
+            border-bottom-style: solid;
         }
 
         .event-section {
@@ -357,110 +385,31 @@
             }
 
             const config = JSON.parse(configStr);
-            const sheet = (config.sheets || []).find(s => s.name.toLowerCase().includes('varsity results'))
-                || (config.sheets || [])[0];
+            const sheets = config.sheets || [];
 
-            if (!sheet) {
-                statusDiv.innerHTML = '<div class="status-msg">No results sheet found in configuration.</div>';
+            if (sheets.length === 0) {
+                statusDiv.innerHTML = '<div class="status-msg">No sheets found in configuration.</div>';
                 return;
             }
 
             try {
-                const timestamp = new Date().getTime();
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${sheet.gid}&t=${timestamp}`;
-                let response;
-                try {
-                    response = await fetch(csvUrl, { cache: 'no-store' });
-                    if (!response.ok) throw new Error('direct failed');
-                } catch {
-                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
-                }
-
-                const csv = await response.text();
-                const csvData = parseCSV(csv);
-
-                // Detect columns — same approach as team athletes page
-                let headerRow = -1;
-                let nameCol = -1, schoolCol = -1, weightClassCol = -1, bwCol = -1;
-                let sq1 = -1, sq2 = -1, sq3 = -1;
-                let bp1 = -1, bp2 = -1, bp3 = -1;
-                let dl1 = -1, dl2 = -1, dl3 = -1;
-                let totalCol = -1;
-
-                for (let i = 0; i < Math.min(15, csvData.length); i++) {
-                    const row = csvData[i];
-                    let foundName = false, foundSchool = false;
-                    for (let j = 0; j < row.length; j++) {
-                        const cell = row[j].toLowerCase().trim();
-                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) { nameCol = j; foundName = true; }
-                        if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) { schoolCol = j; foundSchool = true; }
-                        if ((cell === 'weight class' || cell === 'wt class' || cell === 'class' || cell === 'weightclass' || cell === 'wt. class') && weightClassCol === -1) weightClassCol = j;
-                        if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'body wt') && bwCol === -1) bwCol = j;
-                        if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 's1') && sq1 === -1) sq1 = j;
-                        if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2' || cell === 's2') && sq2 === -1) sq2 = j;
-                        if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3' || cell === 's3') && sq3 === -1) sq3 = j;
-                        if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1' || cell === 'b1' || cell === 'bench press 1') && bp1 === -1) bp1 = j;
-                        if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2' || cell === 'b2' || cell === 'bench press 2') && bp2 === -1) bp2 = j;
-                        if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3' || cell === 'b3' || cell === 'bench press 3') && bp3 === -1) bp3 = j;
-                        if ((cell === 'deadlift 1' || cell === 'dl1' || cell === 'dead 1' || cell === 'd1' || cell === 'deadlift1') && dl1 === -1) dl1 = j;
-                        if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2' || cell === 'd2' || cell === 'deadlift2') && dl2 === -1) dl2 = j;
-                        if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3' || cell === 'd3' || cell === 'deadlift3') && dl3 === -1) dl3 = j;
-                        if (cell === 'total' && totalCol === -1) totalCol = j;
-                    }
-                    if (foundName && foundSchool) { headerRow = i; break; }
-                }
-
-                // Position-based fallback (same as team athletes page)
-                if (headerRow === -1 || nameCol === -1 || weightClassCol === -1 || sq1 === -1) {
-                    headerRow = -1;
-                    nameCol = 7; schoolCol = 5; weightClassCol = 3; bwCol = 6;
-                    sq1 = 8;  sq2 = 9;  sq3 = 10;
-                    bp1 = 12; bp2 = 13; bp3 = 14;
-                    dl1 = 16; dl2 = 17; dl3 = 18;
-                    totalCol = 20;
-                }
-
-                const configuredSchool = (config.schoolName || '').toLowerCase();
                 const grouped = {};
+                const configuredSchool = (config.schoolName || '').toLowerCase();
 
-                for (let i = headerRow + 1; i < csvData.length; i++) {
-                    const row = csvData[i];
-                    if (row.length <= nameCol) continue;
+                // Load varsity sheet (sheet[0])
+                const vAthletes = await loadSheetAthletes(config.spreadsheetId, sheets[0].gid, 'V', configuredSchool);
+                for (const a of vAthletes) {
+                    if (!grouped[a.wc]) grouped[a.wc] = [];
+                    grouped[a.wc].push(a);
+                }
 
-                    const name = row[nameCol]?.trim();
-                    if (!name) continue;
-
-                    const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
-
-                    let wc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
-                    // Extract just the number from weight class (e.g., "114 JV" -> "114")
-                    if (wc) {
-                        const match = wc.match(/(\d+)/);
-                        if (match) wc = match[1];
+                // Load JV sheet (sheet[1]) if available
+                if (sheets.length > 1) {
+                    const jvAthletes = await loadSheetAthletes(config.spreadsheetId, sheets[1].gid, 'JV', configuredSchool);
+                    for (const a of jvAthletes) {
+                        if (!grouped[a.wc]) grouped[a.wc] = [];
+                        grouped[a.wc].push(a);
                     }
-                    if (!wc) continue;
-
-                    const squat   = bestLift(row[sq1] || '', row[sq2] || '', row[sq3] || '');
-                    const bench   = bestLift(row[bp1] || '', row[bp2] || '', row[bp3] || '');
-                    const deadlift = bestLift(row[dl1] || '', row[dl2] || '', row[dl3] || '');
-                    const total   = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
-
-                    const filled = v => v !== undefined && (v + '').trim() !== '';
-                    const squatDone = filled(row[sq1]) && filled(row[sq2]) && filled(row[sq3]);
-                    const benchDone = filled(row[bp1]) && filled(row[bp2]) && filled(row[bp3]);
-                    const deadDone  = filled(row[dl1]) && filled(row[dl2]) && filled(row[dl3]);
-
-                    const bodyWeight = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
-
-                    if (!grouped[wc]) grouped[wc] = [];
-                    grouped[wc].push({
-                        name, school, squat, bench, deadlift, total, bodyWeight,
-                        squatDone, benchDone, deadDone,
-                        sq1: row[sq1] || '', sq2: row[sq2] || '', sq3: row[sq3] || '',
-                        bp1: row[bp1] || '', bp2: row[bp2] || '', bp3: row[bp3] || '',
-                        dl1: row[dl1] || '', dl2: row[dl2] || '', dl3: row[dl3] || '',
-                        isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool)
-                    });
                 }
 
                 allGrouped = grouped;
@@ -472,13 +421,17 @@
 
                 const sortedClasses = Object.keys(grouped).sort((a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999));
                 sortedClasses.forEach(wc => {
+                    const vCount  = grouped[wc].filter(a => a.designation === 'V').length;
+                    const jvCount = grouped[wc].filter(a => a.designation === 'JV').length;
+                    const parts = [];
+                    if (vCount  > 0) parts.push(`${vCount}V`);
+                    if (jvCount > 0) parts.push(`${jvCount}JV`);
                     const opt = document.createElement('option');
                     opt.value = wc;
-                    opt.textContent = `${wc} lbs (${grouped[wc].length} athletes)`;
+                    opt.textContent = `${wc} lbs (${parts.join(', ')})`;
                     select.appendChild(opt);
                 });
 
-                // Restore selection or default to first class
                 if (prevVal && grouped[prevVal]) {
                     select.value = prevVal;
                 } else if (sortedClasses.length > 0) {
@@ -487,15 +440,109 @@
 
                 renderWeightClass();
 
-                const total = Object.values(grouped).flat().length;
+                const totalAthletes = Object.values(grouped).flat().length;
                 const now = new Date();
                 statusDiv.innerHTML = `<div class="status-msg" style="color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.1);">
-                    <i class="fas fa-check-circle me-2"></i>Loaded ${total} athletes — Last updated: ${now.toLocaleTimeString()}
+                    <i class="fas fa-check-circle me-2"></i>Loaded ${totalAthletes} athletes — Last updated: ${now.toLocaleTimeString()}
                 </div>`;
 
             } catch (error) {
                 statusDiv.innerHTML = `<div class="status-msg" style="color: #ef4444; border-color: #ef4444;">Error loading data: ${error.message}</div>`;
             }
+        }
+
+        async function loadSheetAthletes(spreadsheetId, gid, designation, configuredSchool) {
+            const timestamp = new Date().getTime();
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}&t=${timestamp}`;
+            let response;
+            try {
+                response = await fetch(csvUrl, { cache: 'no-store' });
+                if (!response.ok) throw new Error('direct failed');
+            } catch {
+                response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
+            }
+
+            const csv = await response.text();
+            const csvData = parseCSV(csv);
+
+            let headerRow = -1;
+            let nameCol = -1, schoolCol = -1, weightClassCol = -1, bwCol = -1;
+            let sq1 = -1, sq2 = -1, sq3 = -1;
+            let bp1 = -1, bp2 = -1, bp3 = -1;
+            let dl1 = -1, dl2 = -1, dl3 = -1;
+            let totalCol = -1;
+
+            for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                const row = csvData[i];
+                let foundName = false, foundSchool = false;
+                for (let j = 0; j < row.length; j++) {
+                    const cell = row[j].toLowerCase().trim();
+                    if ((cell === 'name' || cell === 'lifter') && nameCol === -1) { nameCol = j; foundName = true; }
+                    if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) { schoolCol = j; foundSchool = true; }
+                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'class' || cell === 'weightclass' || cell === 'wt. class') && weightClassCol === -1) weightClassCol = j;
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'body wt') && bwCol === -1) bwCol = j;
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 's1') && sq1 === -1) sq1 = j;
+                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2' || cell === 's2') && sq2 === -1) sq2 = j;
+                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3' || cell === 's3') && sq3 === -1) sq3 = j;
+                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1' || cell === 'b1' || cell === 'bench press 1') && bp1 === -1) bp1 = j;
+                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2' || cell === 'b2' || cell === 'bench press 2') && bp2 === -1) bp2 = j;
+                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3' || cell === 'b3' || cell === 'bench press 3') && bp3 === -1) bp3 = j;
+                    if ((cell === 'deadlift 1' || cell === 'dl1' || cell === 'dead 1' || cell === 'd1' || cell === 'deadlift1') && dl1 === -1) dl1 = j;
+                    if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2' || cell === 'd2' || cell === 'deadlift2') && dl2 === -1) dl2 = j;
+                    if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3' || cell === 'd3' || cell === 'deadlift3') && dl3 === -1) dl3 = j;
+                    if (cell === 'total' && totalCol === -1) totalCol = j;
+                }
+                if (foundName && foundSchool) { headerRow = i; break; }
+            }
+
+            if (headerRow === -1 || nameCol === -1 || weightClassCol === -1 || sq1 === -1) {
+                headerRow = -1;
+                nameCol = 7; schoolCol = 5; weightClassCol = 3; bwCol = 6;
+                sq1 = 8;  sq2 = 9;  sq3 = 10;
+                bp1 = 12; bp2 = 13; bp3 = 14;
+                dl1 = 16; dl2 = 17; dl3 = 18;
+                totalCol = 20;
+            }
+
+            const athletes = [];
+            for (let i = headerRow + 1; i < csvData.length; i++) {
+                const row = csvData[i];
+                if (row.length <= nameCol) continue;
+
+                const name = row[nameCol]?.trim();
+                if (!name) continue;
+
+                const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
+
+                let wc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                if (wc) {
+                    const match = wc.match(/(\d+)/);
+                    if (match) wc = match[1];
+                }
+                if (!wc) continue;
+
+                const squat    = bestLift(row[sq1] || '', row[sq2] || '', row[sq3] || '');
+                const bench    = bestLift(row[bp1] || '', row[bp2] || '', row[bp3] || '');
+                const deadlift = bestLift(row[dl1] || '', row[dl2] || '', row[dl3] || '');
+                const total    = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
+
+                const filled = v => v !== undefined && (v + '').trim() !== '';
+                const squatDone = filled(row[sq1]) && filled(row[sq2]) && filled(row[sq3]);
+                const benchDone = filled(row[bp1]) && filled(row[bp2]) && filled(row[bp3]);
+                const deadDone  = filled(row[dl1]) && filled(row[dl2]) && filled(row[dl3]);
+
+                const bodyWeight = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
+
+                athletes.push({
+                    name, school, wc, designation, squat, bench, deadlift, total, bodyWeight,
+                    squatDone, benchDone, deadDone,
+                    sq1: row[sq1] || '', sq2: row[sq2] || '', sq3: row[sq3] || '',
+                    bp1: row[bp1] || '', bp2: row[bp2] || '', bp3: row[bp3] || '',
+                    dl1: row[dl1] || '', dl2: row[dl2] || '', dl3: row[dl3] || '',
+                    isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool)
+                });
+            }
+            return athletes;
         }
 
         function renderAttempt(attempt, attemptNum) {
@@ -528,92 +575,114 @@
                 return;
             }
 
-            const athletes = [...allGrouped[wc]].sort((a, b) => b.total - a.total);
-            if (athletes.length === 0) {
+            const all = allGrouped[wc];
+            if (all.length === 0) {
                 container.innerHTML = '<div class="empty-state">No athletes found in this weight class</div>';
                 return;
             }
 
-            // Leader values
-            const leaderSquat = Math.max(...athletes.map(a => a.squat));
-            const leaderBench = Math.max(...athletes.map(a => a.bench));
-            const leaderDead  = Math.max(...athletes.map(a => a.deadlift));
-            const leaderTotal = athletes[0].total;
+            const varsity = [...all.filter(a => a.designation === 'V')].sort((a, b) => b.total - a.total);
+            const jv      = [...all.filter(a => a.designation === 'JV')].sort((a, b) => b.total - a.total);
 
-            const medals = ['🥇', '🥈', '🥉'];
+            function buildCards(athletes, groupLabel, labelColor) {
+                if (athletes.length === 0) return '';
 
-            let html = `<div class="row g-3">`;
+                const leaderSquat = Math.max(...athletes.map(a => a.squat));
+                const leaderBench = Math.max(...athletes.map(a => a.bench));
+                const leaderDead  = Math.max(...athletes.map(a => a.deadlift));
+                const leaderTotal = athletes[0].total;
+                const medals = ['🥇', '🥈', '🥉'];
 
-            athletes.forEach((athlete, idx) => {
-                const rank = idx + 1;
-                const medal = medals[idx] || '';
-                const rankClass = rank <= 3 ? `rank-${rank}` : '';
-                const mySchoolClass = athlete.isMySchool ? 'my-school' : '';
+                let html = `<div class="group-header" style="color:${labelColor}; border-bottom-color:${labelColor}40;">
+                    <i class="fas fa-users me-2"></i>${groupLabel}
+                </div><div class="row g-3">`;
 
-                const diffSquat = athlete.squat - leaderSquat;
-                const diffBench = athlete.bench - leaderBench;
-                const diffDead  = athlete.deadlift - leaderDead;
-                const diffTotal = athlete.total - leaderTotal;
+                athletes.forEach((athlete, idx) => {
+                    const rank = idx + 1;
+                    const medal = medals[idx] || '';
+                    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                    const mySchoolClass = athlete.isMySchool ? 'my-school' : '';
+                    const isJV = athlete.designation === 'JV';
+                    const badgeClass = isJV ? 'jv' : 'varsity';
+                    const badgeLabel = isJV ? 'JV' : 'Varsity';
 
-                function diffHtml(best, diff) {
-                    const bestStr = best ? `<span style="color:#60a5fa; font-weight:800;">${best} lbs</span>` : '';
-                    if (diff === 0) return `<div class="lift-diff leader" style="display:flex;justify-content:space-between;align-items:center;">${bestStr}<span>★ Leader</span></div>`;
-                    return `<div class="lift-diff behind" style="display:flex;justify-content:space-between;align-items:center;">${bestStr}<span>${diff} lbs</span></div>`;
-                }
+                    const diffSquat = athlete.squat - leaderSquat;
+                    const diffBench = athlete.bench - leaderBench;
+                    const diffDead  = athlete.deadlift - leaderDead;
+                    const diffTotal = athlete.total - leaderTotal;
 
-                function totalDiffHtml(val) {
-                    if (val === 0) return `<span class="total-diff leader">★ Leader</span>`;
-                    return `<span class="total-diff behind">${val} lbs</span>`;
-                }
+                    function diffHtml(best, diff) {
+                        const bestStr = best ? `<span style="color:#60a5fa; font-weight:800;">${best} lbs</span>` : '';
+                        if (diff === 0) return `<div class="lift-diff leader" style="display:flex;justify-content:space-between;align-items:center;">${bestStr}<span>★ Leader</span></div>`;
+                        return `<div class="lift-diff behind" style="display:flex;justify-content:space-between;align-items:center;">${bestStr}<span>${diff} lbs</span></div>`;
+                    }
 
-                html += `
-                <div class="col-12 col-sm-6 col-xl-4">
-                    <div class="athlete-card ${rankClass} ${mySchoolClass}">
-                        <div class="card-rank">${medal} Rank #${rank}</div>
-                        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
-                            <div class="card-name">${athlete.name}</div>
-                            ${athlete.bodyWeight ? `<div style="color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 600; white-space: nowrap;">${athlete.bodyWeight} lbs</div>` : ''}
-                        </div>
-                        <div class="card-school">${athlete.school || '—'}</div>
-                        <div class="event-section">
-                            <div class="event-header"><i class="fas fa-compress-arrows-alt me-1"></i>Squat</div>
-                            <div class="attempts-row">
-                                ${renderAttempt(athlete.sq1, '1')}
-                                ${renderAttempt(athlete.sq2, '2')}
-                                ${renderAttempt(athlete.sq3, '3')}
+                    function totalDiffHtml(val) {
+                        if (val === 0) return `<span class="total-diff leader">★ Leader</span>`;
+                        return `<span class="total-diff behind">${val} lbs</span>`;
+                    }
+
+                    const squatBg = athlete.squatDone ? 'background:rgba(16,185,129,0.12); border-radius:8px; padding:8px;' : '';
+                    const benchBg = athlete.benchDone ? 'background:rgba(16,185,129,0.12); border-radius:8px; padding:8px;' : '';
+                    const deadBg  = athlete.deadDone  ? 'background:rgba(16,185,129,0.12); border-radius:8px; padding:8px;' : '';
+
+                    html += `
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="athlete-card ${rankClass} ${mySchoolClass}">
+                            <div class="card-rank">${medal} Rank #${rank}</div>
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+                                <div class="card-name">${athlete.name}</div>
+                                ${athlete.bodyWeight ? `<div style="color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 600; white-space: nowrap;">${athlete.bodyWeight} lbs</div>` : ''}
                             </div>
-                            ${diffHtml(athlete.squat, diffSquat)}
-                        </div>
-                        <div class="event-section">
-                            <div class="event-header"><i class="fas fa-hands me-1"></i>Bench</div>
-                            <div class="attempts-row">
-                                ${renderAttempt(athlete.bp1, '1')}
-                                ${renderAttempt(athlete.bp2, '2')}
-                                ${renderAttempt(athlete.bp3, '3')}
+                            <span class="designation-badge ${badgeClass}">${badgeLabel}</span>
+                            <div class="card-school">${athlete.school || '—'}</div>
+                            <div class="event-section" style="${squatBg}">
+                                <div class="event-header"><i class="fas fa-compress-arrows-alt me-1"></i>Squat</div>
+                                <div class="attempts-row">
+                                    ${renderAttempt(athlete.sq1, '1')}
+                                    ${renderAttempt(athlete.sq2, '2')}
+                                    ${renderAttempt(athlete.sq3, '3')}
+                                </div>
+                                ${diffHtml(athlete.squat, diffSquat)}
                             </div>
-                            ${diffHtml(athlete.bench, diffBench)}
-                        </div>
-                        <div class="event-section">
-                            <div class="event-header"><i class="fas fa-weight-hanging me-1"></i>Deadlift</div>
-                            <div class="attempts-row">
-                                ${renderAttempt(athlete.dl1, '1')}
-                                ${renderAttempt(athlete.dl2, '2')}
-                                ${renderAttempt(athlete.dl3, '3')}
+                            <div class="event-section" style="${benchBg}">
+                                <div class="event-header"><i class="fas fa-hands me-1"></i>Bench</div>
+                                <div class="attempts-row">
+                                    ${renderAttempt(athlete.bp1, '1')}
+                                    ${renderAttempt(athlete.bp2, '2')}
+                                    ${renderAttempt(athlete.bp3, '3')}
+                                </div>
+                                ${diffHtml(athlete.bench, diffBench)}
                             </div>
-                            ${diffHtml(athlete.deadlift, diffDead)}
-                        </div>
-                        <div class="total-box">
-                            <div>
-                                <div class="total-label">Total</div>
-                                <div class="total-value">${athlete.total} lbs</div>
+                            <div class="event-section" style="${deadBg}">
+                                <div class="event-header"><i class="fas fa-weight-hanging me-1"></i>Deadlift</div>
+                                <div class="attempts-row">
+                                    ${renderAttempt(athlete.dl1, '1')}
+                                    ${renderAttempt(athlete.dl2, '2')}
+                                    ${renderAttempt(athlete.dl3, '3')}
+                                </div>
+                                ${diffHtml(athlete.deadlift, diffDead)}
                             </div>
-                            ${totalDiffHtml(diffTotal)}
+                            <div class="total-box">
+                                <div>
+                                    <div class="total-label">Total</div>
+                                    <div class="total-value">${athlete.total} lbs</div>
+                                </div>
+                                ${totalDiffHtml(diffTotal)}
+                            </div>
                         </div>
-                    </div>
-                </div>`;
-            });
+                    </div>`;
+                });
 
-            html += `</div>`;
+                html += `</div>`;
+                return html;
+            }
+
+            let html = '';
+            html += buildCards(varsity, 'Varsity', '#8b5cf6');
+            if (varsity.length > 0 && jv.length > 0) html += '<div style="margin-top: 32px;"></div>';
+            html += buildCards(jv, 'JV', '#10b981');
+
             container.innerHTML = html;
         }
 
