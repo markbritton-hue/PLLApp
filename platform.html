@@ -766,16 +766,22 @@
                         </div>
 
                         <div class="row g-2">
-                            <div class="col-6">
+                            <div class="col-4">
                                 <div class="stat-box">
-                                    <div class="stat-label">Weight Class</div>
+                                    <div class="stat-label">Wt Class</div>
                                     <div class="stat-value">${athlete.weightClass || 'N/A'} <small>lbs</small></div>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <div class="stat-box">
-                                    <div class="stat-label">Body Weight</div>
+                                    <div class="stat-label">Body Wt</div>
                                     <div class="stat-value">${athlete.bodyWeight} <small>lbs</small></div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-label">lb/lb</div>
+                                    <div class="stat-value" style="color: #a78bfa;">${athlete.bodyWeight > 0 && athlete.total > 0 ? (athlete.total / athlete.bodyWeight).toFixed(2) : '—'}</div>
                                 </div>
                             </div>
                         </div>
