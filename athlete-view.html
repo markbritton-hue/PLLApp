@@ -635,6 +635,7 @@
                                 ${athlete.bodyWeight ? `<div style="color: rgba(255,255,255,0.65); font-size: 1.1rem; font-weight: 700; white-space: nowrap;">${athlete.bodyWeight} lbs</div>` : ''}
                             </div>
                             <span class="designation-badge ${badgeClass}">${badgeLabel}</span>
+                            ${athlete.bodyWeight > 0 ? `<div style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;"><span style="color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.7rem;">lb/lb</span> <span style="color: #a78bfa;">${(athlete.total / athlete.bodyWeight).toFixed(2)}</span></div>` : ''}
                             <div class="card-school">${athlete.school || '—'}</div>
                             <div class="event-section" style="${squatBg}">
                                 <div class="event-header"><i class="fas fa-compress-arrows-alt me-1"></i>Squat</div>
