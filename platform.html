@@ -109,8 +109,26 @@
 
         .athlete-school {
             font-size: 1rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 700;
+        }
+
+        .designation-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .designation-badge.varsity {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .designation-badge.jv {
+            background: #10b981;
+            color: white;
         }
 
         .stat-box {
@@ -586,7 +604,9 @@
                 if (!name) continue;
 
                 const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
-                let weightClass = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                let weightClassRaw = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                const designation = weightClassRaw && weightClassRaw.toUpperCase().includes('JV') ? 'JV' : 'V';
+                let weightClass = weightClassRaw;
 
                 // Extract numeric weight class
                 if (weightClass) {
@@ -597,6 +617,7 @@
                 const athlete = {
                     name: name,
                     school: school,
+                    designation: designation,
                     weightClass: weightClass,
                     bodyWeight: bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0,
                     squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
@@ -739,7 +760,10 @@
                                 ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
                             </div>
                         </div>
-                        <div class="athlete-school">${athlete.school}</div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span class="designation-badge ${athlete.designation === 'JV' ? 'jv' : 'varsity'}">${athlete.designation === 'JV' ? 'JV' : 'Varsity'}</span>
+                            <span class="athlete-school">${athlete.school}</span>
+                        </div>
 
                         <div class="row g-2">
                             <div class="col-6">
