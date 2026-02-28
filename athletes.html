@@ -420,35 +420,36 @@
             try {
                 const config = JSON.parse(configStr);
 
-                // Always use Sheet 1 and Sheet 2 (first two sheets in configuration)
                 if (!config.sheets || config.sheets.length === 0) {
                     statusDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>No sheets found in configuration.</div>';
                     return;
                 }
 
-                const sheet1 = config.sheets[0];
-                const sheet2 = config.sheets.length > 1 ? config.sheets[1] : null;
+                // Load from all platform sheets to get every athlete (not just top 10 from results)
+                const platformSheets = config.sheets.filter(s => s.name.toLowerCase().startsWith('platform'));
 
-                statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading athletes from configured sheets...</div>';
+                statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading athletes from platform sheets...</div>';
 
-
-                // Load data from both sheets
                 const allAthletes = [];
+                const seenNames = new Set();
 
-                console.log(`Loading athletes from Sheet 1 (Varsity): ${sheet1.name}...`);
-                const sheet1Athletes = await loadSheetByGid(config.spreadsheetId, sheet1.gid, 'V');
-                allAthletes.push(...sheet1Athletes);
-                console.log(`Loaded ${sheet1Athletes.length} varsity athletes from ${sheet1.name}`);
-
-                if (sheet2) {
-                    console.log(`Loading athletes from Sheet 2 (JV): ${sheet2.name}...`);
-                    const sheet2Athletes = await loadSheetByGid(config.spreadsheetId, sheet2.gid, 'JV');
-                    allAthletes.push(...sheet2Athletes);
-                    console.log(`Loaded ${sheet2Athletes.length} JV athletes from ${sheet2.name}`);
+                for (const platform of platformSheets) {
+                    console.log(`Loading athletes from ${platform.name}...`);
+                    const platformAthletes = await loadSheetByGid(config.spreadsheetId, platform.gid, '');
+                    let added = 0;
+                    for (const athlete of platformAthletes) {
+                        const key = athlete.name.toLowerCase();
+                        if (!seenNames.has(key)) {
+                            seenNames.add(key);
+                            allAthletes.push(athlete);
+                            added++;
+                        }
+                    }
+                    console.log(`Loaded ${added} new athletes from ${platform.name}`);
                 }
 
                 if (allAthletes.length === 0) {
-                    statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i>No athletes found in the sheets.</div>';
+                    statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i>No athletes found in the platform sheets.</div>';
                     return;
                 }
 
@@ -459,7 +460,7 @@
 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
-                const sheetNames = sheet2 ? `${sheet1.name} + ${sheet2.name}` : sheet1.name;
+                const sheetNames = platformSheets.map(s => s.name).join(', ');
                 statusDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Loaded ${allAthletes.length} athletes from ${sheetNames} - Last updated: ${timeStr}</div>`;
 
             } catch (error) {
@@ -684,9 +685,16 @@
                 matchedRows++;
                 if (!name) continue;
 
-                let weightClass = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                const rawWeightClass = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+
+                // Auto-detect V vs JV from the weight class field (e.g., "114 JV" -> JV)
+                let designation = defaultDesignation;
+                if (!designation && rawWeightClass) {
+                    designation = rawWeightClass.toUpperCase().includes('JV') ? 'JV' : 'V';
+                }
 
                 // Extract just the number from weight class (e.g., "114 JV" -> "114")
+                let weightClass = rawWeightClass;
                 if (weightClass) {
                     const match = weightClass.match(/(\d+)/);
                     if (match) {
@@ -697,7 +705,7 @@
                 const athlete = {
                     name: name,
                     school: school,
-                    designation: defaultDesignation,
+                    designation: designation,
                     weightClass: weightClass,
                     bodyWeight: bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0,
                     squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
