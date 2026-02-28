@@ -360,18 +360,18 @@
                         platformPositionMap[athlete.sheetOrder] = idx + 1;
                     });
 
-                    // Sort school athletes and filter to pending only
+                    // Show all school athletes — sorted by lifting order
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
-                    const athletesToShow = sortedAthletes.filter(pendingFilter);
 
                     // Attach overall platform position to each school athlete
-                    athletesToShow.forEach(athlete => {
+                    sortedAthletes.forEach(athlete => {
                         athlete.platformPosition = platformPositionMap[athlete.sheetOrder] || 0;
+                        athlete.hasPending = pendingFilter(athlete);
                     });
 
-                    if (athletesToShow.length > 0) {
-                        renderPlatformSection(platform.name, athletesToShow);
-                        totalAthletesShown += athletesToShow.length;
+                    if (sortedAthletes.length > 0) {
+                        renderPlatformSection(platform.name, sortedAthletes);
+                        totalAthletesShown += sortedAthletes.length;
                     }
 
                 } catch (error) {
@@ -656,7 +656,10 @@
                 const overallPosition = athlete.platformPosition || 0;
 
                 // Use overallPosition for both badge and position number
-                if (overallPosition === 1) {
+                if (!athlete.hasPending) {
+                    statusLabel = 'DONE';
+                    statusColor = '#6b7280';
+                } else if (overallPosition === 1) {
                     statusLabel = 'LIFTING';
                     statusColor = '#ef4444';
                 } else if (overallPosition === 2) {
@@ -670,7 +673,7 @@
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                                 <div class="athlete-name">${athlete.name}</div>
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    ${overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800;">Position ${overallPosition}</div>` : ''}
+                                    ${athlete.hasPending && overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800;">Position ${overallPosition}</div>` : ''}
                                     ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 6px 16px; border-radius: 12px; font-size: 1rem; font-weight: 800; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
                                 </div>
                             </div>
