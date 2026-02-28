@@ -95,6 +95,10 @@
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
 
+        .status-badge.done {
+            background: #6b7280;
+        }
+
         .btn-back {
             background: rgba(30, 41, 59, 0.8);
             border: 2px solid rgba(96, 165, 250, 0.3);
@@ -252,15 +256,15 @@
                     });
 
                     const sortedAthletes = sortAthletesByLiftingOrder(schoolAthletes);
-                    const athletesToShow = sortedAthletes.filter(pendingFilter);
 
-                    // Attach overall platform position to each school athlete
-                    athletesToShow.forEach(athlete => {
+                    // Attach overall platform position and pending status to each school athlete
+                    sortedAthletes.forEach(athlete => {
                         athlete.platformPosition = platformPositionMap[athlete.sheetOrder] || 0;
+                        athlete.hasPending = pendingFilter(athlete);
                     });
 
-                    if (athletesToShow.length > 0) {
-                        renderPlatformSection(platform.name, athletesToShow);
+                    if (sortedAthletes.length > 0) {
+                        renderPlatformSection(platform.name, sortedAthletes);
                     }
 
                 } catch (error) {
@@ -492,8 +496,10 @@
                 let status = '';
                 let statusClass = '';
 
-                // Only show LIFTING badge for overall position 1, ON DECK for position 2
-                if (overallPosition === 1) {
+                if (!athlete.hasPending) {
+                    status = 'DONE';
+                    statusClass = 'done';
+                } else if (overallPosition === 1) {
                     status = 'LIFTING';
                     statusClass = 'lifting';
                 } else if (overallPosition === 2) {
@@ -522,7 +528,7 @@
                             ${attemptWeight ? `<span class="attempt-weight">- Attempting ${attemptWeight}</span>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            ${overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
+                            ${athlete.hasPending && overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
                             ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                         </div>
                     </div>
