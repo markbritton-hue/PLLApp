@@ -582,6 +582,34 @@
                 }
             }
 
+            // TRPL platform sheets use two header rows: row 0 has Name/School/Weight Class,
+            // row 1 has the lift attempt sub-headers. Check the next row for missing columns.
+            if (headerRow !== -1 && headerRow + 1 < csvData.length) {
+                const row1 = csvData[headerRow + 1];
+                for (let j = 0; j < row1.length; j++) {
+                    const cell = row1[j].toLowerCase().trim();
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && squat1Col === -1) squat1Col = j;
+                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && squat2Col === -1) { squat2Col = j; if (squat1Col === -1 && j > 0) squat1Col = j - 1; }
+                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
+                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
+                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bench2Col === -1) { bench2Col = j; if (bench1Col === -1 && j > 0) bench1Col = j - 1; }
+                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
+                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
+                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dead2Col === -1) { dead2Col = j; if (dead1Col === -1 && j > 0) dead1Col = j - 1; }
+                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bodyWeightCol === -1) bodyWeightCol = j;
+                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'class') && weightClassCol === -1) weightClassCol = j;
+                    if (cell === 'total' && totalCol === -1) totalCol = j;
+                }
+                // If sub-headers were in row 1, skip it by advancing headerRow
+                if (squat1Col !== -1) headerRow = headerRow + 1;
+            }
+
+            // Infer missing attempt columns from adjacent ones
+            if (squat1Col !== -1 && squat2Col !== -1 && squat3Col === -1) squat3Col = squat2Col + 1;
+            if (bench1Col !== -1 && bench2Col !== -1 && bench3Col === -1) bench3Col = bench2Col + 1;
+            if (dead1Col !== -1 && dead2Col !== -1 && dead3Col === -1) dead3Col = dead2Col + 1;
+
             // If no header found OR missing critical columns, use position-based parsing
             const missingColumns = headerRow === -1 || nameCol === -1 || weightClassCol === -1 || squat1Col === -1;
             if (missingColumns) {
