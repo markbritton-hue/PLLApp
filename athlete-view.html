@@ -395,18 +395,15 @@
             try {
                 const grouped = {};
                 const configuredSchool = (config.schoolName || '').toLowerCase();
+                const platformSheets = sheets.filter(s => s.name.toLowerCase().startsWith('platform'));
+                const seenNames = new Set();
 
-                // Load varsity sheet (sheet[0])
-                const vAthletes = await loadSheetAthletes(config.spreadsheetId, sheets[0].gid, 'V', configuredSchool);
-                for (const a of vAthletes) {
-                    if (!grouped[a.wc]) grouped[a.wc] = [];
-                    grouped[a.wc].push(a);
-                }
-
-                // Load JV sheet (sheet[1]) if available
-                if (sheets.length > 1) {
-                    const jvAthletes = await loadSheetAthletes(config.spreadsheetId, sheets[1].gid, 'JV', configuredSchool);
-                    for (const a of jvAthletes) {
+                for (const platform of platformSheets) {
+                    const athletes = await loadSheetAthletes(config.spreadsheetId, platform.gid, '', configuredSchool);
+                    for (const a of athletes) {
+                        const key = a.name.toLowerCase();
+                        if (seenNames.has(key)) continue;
+                        seenNames.add(key);
                         if (!grouped[a.wc]) grouped[a.wc] = [];
                         grouped[a.wc].push(a);
                     }
@@ -495,13 +492,34 @@
                 if (foundName && foundSchool) { headerRow = i; break; }
             }
 
+            // Check next row for TRPL two-row header (attempt sub-headers in row 1)
+            if (headerRow !== -1 && headerRow + 1 < csvData.length) {
+                const row1 = csvData[headerRow + 1];
+                for (let j = 0; j < row1.length; j++) {
+                    const cell = row1[j].toLowerCase().trim();
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && sq1 === -1) sq1 = j;
+                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && sq2 === -1) { sq2 = j; if (sq1 === -1 && j > 0) sq1 = j - 1; }
+                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && sq3 === -1) sq3 = j;
+                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bp1 === -1) bp1 = j;
+                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bp2 === -1) { bp2 = j; if (bp1 === -1 && j > 0) bp1 = j - 1; }
+                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bp3 === -1) bp3 = j;
+                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dl1 === -1) dl1 = j;
+                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dl2 === -1) { dl2 = j; if (dl1 === -1 && j > 0) dl1 = j - 1; }
+                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dl3 === -1) dl3 = j;
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bwCol === -1) bwCol = j;
+                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'class') && weightClassCol === -1) weightClassCol = j;
+                    if (cell === 'total' && totalCol === -1) totalCol = j;
+                }
+                if (sq1 !== -1) headerRow = headerRow + 1;
+            }
+
+            // Infer missing attempt columns
+            if (sq1 !== -1 && sq2 !== -1 && sq3 === -1) sq3 = sq2 + 1;
+            if (bp1 !== -1 && bp2 !== -1 && bp3 === -1) bp3 = bp2 + 1;
+            if (dl1 !== -1 && dl2 !== -1 && dl3 === -1) dl3 = dl2 + 1;
+
             if (headerRow === -1 || nameCol === -1 || weightClassCol === -1 || sq1 === -1) {
-                headerRow = -1;
-                nameCol = 7; schoolCol = 5; weightClassCol = 3; bwCol = 6;
-                sq1 = 8;  sq2 = 9;  sq3 = 10;
-                bp1 = 12; bp2 = 13; bp3 = 14;
-                dl1 = 16; dl2 = 17; dl3 = 18;
-                totalCol = 20;
+                return []; // Can't parse this sheet
             }
 
             const athletes = [];
@@ -514,7 +532,13 @@
 
                 const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
 
-                let wc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                const rawWc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                // Auto-detect V/JV from weight class field when designation not pre-set
+                let resolvedDesignation = designation;
+                if (!resolvedDesignation && rawWc) {
+                    resolvedDesignation = rawWc.toUpperCase().includes('JV') ? 'JV' : 'V';
+                }
+                let wc = rawWc;
                 if (wc) {
                     const match = wc.match(/(\d+)/);
                     if (match) wc = match[1];
@@ -534,7 +558,7 @@
                 const bodyWeight = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
 
                 athletes.push({
-                    name, school, wc, designation, squat, bench, deadlift, total, bodyWeight,
+                    name, school, wc, designation: resolvedDesignation, squat, bench, deadlift, total, bodyWeight,
                     squatDone, benchDone, deadDone,
                     sq1: row[sq1] || '', sq2: row[sq2] || '', sq3: row[sq3] || '',
                     bp1: row[bp1] || '', bp2: row[bp2] || '', bp3: row[bp3] || '',
