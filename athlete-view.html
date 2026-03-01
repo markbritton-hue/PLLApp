@@ -398,8 +398,11 @@
                 const platformSheets = sheets.filter(s => s.name.toLowerCase().startsWith('platform'));
                 const seenNames = new Set();
 
-                for (const platform of platformSheets) {
-                    const athletes = await loadSheetAthletes(config.spreadsheetId, platform.gid, '', configuredSchool);
+                // Fetch all platform sheets in parallel
+                const results = await Promise.all(
+                    platformSheets.map(p => loadSheetAthletes(config.spreadsheetId, p.gid, '', configuredSchool))
+                );
+                for (const athletes of results) {
                     for (const a of athletes) {
                         const key = a.name.toLowerCase();
                         if (seenNames.has(key)) continue;

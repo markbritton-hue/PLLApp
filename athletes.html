@@ -433,19 +433,18 @@
                 const allAthletes = [];
                 const seenNames = new Set();
 
-                for (const platform of platformSheets) {
-                    console.log(`Loading athletes from ${platform.name}...`);
-                    const platformAthletes = await loadSheetByGid(config.spreadsheetId, platform.gid, '');
-                    let added = 0;
+                // Fetch all platform sheets in parallel
+                const platformResults = await Promise.all(
+                    platformSheets.map(p => loadSheetByGid(config.spreadsheetId, p.gid, ''))
+                );
+                for (const platformAthletes of platformResults) {
                     for (const athlete of platformAthletes) {
                         const key = athlete.name.toLowerCase();
                         if (!seenNames.has(key)) {
                             seenNames.add(key);
                             allAthletes.push(athlete);
-                            added++;
                         }
                     }
-                    console.log(`Loaded ${added} new athletes from ${platform.name}`);
                 }
 
                 if (allAthletes.length === 0) {

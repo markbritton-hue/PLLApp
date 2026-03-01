@@ -308,9 +308,11 @@
                 const grouped = {};
                 const seenNames = new Set();
 
-                for (const platform of platformSheets) {
-                    const csvData = await fetchSheetCSV(config.spreadsheetId, platform.gid);
-                    const athletes = parseAthletesFromPlatform(csvData);
+                // Fetch all platform sheets in parallel
+                const allResults = await Promise.all(
+                    platformSheets.map(p => fetchSheetCSV(config.spreadsheetId, p.gid).then(parseAthletesFromPlatform))
+                );
+                for (const athletes of allResults) {
                     for (const athlete of athletes) {
                         if (seenNames.has(athlete.name.toLowerCase())) continue;
                         seenNames.add(athlete.name.toLowerCase());
