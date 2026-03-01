@@ -215,6 +215,75 @@
             return Math.max(...vals);
         }
 
+        async function fetchSheetCSV(spreadsheetId, gid) {
+            const timestamp = new Date().getTime();
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}&t=${timestamp}`;
+            let response;
+            try {
+                response = await fetch(csvUrl, { cache: 'no-store' });
+                if (!response.ok) throw new Error('direct failed');
+            } catch {
+                response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
+            }
+            return parseCSV(await response.text());
+        }
+
+        function parseAthletesFromPlatform(csvData) {
+            const athletes = [];
+            let headerRow = -1;
+            let nameCol = -1, schoolCol = -1, wcCol = -1, bwCol = -1;
+            let sq1 = -1, sq2 = -1, sq3 = -1;
+            let bp1 = -1, bp2 = -1, bp3 = -1;
+            let dl1 = -1, dl2 = -1, dl3 = -1;
+            let totalCol = -1;
+
+            for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                const row = csvData[i];
+                for (let j = 0; j < row.length; j++) {
+                    const cell = row[j].toLowerCase().trim();
+                    if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
+                    if (cell === 'school' && schoolCol === -1) schoolCol = j;
+                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'class') && wcCol === -1) wcCol = j;
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bwCol === -1) bwCol = j;
+                    if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && sq1 === -1) sq1 = j;
+                    if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && sq2 === -1) sq2 = j;
+                    if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && sq3 === -1) sq3 = j;
+                    if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bp1 === -1) bp1 = j;
+                    if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bp2 === -1) bp2 = j;
+                    if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bp3 === -1) bp3 = j;
+                    if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dl1 === -1) dl1 = j;
+                    if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dl2 === -1) dl2 = j;
+                    if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dl3 === -1) dl3 = j;
+                    if (cell === 'total' && totalCol === -1) totalCol = j;
+                }
+                if (nameCol !== -1 && schoolCol !== -1) { headerRow = i; break; }
+            }
+
+            if (headerRow === -1) return athletes;
+
+            // Infer missing attempt columns
+            if (sq1 !== -1 && sq2 !== -1 && sq3 === -1) sq3 = sq2 + 1;
+            if (bp1 !== -1 && bp2 !== -1 && bp3 === -1) bp3 = bp2 + 1;
+            if (dl1 !== -1 && dl2 !== -1 && dl3 === -1) dl3 = dl2 + 1;
+
+            for (let i = headerRow + 1; i < csvData.length; i++) {
+                const row = csvData[i];
+                const name = row[nameCol]?.trim();
+                if (!name) continue;
+                const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
+                let wc = wcCol !== -1 ? row[wcCol]?.trim() : '';
+                if (wc) { const m = wc.match(/(\d+)/); if (m) wc = m[1]; }
+                const bw = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
+                const squat = bestLift(sq1 !== -1 ? row[sq1] : '', sq2 !== -1 ? row[sq2] : '', sq3 !== -1 ? row[sq3] : '');
+                const bench = bestLift(bp1 !== -1 ? row[bp1] : '', bp2 !== -1 ? row[bp2] : '', bp3 !== -1 ? row[bp3] : '');
+                const deadlift = bestLift(dl1 !== -1 ? row[dl1] : '', dl2 !== -1 ? row[dl2] : '', dl3 !== -1 ? row[dl3] : '');
+                const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
+                if (!wc || !name) continue;
+                athletes.push({ name, school, wc, bw, squat, bench, deadlift, total });
+            }
+            return athletes;
+        }
+
         async function loadResults() {
             const configStr = localStorage.getItem('trplConfig');
             const statusDiv = document.getElementById('statusMsg');
@@ -224,128 +293,41 @@
             }
 
             const config = JSON.parse(configStr);
-            const sheet = (config.sheets || []).find(s => s.name.toLowerCase().includes('varsity results'))
-                || (config.sheets || [])[0];
+            const platformSheets = (config.sheets || []).filter(s => s.name.toLowerCase().startsWith('platform'));
 
-            if (!sheet) {
-                statusDiv.innerHTML = '<div class="status-msg">No results sheet found in configuration.</div>';
+            if (platformSheets.length === 0) {
+                statusDiv.innerHTML = '<div class="status-msg">No platform sheets found in configuration.</div>';
                 return;
             }
 
-            // Update heading
-            document.getElementById('pageTitle').innerHTML = `<i class="fas fa-trophy me-2"></i>${sheet.name}`;
+            document.getElementById('pageTitle').innerHTML = `<i class="fas fa-trophy me-2"></i>All Results`;
+            statusDiv.innerHTML = '<div class="status-msg">Loading results from platform sheets...</div>';
 
             try {
-                const timestamp = new Date().getTime();
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${sheet.gid}&t=${timestamp}`;
-                let response;
-                try {
-                    response = await fetch(csvUrl, { cache: 'no-store' });
-                    if (!response.ok) throw new Error('direct failed');
-                } catch {
-                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
-                }
-
-                const csvData = parseCSV(await response.text());
-
-                // Detect header row and columns
-                let headerRow = -1;
-                let nameCol = -1, schoolCol = -1, wcCol = -1, bwCol = -1;
-                let sq1 = -1, sq2 = -1, sq3 = -1;
-                let bp1 = -1, bp2 = -1, bp3 = -1;
-                let dl1 = -1, dl2 = -1, dl3 = -1;
-                let totalCol = -1, squatCol = -1, benchCol = -1, deadCol = -1;
-
-                let placeCol = -1;
-                for (let i = 0; i < Math.min(15, csvData.length); i++) {
-                    const row = csvData[i];
-                    for (let j = 0; j < row.length; j++) {
-                        const cell = row[j].toLowerCase().trim();
-                        if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
-                        if ((cell === 'school' || cell.includes('school') || cell === 'hs' || cell === 'team') && schoolCol === -1) schoolCol = j;
-                        if ((cell === 'weight class' || cell === 'wt class' || cell === 'wt. class' || cell === 'class' || cell === 'weightclass' || cell === 'weight cls' || cell === 'wt cls') && wcCol === -1) wcCol = j;
-                        if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight' || cell === 'weight') && bwCol === -1) bwCol = j;
-                        if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1') && sq1 === -1) sq1 = j;
-                        if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && sq2 === -1) sq2 = j;
-                        if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && sq3 === -1) sq3 = j;
-                        if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bp1 === -1) bp1 = j;
-                        if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bp2 === -1) bp2 = j;
-                        if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bp3 === -1) bp3 = j;
-                        if ((cell === 'deadlift 1' || cell === 'dl1' || cell === 'dead 1' || cell === 'deal lift 1') && dl1 === -1) dl1 = j;
-                        if ((cell === 'deadlift 2' || cell === 'dl2' || cell === 'dead 2' || cell === 'dead lift 2') && dl2 === -1) dl2 = j;
-                        if ((cell === 'deadlift 3' || cell === 'dl3' || cell === 'dead 3' || cell === 'dead lift 3') && dl3 === -1) dl3 = j;
-                        if (cell === 'total' && totalCol === -1) totalCol = j;
-                        // When seeing a single "Squat"/"Bench"/"Dead Lift" header, the block is
-                        // [attempt1, attempt2, attempt3, best] — point to best (j+3)
-                        if (cell === 'squat' && squatCol === -1) { sq1 = j; sq2 = j+1; sq3 = j+2; squatCol = j+3; }
-                        if ((cell === 'bench' || cell === 'bench press') && benchCol === -1) { bp1 = j; bp2 = j+1; bp3 = j+2; benchCol = j+3; }
-                        if ((cell === 'deadlift' || cell === 'dead lift') && deadCol === -1) { dl1 = j; dl2 = j+1; dl3 = j+2; deadCol = j+3; }
-                        if ((cell === 'place' || cell === 'pl' || cell === 'rank') && placeCol === -1) placeCol = j;
-                    }
-                    if (nameCol !== -1 && schoolCol !== -1) { headerRow = i; break; }
-                }
-
-                if (headerRow === -1) {
-                    statusDiv.innerHTML = '<div class="status-msg">Could not detect header row in results sheet.</div>';
-                    return;
-                }
-
-                // Always use column A (index 0) as the weight class source
-                wcCol = 0;
-
                 const configuredSchool = getConfiguredSchool();
                 const grouped = {};
-                let currentWC = ''; // tracks weight class across athletes in the same class
+                const seenNames = new Set();
 
-                for (let i = headerRow + 1; i < csvData.length; i++) {
-                    const row = csvData[i];
-
-                    // Update currentWC whenever col A has a numeric value
-                    const colAVal = row[0]?.trim();
-                    if (colAVal && /^\d+$/.test(colAVal)) {
-                        currentWC = colAVal;
+                for (const platform of platformSheets) {
+                    const csvData = await fetchSheetCSV(config.spreadsheetId, platform.gid);
+                    const athletes = parseAthletesFromPlatform(csvData);
+                    for (const athlete of athletes) {
+                        if (seenNames.has(athlete.name.toLowerCase())) continue;
+                        seenNames.add(athlete.name.toLowerCase());
+                        if (!grouped[athlete.wc]) grouped[athlete.wc] = [];
+                        athlete.isMySchool = configuredSchool && athlete.school.toLowerCase().includes(configuredSchool.toLowerCase());
+                        grouped[athlete.wc].push(athlete);
                     }
-
-                    const name = nameCol !== -1 ? row[nameCol]?.trim() : '';
-                    if (!name) continue;
-
-                    const school = schoolCol !== -1 ? row[schoolCol]?.trim() : '';
-                    const wc = currentWC;
-
-                    const bw = bwCol !== -1 ? parseFloat(row[bwCol]) || 0 : 0;
-
-                    // Compute best lifts from attempts or use direct columns
-                    const squat = squatCol !== -1
-                        ? parseFloat(row[squatCol]) || 0
-                        : bestLift(sq1 !== -1 ? row[sq1] : '', sq2 !== -1 ? row[sq2] : '', sq3 !== -1 ? row[sq3] : '');
-                    const bench = benchCol !== -1
-                        ? parseFloat(row[benchCol]) || 0
-                        : bestLift(bp1 !== -1 ? row[bp1] : '', bp2 !== -1 ? row[bp2] : '', bp3 !== -1 ? row[bp3] : '');
-                    const deadlift = deadCol !== -1
-                        ? parseFloat(row[deadCol]) || 0
-                        : bestLift(dl1 !== -1 ? row[dl1] : '', dl2 !== -1 ? row[dl2] : '', dl3 !== -1 ? row[dl3] : '');
-                    const total = totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : squat + bench + deadlift;
-
-                    if (!wc) continue; // skip rows with no weight class
-
-                    if (!grouped[wc]) grouped[wc] = [];
-                    grouped[wc].push({ name, school, bw, squat, bench, deadlift, total,
-                        isMySchool: configuredSchool && school.toLowerCase().includes(configuredSchool.toLowerCase()) });
                 }
 
-                // Sort weight classes numerically then SHW
-                const sortedClasses = Object.keys(grouped).sort((a, b) => {
-                    const an = parseInt(a) || 9999;
-                    const bn = parseInt(b) || 9999;
-                    return an - bn;
-                });
+                // Sort weight classes numerically
+                const sortedClasses = Object.keys(grouped).sort((a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999));
 
                 const container = document.getElementById('resultsContainer');
                 container.innerHTML = '';
 
                 sortedClasses.forEach(wc => {
                     const athletes = grouped[wc].sort((a, b) => b.total - a.total);
-
                     const section = document.createElement('div');
                     section.className = 'weight-class-section';
 
@@ -381,11 +363,11 @@
                                 <td class="rank">${medal}${rank}</td>
                                 <td>${athlete.name}</td>
                                 <td>${athlete.school}</td>
-                                <td class="stat">${athlete.bw}</td>
+                                <td class="stat">${athlete.bw || '-'}</td>
                                 <td class="stat">${athlete.squat || '-'}</td>
                                 <td class="stat">${athlete.bench || '-'}</td>
                                 <td class="stat">${athlete.deadlift || '-'}</td>
-                                <td class="stat"><strong>${athlete.total}</strong></td>
+                                <td class="stat"><strong>${athlete.total || '-'}</strong></td>
                             </tr>
                         `;
                     });
@@ -395,9 +377,10 @@
                     container.appendChild(section);
                 });
 
+                const totalCount = Object.values(grouped).flat().length;
                 const now = new Date();
                 statusDiv.innerHTML = `<div class="status-msg" style="color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.1);">
-                    <i class="fas fa-check-circle me-2"></i>Loaded ${Object.values(grouped).flat().length} athletes — Last updated: ${now.toLocaleTimeString()}
+                    <i class="fas fa-check-circle me-2"></i>Loaded ${totalCount} athletes across ${sortedClasses.length} weight classes — Last updated: ${now.toLocaleTimeString()}
                 </div>`;
 
             } catch (error) {
