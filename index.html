@@ -426,8 +426,13 @@
                     Donate via Venmo
                 </a>
             </div>
+        <!-- Version info -->
+        <div style="text-align: center; padding: 10px 0 4px; opacity: 0.5;">
+            <p id="app-version" style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin: 0; letter-spacing: 0.5px;"></p>
+        </div>
+
         <!-- Powered by Streamwave -->
-        <div style="text-align: center; padding: 20px 0 10px; opacity: 0.6;">
+        <div style="text-align: center; padding: 8px 0 10px; opacity: 0.6;">
             <p style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Powered by</p>
             <img src="StreaWaveProd-LogoTrans-White.png" alt="StreamWave Productions" style="height: 80px; width: auto;">
         </div>
@@ -468,6 +473,16 @@
                 const modal = document.getElementById('setupModal');
                 modal.style.display = 'flex';
             }
+
+            fetch('https://api.github.com/repos/markbritton-hue/PLLApp/releases/latest')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.tag_name) {
+                        const date = new Date(data.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                        document.getElementById('app-version').textContent = `${data.tag_name} · ${date}`;
+                    }
+                })
+                .catch(() => {});
         });
     </script>
 </body>
