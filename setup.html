@@ -1205,88 +1205,79 @@
             const input = document.getElementById('schoolName');
             const helpText = document.getElementById('schoolNameHelp');
 
-            // Try these sheet types in order of preference
-            // Platform sheets contain ALL athletes (not just top finishers), so use one as primary source
             const platformSheets = sheets.filter(s => s.name.toLowerCase().startsWith('platform'));
-            const candidates = [
+            const nonPlatformCandidates = [
                 sheets.find(s => s.name.toLowerCase().includes('varsity team')),
                 sheets.find(s => s.name.toLowerCase().includes('jv team')),
                 sheets.find(s => s.name.toLowerCase().includes('team')),
-                platformSheets[0],
                 sheets.find(s => s.name.toLowerCase().includes('varsity results')),
                 sheets.find(s => s.name.toLowerCase().includes('results')),
-                sheets[0]
             ].filter(Boolean);
 
             let schools = new Set();
 
-            for (const sheet of candidates) {
-                try {
-                    const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${sheet.gid}`;
-                    let response;
-                    try {
-                        response = await fetch(csvUrl);
-                        if (!response.ok) throw new Error('direct failed');
-                    } catch {
-                        response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
-                        if (!response.ok) continue;
-                    }
-
-                    const csvData = parseCSV(await response.text());
-                    console.log(`Trying sheet "${sheet.name}" for school names, ${csvData.length} rows`);
-                    // Log first few rows so we can see actual header names
-                    for (let dbg = 0; dbg < Math.min(6, csvData.length); dbg++) {
-                        console.log(`  row[${dbg}]:`, csvData[dbg]);
-                    }
-
-                    // Search all columns across first 25 rows for a school/team header
-                    // Uses includes() so "High School", "School Name", etc. all match
-                    let col = -1, headerRow = -1;
-                    for (let i = 0; i < Math.min(25, csvData.length); i++) {
-                        for (let j = 0; j < csvData[i].length; j++) {
-                            const cell = csvData[i][j].toLowerCase().trim();
-                            if (cell.includes('school') || cell === 'team' || cell === 'team name' || cell === 'club' || cell === 'organization') {
-                                col = j;
-                                headerRow = i;
-                                break;
-                            }
+            function extractSchoolsFromCSV(csvData, sheetName) {
+                let col = -1, headerRow = -1;
+                for (let i = 0; i < Math.min(25, csvData.length); i++) {
+                    for (let j = 0; j < csvData[i].length; j++) {
+                        const cell = csvData[i][j].toLowerCase().trim();
+                        if (cell.includes('school') || cell === 'team' || cell === 'team name' || cell === 'club' || cell === 'organization') {
+                            col = j; headerRow = i; break;
                         }
-                        if (col !== -1) break;
                     }
-
-                    console.log(`Sheet "${sheet.name}": headerRow=${headerRow}, col=${col}`);
-
-                    // Fallback: if no header found in a team sheet, use column G (index 6)
-                    if (col === -1 && sheet.name.toLowerCase().includes('team') && csvData[0]?.length > 6) {
-                        col = 6;
-                        // Find which row is the header in column G
-                        headerRow = -1;
-                        for (let i = 0; i < Math.min(20, csvData.length); i++) {
-                            const cell = (csvData[i][6] || '').toLowerCase().trim();
-                            if (cell.includes('school') || cell.includes('team') || cell === 'hs' || cell === 'club') {
-                                headerRow = i;
-                                break;
-                            }
-                        }
-                        // If no header row found in col G, default to skipping row 0
-                        if (headerRow === -1) headerRow = 0;
-                        console.log(`Column G fallback for team sheet, headerRow=${headerRow}`);
-                    }
-
-                    if (col === -1) continue;
-
-                    for (let i = headerRow + 1; i < csvData.length; i++) {
-                        const val = (csvData[i][col] || '').trim();
-                        if (val && isNaN(val) && val.length > 1) schools.add(val);
-                    }
-
-                    if (schools.size > 0) {
-                        console.log(`✅ Found ${schools.size} schools from "${sheet.name}"`);
-                        break;
-                    }
-                } catch (e) {
-                    console.warn(`Failed to load school names from sheet "${sheet.name}":`, e);
+                    if (col !== -1) break;
                 }
+                // Fallback for team sheets: try column G
+                if (col === -1 && sheetName.toLowerCase().includes('team') && csvData[0]?.length > 6) {
+                    col = 6; headerRow = 0;
+                    for (let i = 0; i < Math.min(20, csvData.length); i++) {
+                        const cell = (csvData[i][6] || '').toLowerCase().trim();
+                        if (cell.includes('school') || cell.includes('team') || cell === 'hs' || cell === 'club') { headerRow = i; break; }
+                    }
+                }
+                if (col === -1) return;
+                for (let i = headerRow + 1; i < csvData.length; i++) {
+                    const val = (csvData[i][col] || '').trim();
+                    if (val && isNaN(val) && val.length > 1) schools.add(val);
+                }
+            }
+
+            async function fetchCSV(gid) {
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
+                let response;
+                try {
+                    response = await fetch(csvUrl);
+                    if (!response.ok) throw new Error('direct failed');
+                } catch {
+                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`);
+                    if (!response.ok) return null;
+                }
+                return parseCSV(await response.text());
+            }
+
+            // First try non-platform sheets (team sheets have all schools reliably)
+            for (const sheet of nonPlatformCandidates) {
+                try {
+                    const csvData = await fetchCSV(sheet.gid);
+                    if (!csvData) continue;
+                    extractSchoolsFromCSV(csvData, sheet.name);
+                    if (schools.size > 0) { console.log(`✅ Found ${schools.size} schools from "${sheet.name}"`); break; }
+                } catch (e) {
+                    console.warn(`Failed to load school names from "${sheet.name}":`, e);
+                }
+            }
+
+            // If still no schools, load ALL platform sheets in parallel (covers every athlete)
+            if (schools.size === 0 && platformSheets.length > 0) {
+                console.log(`Loading all ${platformSheets.length} platform sheets for school names...`);
+                const results = await Promise.all(platformSheets.map(async p => {
+                    try { return { name: p.name, data: await fetchCSV(p.gid) }; }
+                    catch { return null; }
+                }));
+                results.filter(Boolean).forEach(({ name, data }) => {
+                    if (data) extractSchoolsFromCSV(data, name);
+                });
+                if (schools.size > 0) console.log(`✅ Found ${schools.size} schools across all platform sheets`);
             }
 
             if (schools.size === 0) {
