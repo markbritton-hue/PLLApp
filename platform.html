@@ -350,10 +350,69 @@
                     platformSelect.appendChild(option);
                 });
 
+                // Load weight classes for all platforms in background
+                loadAllPlatformWeightClasses(config.spreadsheetId, platforms);
+
             } catch (error) {
                 console.error('Error loading platforms:', error);
                 showStatus('Error loading configuration: ' + error.message, 'error');
             }
+        }
+
+        // Fetch all platforms in parallel and update dropdown with weight classes
+        async function loadAllPlatformWeightClasses(spreadsheetId, platforms) {
+            const results = await Promise.all(platforms.map(async platform => {
+                try {
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${platform.gid}`;
+                    let response;
+                    try {
+                        response = await fetch(csvUrl, { cache: 'no-store' });
+                        if (!response.ok) throw new Error('direct failed');
+                    } catch {
+                        response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
+                        if (!response.ok) return { gid: platform.gid, weightClasses: [] };
+                    }
+                    const csvData = parseCSV(await response.text());
+
+                    // Find weight class column
+                    let weightClassCol = -1, headerRow = -1;
+                    for (let i = 0; i < Math.min(15, csvData.length); i++) {
+                        for (let j = 0; j < csvData[i].length; j++) {
+                            const cell = csvData[i][j].toLowerCase().trim();
+                            if (cell === 'weight class' || cell === 'wt class' || cell === 'class') {
+                                weightClassCol = j;
+                                headerRow = i;
+                                break;
+                            }
+                        }
+                        if (weightClassCol !== -1) break;
+                    }
+                    if (weightClassCol === -1) return { gid: platform.gid, weightClasses: [] };
+
+                    // Two-row header — skip an extra row if row 1 looks like sub-headers
+                    const dataStart = (headerRow === 0 && csvData[1]) ? 2 : headerRow + 1;
+
+                    const wcs = new Set();
+                    for (let i = dataStart; i < csvData.length; i++) {
+                        const raw = csvData[i][weightClassCol]?.trim();
+                        if (!raw) continue;
+                        const num = raw.match(/(\d+)/)?.[1];
+                        if (num) wcs.add(Number(num));
+                    }
+                    return { gid: platform.gid, weightClasses: [...wcs].sort((a, b) => a - b) };
+                } catch {
+                    return { gid: platform.gid, weightClasses: [] };
+                }
+            }));
+
+            // Update dropdown options
+            const platformSelect = document.getElementById('platformSelect');
+            results.forEach(({ gid, weightClasses }) => {
+                const option = [...platformSelect.options].find(o => o.value === String(gid));
+                if (option && weightClasses.length > 0) {
+                    option.textContent = `${option.textContent.split(' —')[0]} — ${weightClasses.join(', ')} lbs`;
+                }
+            });
         }
 
         // Load selected platform data
