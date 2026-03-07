@@ -610,11 +610,10 @@
                 totalCol = 20;
             } else {
                 console.log('✅ Using header-based parsing');
-                // For platform sheets, look in the row after the header for attempt sub-headers
-                const subHeaderRow = csvData[headerRow + 1];
-                if (subHeaderRow) {
-                    for (let j = 0; j < subHeaderRow.length; j++) {
-                        const cell = subHeaderRow[j].toLowerCase().trim();
+
+                function scanSubHeaderRow(row) {
+                    for (let j = 0; j < row.length; j++) {
+                        const cell = row[j].toLowerCase().trim();
                         if ((cell === 'squat 1' || cell === 'sq1' || cell === 'sq 1' || cell === 'squat1') && squat1Col === -1) squat1Col = j;
                         if ((cell === 'squat 2' || cell === 'sq2' || cell === 'sq 2' || cell === 'squat2') && squat2Col === -1) {
                             squat2Col = j;
@@ -636,8 +635,13 @@
                     }
                 }
 
-                // Skip past both header rows
+                // Try row immediately after the header, then one more row down for sheets with extra header rows
                 if (csvData[headerRow + 1]) {
+                    scanSubHeaderRow(csvData[headerRow + 1]);
+                    headerRow = headerRow + 1;
+                }
+                if (squat1Col === -1 && bench1Col === -1 && dead1Col === -1 && csvData[headerRow + 1]) {
+                    scanSubHeaderRow(csvData[headerRow + 1]);
                     headerRow = headerRow + 1;
                 }
             }

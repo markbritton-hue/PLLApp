@@ -492,34 +492,40 @@
 
             if (headerRow === -1) return athletes;
 
-            // Check the row after the header for attempt sub-headers
-            const subHeaderRow = csvData[headerRow + 1];
-            if (subHeaderRow) {
-                for (let j = 0; j < subHeaderRow.length; j++) {
-                    const cell = subHeaderRow[j].toLowerCase().trim();
+            // Check the row(s) after the header for attempt sub-headers
+            function scanSubHeaderRow(row) {
+                for (let j = 0; j < row.length; j++) {
+                    const cell = row[j].toLowerCase().trim();
                     if ((cell === 'squat 1' || cell === 'sq1' || cell === 'sq 1' || cell === 'squat1') && squat1Col === -1) squat1Col = j;
                     if ((cell === 'squat 2' || cell === 'sq2' || cell === 'sq 2' || cell === 'squat2') && squat2Col === -1) {
                         squat2Col = j;
                         if (squat1Col === -1 && j > 0) squat1Col = j - 1;
-                        if (squat3Col === -1 && j < subHeaderRow.length - 1) squat3Col = j + 1;
+                        if (squat3Col === -1 && j < row.length - 1) squat3Col = j + 1;
                     }
                     if ((cell === 'squat 3' || cell === 'sq3' || cell === 'sq 3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
                     if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bp 1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
                     if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bp 2' || cell === 'bench2') && bench2Col === -1) {
                         bench2Col = j;
                         if (bench1Col === -1 && j > 0) bench1Col = j - 1;
-                        if (bench3Col === -1 && j < subHeaderRow.length - 1) bench3Col = j + 1;
+                        if (bench3Col === -1 && j < row.length - 1) bench3Col = j + 1;
                     }
                     if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bp 3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
                     if ((cell === 'dead lift 1' || cell === 'deal lift 1' || cell === 'dl1' || cell === 'dl 1' || cell === 'deadlift 1' || cell === 'dead 1') && dead1Col === -1) dead1Col = j;
                     if ((cell === 'dead lift 2' || cell === 'dl2' || cell === 'dl 2' || cell === 'deadlift 2' || cell === 'dead 2') && dead2Col === -1) {
                         dead2Col = j;
                         if (dead1Col === -1 && j > 0) dead1Col = j - 1;
-                        if (dead3Col === -1 && j < subHeaderRow.length - 1) dead3Col = j + 1;
+                        if (dead3Col === -1 && j < row.length - 1) dead3Col = j + 1;
                     }
                     if ((cell === 'dead lift 3' || cell === 'dl3' || cell === 'dl 3' || cell === 'deadlift 3' || cell === 'dead 3') && dead3Col === -1) dead3Col = j;
                 }
-                if (csvData[headerRow + 1]) headerRow = headerRow + 1;
+            }
+            if (csvData[headerRow + 1]) {
+                scanSubHeaderRow(csvData[headerRow + 1]);
+                headerRow = headerRow + 1;
+            }
+            if (squat1Col === -1 && bench1Col === -1 && dead1Col === -1 && csvData[headerRow + 1]) {
+                scanSubHeaderRow(csvData[headerRow + 1]);
+                headerRow = headerRow + 1;
             }
 
             // Additional fallback: if we have columns for attempt 1 and 2, infer attempt 3
