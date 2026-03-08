@@ -289,6 +289,7 @@
     <script>
         let autoRefreshInterval = null;
         let currentPlatformGid = null;
+        let lastLiftingName = null;
 
         function toggleAutoRefresh() {
             const btn = document.getElementById('refreshToggle');
@@ -795,6 +796,19 @@
                 return a.sheetOrder - b.sheetOrder;
             });
 
+            // Pin just-finished athlete at position 1 until next lift completes
+            const currentLifter = sortedAthletes.find(a => hasPendingInColumn(a, currentColumn));
+            let justFinished = null;
+            if (lastLiftingName && currentLifter?.name !== lastLiftingName) {
+                const lastAthlete = sortedAthletes.find(a => a.name === lastLiftingName);
+                if (lastAthlete && !hasPendingInColumn(lastAthlete, currentColumn)) {
+                    justFinished = lastAthlete;
+                    sortedAthletes.splice(sortedAthletes.indexOf(lastAthlete), 1);
+                    sortedAthletes.unshift(lastAthlete);
+                }
+            }
+            if (currentLifter) lastLiftingName = currentLifter.name;
+
             // Create grid layout
             const row = document.createElement('div');
             row.className = 'row g-4';
@@ -805,9 +819,13 @@
 
                 // Determine status label and color based on sorted position
                 const overallPosition = index + 1;
+                const isJustFinished = justFinished && athlete.name === justFinished.name;
                 let statusLabel = '';
                 let statusColor = '';
-                if (overallPosition === 1) {
+                if (isJustFinished) {
+                    statusLabel = 'JUST FINISHED';
+                    statusColor = '#a78bfa'; // purple
+                } else if (overallPosition === 1) {
                     statusLabel = 'LIFTING';
                     statusColor = '#ef4444'; // red
                 } else if (overallPosition === 2) {
@@ -826,7 +844,7 @@
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                             <div class="athlete-name">${athlete.name}</div>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                ${overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.1rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
+                                ${overallPosition > 2 && !isJustFinished ? `<div style="color: #60a5fa; font-size: 1.1rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
                                 ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
                             </div>
                         </div>
