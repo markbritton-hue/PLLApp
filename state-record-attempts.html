@@ -440,6 +440,37 @@
         return athletes;
     }
 
+    function getCurrentAttemptColumn(athletes) {
+        const cols = ['squat1','squat2','squat3','bench1','bench2','bench3','dead1','dead2','dead3'];
+        for (const col of cols) {
+            if (athletes.some(a => { const v = a[col]; return v && !v.toLowerCase().includes('g') && !v.toLowerCase().includes('x'); })) return col;
+        }
+        return null;
+    }
+
+    function hasPendingInColumn(athlete, column) {
+        if (!column) return false;
+        const v = athlete[column];
+        return v && !v.toLowerCase().includes('g') && !v.toLowerCase().includes('x');
+    }
+
+    function getPlatformPosition(athlete, platformAthletes) {
+        const col = getCurrentAttemptColumn(platformAthletes);
+        const sorted = [...platformAthletes].sort((a, b) => {
+            const ap = hasPendingInColumn(a, col), bp = hasPendingInColumn(b, col);
+            if (ap && !bp) return -1; if (!ap && bp) return 1;
+            if (ap && bp && col) {
+                const aw = parseFloat(a[col].replace(/[xgXG]/g,'').trim()) || 0;
+                const bw = parseFloat(b[col].replace(/[xgXG]/g,'').trim()) || 0;
+                if (aw !== bw) return aw - bw;
+            }
+            return a.sheetOrder - b.sheetOrder;
+        });
+        const idx = sorted.findIndex(a => a.name === athlete.name);
+        return idx === -1 ? null : idx + 1;
+    }
+
+
     function isPending(val) {
         if (!val) return false;
         const v = val.toLowerCase().trim();
@@ -534,7 +565,10 @@
                         <div class="athlete-name">${athlete.name}</div>
                         <div class="athlete-meta">${athlete.school} &bull; Varsity ${athlete.weightClass} lbs</div>
                     </div>
-                    <span style="background:rgba(245,158,11,0.15);border:1px solid #f59e0b;color:#f59e0b;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;white-space:nowrap;">RECORD ATTEMPT</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="platform.html?gid=${athlete.platformGid}" style="background:rgba(6,182,212,0.15);border:1px solid #06b6d4;color:#06b6d4;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;white-space:nowrap;text-decoration:none;">${athlete.platformName}</a>
+                        <span style="background:rgba(96,165,250,0.15);border:1px solid #60a5fa;color:#60a5fa;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;white-space:nowrap;">Position ${athlete.platformPosition}</span>
+                    </div>
                 </div>
                 ${hits.map(h => {
                     const margin = h.weight - h.record.weight;
@@ -583,12 +617,29 @@
         }
 
         try {
-            const results = await Promise.all(platforms.map(async p => {
+            const platformResults = await Promise.all(platforms.map(async p => {
                 try {
-                    return await loadPlatformData(config.spreadsheetId, p.gid);
+                    const list = await loadPlatformData(config.spreadsheetId, p.gid);
+                    const col = getCurrentAttemptColumn(list);
+                    const sorted = [...list].sort((a, b) => {
+                        const ap = hasPendingInColumn(a, col), bp = hasPendingInColumn(b, col);
+                        if (ap && !bp) return -1; if (!ap && bp) return 1;
+                        if (ap && bp && col) {
+                            const aw = parseFloat(a[col].replace(/[xgXG]/g,'').trim()) || 0;
+                            const bw = parseFloat(b[col].replace(/[xgXG]/g,'').trim()) || 0;
+                            if (aw !== bw) return aw - bw;
+                        }
+                        return a.sheetOrder - b.sheetOrder;
+                    });
+                    return list.map(a => ({
+                        ...a,
+                        platformName: p.name,
+                        platformGid: p.gid,
+                        platformPosition: sorted.findIndex(s => s.name === a.name) + 1
+                    }));
                 } catch(e) { return []; }
             }));
-            athletes = results.flat();
+            athletes = platformResults.flat();
             renderAttempts();
         } catch(e) {
             container.innerHTML = `<div class="no-records-msg"><i class="fas fa-exclamation-triangle"></i><p>Error: ${e.message}</p></div>`;
