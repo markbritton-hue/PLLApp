@@ -313,81 +313,131 @@
         return null;
     }
 
-    // ─── CSV / athlete loading ─────────────────────────────────────────────────
-    async function fetchCSV(spreadsheetId, gid) {
+    // ─── CSV / athlete loading (same proven logic as display.html) ────────────
+    async function loadPlatformData(spreadsheetId, gid) {
         const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}&t=${Date.now()}`;
-        const resp = await fetch(url);
-        const text = await resp.text();
-        return text.trim().split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
+        let response;
+        try {
+            response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error('Direct fetch failed');
+        } catch(e) {
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+            response = await fetch(proxyUrl, { cache: 'no-store' });
+        }
+        const text = await response.text();
+        return parseAthletes(parseCSV(text));
+    }
+
+    function parseCSV(csv) {
+        const lines = csv.split('\n');
+        const result = [];
+        for (let line of lines) {
+            if (!line.trim()) continue;
+            const values = [];
+            let current = '', inQuotes = false;
+            for (let j = 0; j < line.length; j++) {
+                const char = line[j];
+                if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === ',' && !inQuotes) { values.push(current.trim().replace(/^"|"$/g,'')); current = ''; }
+                else { current += char; }
+            }
+            values.push(current.trim().replace(/^"|"$/g,''));
+            result.push(values);
+        }
+        return result;
     }
 
     function parseAthletes(csvData) {
-        if (!csvData || csvData.length < 2) return [];
-        let headerRow = 0;
+        const athletes = [];
+        let headerRow = -1;
         let nameCol=-1, schoolCol=-1, weightClassCol=-1, bodyWeightCol=-1, totalCol=-1;
-        let sq1=-1, sq2=-1, sq3=-1, bp1=-1, bp2=-1, bp3=-1, dl1=-1, dl2=-1, dl3=-1;
+        let squat1Col=-1, squat2Col=-1, squat3Col=-1;
+        let bench1Col=-1, bench2Col=-1, bench3Col=-1;
+        let dead1Col=-1, dead2Col=-1, dead3Col=-1;
 
-        for (let i = 0; i < Math.min(5, csvData.length); i++) {
-            const row = csvData[i].map(c => c.toLowerCase().trim());
-            if (row.some(c => c === 'name' || c === 'athlete')) { headerRow = i; break; }
-        }
-
-        const h0 = csvData[headerRow].map(c => c.toLowerCase().trim());
-        h0.forEach((cell, j) => {
-            if ((cell === 'name' || cell === 'athlete') && nameCol === -1) nameCol = j;
-            if ((cell === 'school' || cell === 'team') && schoolCol === -1) schoolCol = j;
-            if ((cell === 'weight class' || cell === 'wt class' || cell === 'wt. class' || cell === 'class' || cell === 'wc' || (cell.includes('wt') && cell.includes('class'))) && weightClassCol === -1) weightClassCol = j;
-            if ((cell === 'body weight' || cell === 'bwt' || cell === 'body wt' || cell === 'bw') && bodyWeightCol === -1) bodyWeightCol = j;
-            if (cell === 'total' && totalCol === -1) totalCol = j;
-        });
-
-        function scanSub(row) {
-            row.forEach((cell, j) => {
-                cell = cell.toLowerCase().trim();
-                if ((cell==='sq1'||cell==='squat 1'||cell==='sq 1'||cell==='squat1'||cell==='f') && sq1===-1) sq1=j;
-                if ((cell==='sq2'||cell==='squat 2'||cell==='sq 2'||cell==='squat2') && sq2===-1) sq2=j;
-                if ((cell==='sq3'||cell==='squat 3'||cell==='sq 3'||cell==='squat3') && sq3===-1) sq3=j;
-                if ((cell==='bp1'||cell==='bench 1'||cell==='bp 1'||cell==='bench1') && bp1===-1) bp1=j;
-                if ((cell==='bp2'||cell==='bench 2'||cell==='bp 2'||cell==='bench2') && bp2===-1) bp2=j;
-                if ((cell==='bp3'||cell==='bench 3'||cell==='bp 3'||cell==='bench3') && bp3===-1) bp3=j;
-                if ((cell==='dl1'||cell==='dead 1'||cell==='dl 1'||cell==='dead1'||cell==='deadlift 1') && dl1===-1) dl1=j;
-                if ((cell==='dl2'||cell==='dead 2'||cell==='dl 2'||cell==='dead2'||cell==='deadlift 2') && dl2===-1) dl2=j;
-                if ((cell==='dl3'||cell==='dead 3'||cell==='dl 3'||cell==='dead3'||cell==='deadlift 3') && dl3===-1) dl3=j;
-            });
-        }
-        if (csvData[headerRow + 1]) scanSub(csvData[headerRow + 1]);
-        if (sq1===-1 && bp1===-1 && dl1===-1 && csvData[headerRow + 2]) {
-            scanSub(csvData[headerRow + 2]);
-            if (sq1!==-1 || bp1!==-1 || dl1!==-1) headerRow++;
-        }
-        if (sq2===-1 && sq1!==-1) sq2 = sq1+1;
-        if (sq3===-1 && sq2!==-1) sq3 = sq2+1;
-        if (bp1===-1 && sq3!==-1) bp1 = sq3+1;
-        if (bp2===-1 && bp1!==-1) bp2 = bp1+1;
-        if (bp3===-1 && bp2!==-1) bp3 = bp2+1;
-        if (dl1===-1 && bp3!==-1) dl1 = bp3+1;
-        if (dl2===-1 && dl1!==-1) dl2 = dl1+1;
-        if (dl3===-1 && dl2!==-1) dl3 = dl2+1;
-
-        const out = [];
-        for (let i = headerRow + 2; i < csvData.length; i++) {
+        for (let i = 0; i < Math.min(15, csvData.length); i++) {
             const row = csvData[i];
-            const name = nameCol !== -1 ? row[nameCol]?.trim() : '';
+            for (let j = 0; j < row.length; j++) {
+                const cell = row[j].toLowerCase().trim();
+                if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
+                if (cell === 'school' && schoolCol === -1) schoolCol = j;
+                if ((cell === 'weight class' || cell === 'wt class' || cell === 'wt. class' || cell === 'class' || cell === 'wc' || (cell.includes('wt') && cell.includes('class'))) && weightClassCol === -1) weightClassCol = j;
+                if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight') && bodyWeightCol === -1) bodyWeightCol = j;
+                if (cell === 'total' && totalCol === -1) totalCol = j;
+                if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && squat1Col === -1) squat1Col = j;
+                if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && squat2Col === -1) squat2Col = j;
+                if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
+                if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
+                if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bench2') && bench2Col === -1) bench2Col = j;
+                if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
+                if ((cell === 'deadlift 1' || cell === 'dead 1' || cell === 'dl1' || cell === 'deal lift 1') && dead1Col === -1) dead1Col = j;
+                if ((cell === 'deadlift 2' || cell === 'dead 2' || cell === 'dl2' || cell === 'dead lift 2') && dead2Col === -1) dead2Col = j;
+                if ((cell === 'deadlift 3' || cell === 'dead 3' || cell === 'dl3' || cell === 'dead lift 3') && dead3Col === -1) dead3Col = j;
+            }
+            if (nameCol !== -1 && schoolCol !== -1) { headerRow = i; break; }
+        }
+
+        if (headerRow === -1) return athletes;
+
+        function scanSubHeaderRow(row) {
+            for (let j = 0; j < row.length; j++) {
+                const cell = row[j].toLowerCase().trim();
+                if ((cell === 'squat 1' || cell === 'sq1' || cell === 'sq 1' || cell === 'squat1') && squat1Col === -1) squat1Col = j;
+                if ((cell === 'squat 2' || cell === 'sq2' || cell === 'sq 2' || cell === 'squat2') && squat2Col === -1) {
+                    squat2Col = j;
+                    if (squat1Col === -1 && j > 0) squat1Col = j - 1;
+                    if (squat3Col === -1 && j < row.length - 1) squat3Col = j + 1;
+                }
+                if ((cell === 'squat 3' || cell === 'sq3' || cell === 'sq 3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
+                if ((cell === 'bench 1' || cell === 'bp1' || cell === 'bp 1' || cell === 'bench1') && bench1Col === -1) bench1Col = j;
+                if ((cell === 'bench 2' || cell === 'bp2' || cell === 'bp 2' || cell === 'bench2') && bench2Col === -1) {
+                    bench2Col = j;
+                    if (bench1Col === -1 && j > 0) bench1Col = j - 1;
+                    if (bench3Col === -1 && j < row.length - 1) bench3Col = j + 1;
+                }
+                if ((cell === 'bench 3' || cell === 'bp3' || cell === 'bp 3' || cell === 'bench3') && bench3Col === -1) bench3Col = j;
+                if ((cell === 'dead lift 1' || cell === 'deal lift 1' || cell === 'dl1' || cell === 'dl 1' || cell === 'deadlift 1' || cell === 'dead 1') && dead1Col === -1) dead1Col = j;
+                if ((cell === 'dead lift 2' || cell === 'dl2' || cell === 'dl 2' || cell === 'deadlift 2' || cell === 'dead 2') && dead2Col === -1) {
+                    dead2Col = j;
+                    if (dead1Col === -1 && j > 0) dead1Col = j - 1;
+                    if (dead3Col === -1 && j < row.length - 1) dead3Col = j + 1;
+                }
+                if ((cell === 'dead lift 3' || cell === 'dl3' || cell === 'dl 3' || cell === 'deadlift 3' || cell === 'dead 3') && dead3Col === -1) dead3Col = j;
+            }
+        }
+        if (csvData[headerRow + 1]) { scanSubHeaderRow(csvData[headerRow + 1]); headerRow = headerRow + 1; }
+        if (squat1Col === -1 && bench1Col === -1 && dead1Col === -1 && csvData[headerRow + 1]) {
+            scanSubHeaderRow(csvData[headerRow + 1]); headerRow = headerRow + 1;
+        }
+        if (squat1Col !== -1 && squat2Col !== -1 && squat3Col === -1) squat3Col = squat2Col + 1;
+        if (bench1Col !== -1 && bench2Col !== -1 && bench3Col === -1) bench3Col = bench2Col + 1;
+        if (dead1Col  !== -1 && dead2Col  !== -1 && dead3Col  === -1) dead3Col  = dead2Col  + 1;
+
+        for (let i = headerRow + 1; i < csvData.length; i++) {
+            const row = csvData[i];
+            if (row.length <= nameCol) continue;
+            const name = row[nameCol]?.trim();
             if (!name) continue;
             const rawWc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
-            const desig = rawWc?.toUpperCase().includes('JV') ? 'JV' : 'V';
-            const wc = rawWc?.match(/(\d+)/)?.[1] || rawWc || '';
-            out.push({
+            const designation = rawWc?.toUpperCase().includes('JV') ? 'JV' : 'V';
+            const weightClass = rawWc?.match(/(\d+)/)?.[1] || rawWc;
+            athletes.push({
                 name, school: schoolCol !== -1 ? row[schoolCol]?.trim() : '',
-                weightClass: wc, designation: desig,
-                bodyWeight: parseFloat(bodyWeightCol !== -1 ? row[bodyWeightCol]?.trim() : '0') || 0,
-                total: parseFloat(totalCol !== -1 ? row[totalCol]?.trim() : '0') || 0,
-                squat1: sq1!==-1?row[sq1]?.trim():'', squat2: sq2!==-1?row[sq2]?.trim():'', squat3: sq3!==-1?row[sq3]?.trim():'',
-                bench1: bp1!==-1?row[bp1]?.trim():'', bench2: bp2!==-1?row[bp2]?.trim():'', bench3: bp3!==-1?row[bp3]?.trim():'',
-                dead1:  dl1!==-1?row[dl1]?.trim():'',  dead2:  dl2!==-1?row[dl2]?.trim():'',  dead3:  dl3!==-1?row[dl3]?.trim():'',
+                designation, weightClass,
+                bodyWeight: bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0,
+                total: totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0,
+                squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
+                squat2: squat2Col !== -1 ? row[squat2Col]?.trim() : '',
+                squat3: squat3Col !== -1 ? row[squat3Col]?.trim() : '',
+                bench1: bench1Col !== -1 ? row[bench1Col]?.trim() : '',
+                bench2: bench2Col !== -1 ? row[bench2Col]?.trim() : '',
+                bench3: bench3Col !== -1 ? row[bench3Col]?.trim() : '',
+                dead1:  dead1Col  !== -1 ? row[dead1Col]?.trim()  : '',
+                dead2:  dead2Col  !== -1 ? row[dead2Col]?.trim()  : '',
+                dead3:  dead3Col  !== -1 ? row[dead3Col]?.trim()  : '',
             });
         }
-        return out;
+        return athletes;
     }
 
     function isPending(val) {
@@ -535,8 +585,7 @@
         try {
             const results = await Promise.all(platforms.map(async p => {
                 try {
-                    const csv = await fetchCSV(config.spreadsheetId, p.gid);
-                    return parseAthletes(csv);
+                    return await loadPlatformData(config.spreadsheetId, p.gid);
                 } catch(e) { return []; }
             }));
             athletes = results.flat();
