@@ -803,11 +803,25 @@
                 const lastAthlete = sortedAthletes.find(a => a.name === lastLiftingName);
                 if (lastAthlete && !hasPendingInColumn(lastAthlete, currentColumn)) {
                     justFinished = lastAthlete;
-                    sortedAthletes.splice(sortedAthletes.indexOf(lastAthlete), 1);
-                    sortedAthletes.unshift(lastAthlete);
                 }
             }
             if (currentLifter) lastLiftingName = currentLifter.name;
+
+            // Render just-finished athlete as a separate card above the main grid
+            if (justFinished) {
+                const jfRow = document.createElement('div');
+                jfRow.className = 'row g-4 mb-2';
+                const jfCol = document.createElement('div');
+                jfCol.className = 'col-12';
+                const jfSchool = justFinished.school;
+                const jfIsMySchool = configuredSchool && jfSchool &&
+                    jfSchool.toLowerCase().includes(configuredSchool.toLowerCase());
+                const jfCardBg = jfIsMySchool ? 'rgba(249, 115, 22, 0.18)' : 'rgba(30, 41, 59, 0.9)';
+                const jfCardBorder = jfIsMySchool ? 'rgba(249, 115, 22, 0.7)' : 'rgba(167, 139, 250, 0.5)';
+                jfCol.innerHTML = buildAthleteCard(justFinished, 'JUST FINISHED', '#a78bfa', null, jfCardBg, jfCardBorder);
+                jfRow.appendChild(jfCol);
+                container.appendChild(jfRow);
+            }
 
             // Create grid layout
             const row = document.createElement('div');
@@ -819,13 +833,9 @@
 
                 // Determine status label and color based on sorted position
                 const overallPosition = index + 1;
-                const isJustFinished = justFinished && athlete.name === justFinished.name;
                 let statusLabel = '';
                 let statusColor = '';
-                if (isJustFinished) {
-                    statusLabel = 'JUST FINISHED';
-                    statusColor = '#a78bfa'; // purple
-                } else if (overallPosition === 1) {
+                if (overallPosition === 1) {
                     statusLabel = 'LIFTING';
                     statusColor = '#ef4444'; // red
                 } else if (overallPosition === 2) {
@@ -839,12 +849,21 @@
                 const cardBgColor = isMySchool ? 'rgba(249, 115, 22, 0.18)' : 'rgba(30, 41, 59, 0.9)';
                 const cardBorderColor = isMySchool ? 'rgba(249, 115, 22, 0.7)' : 'rgba(96, 165, 250, 0.2)';
 
-                col.innerHTML = `
+                col.innerHTML = buildAthleteCard(athlete, statusLabel, statusColor, overallPosition > 2 ? overallPosition : null, cardBgColor, cardBorderColor);
+
+                row.appendChild(col);
+            });
+
+            container.appendChild(row);
+        }
+
+        function buildAthleteCard(athlete, statusLabel, statusColor, positionNum, cardBgColor, cardBorderColor) {
+            return `
                     <div class="athlete-card" style="background: ${cardBgColor}; border-color: ${cardBorderColor};">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                             <div class="athlete-name">${athlete.name}</div>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                ${overallPosition > 2 && !isJustFinished ? `<div style="color: #60a5fa; font-size: 1.1rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
+                                ${positionNum ? `<div style="color: #60a5fa; font-size: 1.1rem; font-weight: 800; white-space: nowrap;">Position ${positionNum}</div>` : ''}
                                 ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
                             </div>
                         </div>
@@ -909,11 +928,6 @@
                         </div>
                     </div>
                 `;
-
-                row.appendChild(col);
-            });
-
-            container.appendChild(row);
         }
 
         // Render single attempt
