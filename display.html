@@ -263,6 +263,13 @@
                         athlete.hasPending = pendingFilter(athlete);
                     });
 
+                    // Sort by platform position (DONE athletes at the end)
+                    sortedAthletes.sort((a, b) => {
+                        if (!a.hasPending && b.hasPending) return 1;
+                        if (a.hasPending && !b.hasPending) return -1;
+                        return (a.platformPosition || 999) - (b.platformPosition || 999);
+                    });
+
                     if (sortedAthletes.length > 0) {
                         renderPlatformSection(platform.name, sortedAthletes);
                     }
