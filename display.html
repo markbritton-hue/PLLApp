@@ -119,6 +119,27 @@
             color: white;
         }
 
+        .athlete-details {
+            display: none;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 0 0 8px 8px;
+            margin-top: -4px;
+            border-left: 3px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .athlete-details.open {
+            display: block;
+        }
+
+        .attempt-cell {
+            text-align: center;
+            padding: 6px 4px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
         .auto-refresh {
             background: rgba(16, 185, 129, 0.2);
             border: 2px solid #10b981;
@@ -324,7 +345,7 @@
         function parseAthletes(csvData) {
             const athletes = [];
             let headerRow = -1;
-            let nameCol = -1, schoolCol = -1;
+            let nameCol = -1, schoolCol = -1, weightClassCol = -1, bodyWeightCol = -1, totalCol = -1;
             let squat1Col = -1, squat2Col = -1, squat3Col = -1;
             let bench1Col = -1, bench2Col = -1, bench3Col = -1;
             let dead1Col = -1, dead2Col = -1, dead3Col = -1;
@@ -335,6 +356,9 @@
                     const cell = row[j].toLowerCase().trim();
                     if ((cell === 'name' || cell === 'lifter') && nameCol === -1) nameCol = j;
                     if (cell === 'school' && schoolCol === -1) schoolCol = j;
+                    if ((cell === 'weight class' || cell === 'wt class' || cell === 'wt. class' || cell === 'class' || cell === 'wc' || (cell.includes('wt') && cell.includes('class'))) && weightClassCol === -1) weightClassCol = j;
+                    if ((cell === 'body weight' || cell === 'bw' || cell === 'bodyweight') && bodyWeightCol === -1) bodyWeightCol = j;
+                    if (cell === 'total' && totalCol === -1) totalCol = j;
                     if ((cell === 'squat 1' || cell === 'sq1' || cell === 'squat1' || cell === 'f') && squat1Col === -1) squat1Col = j;
                     if ((cell === 'squat 2' || cell === 'sq2' || cell === 'squat2') && squat2Col === -1) squat2Col = j;
                     if ((cell === 'squat 3' || cell === 'sq3' || cell === 'squat3') && squat3Col === -1) squat3Col = j;
@@ -408,9 +432,16 @@
                 const name = row[nameCol]?.trim();
                 if (!name) continue;
 
+                const rawWc = weightClassCol !== -1 ? row[weightClassCol]?.trim() : '';
+                const designation = rawWc?.toUpperCase().includes('JV') ? 'JV' : 'V';
+                const weightClass = rawWc?.match(/(\d+)/)?.[1] || rawWc;
                 athletes.push({
                     name: name,
                     school: schoolCol !== -1 ? row[schoolCol]?.trim() : '',
+                    designation,
+                    weightClass,
+                    bodyWeight: bodyWeightCol !== -1 ? parseFloat(row[bodyWeightCol]) || 0 : 0,
+                    total: totalCol !== -1 ? parseFloat(row[totalCol]) || 0 : 0,
                     squat1: squat1Col !== -1 ? row[squat1Col]?.trim() : '',
                     squat2: squat2Col !== -1 ? row[squat2Col]?.trim() : '',
                     squat3: squat3Col !== -1 ? row[squat3Col]?.trim() : '',
@@ -489,13 +520,25 @@
             });
         }
 
+        function renderAttempt(val) {
+            if (!val) return `<div class="attempt-cell" style="background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">—</div>`;
+            const failed = val.toLowerCase().includes('x');
+            const good = val.toLowerCase().includes('g');
+            const num = val.replace(/[xgXG]/g, '').trim();
+            const bg = failed ? '#ef4444' : good ? 'rgba(16,185,129,0.2)' : '#000';
+            const border = failed ? '#dc2626' : good ? '#10b981' : 'rgba(96,165,250,0.2)';
+            const color = failed ? 'white' : good ? '#10b981' : 'white';
+            const icon = failed ? ' ✗' : good ? ' ✓' : '';
+            return `<div class="attempt-cell" style="background:${bg}; border:1px solid ${border}; color:${color};">${num}${icon}</div>`;
+        }
+
         function renderAllAthletes(athletes) {
             const container = document.getElementById('displayContainer');
             const section = document.createElement('div');
             section.className = 'platform-section';
             let html = '';
 
-            athletes.forEach(athlete => {
+            athletes.forEach((athlete, idx) => {
                 const overallPosition = athlete.platformPosition || 0;
                 let status = '', statusClass = '';
 
@@ -514,24 +557,58 @@
                 }
 
                 const rowClass = statusClass || 'default';
+                const detailId = `detail-${idx}`;
 
                 html += `
-                    <div class="athlete-row ${rowClass}">
+                    <div class="athlete-row ${rowClass}" onclick="toggleDetail('${detailId}')" style="cursor:pointer;">
                         <div class="athlete-name">
                             ${athlete.name}
+                            ${athlete.weightClass ? `<span style="font-size:0.8rem; color:rgba(255,255,255,0.5); font-weight:500; margin-left:6px;">${athlete.designation === 'JV' ? 'JV ' : ''}${athlete.weightClass} lbs</span>` : ''}
                             ${attemptWeight ? `<div style="font-size: 0.85rem; font-weight: 600; color: #60a5fa; margin-top: 2px;">Attempting ${attemptWeight}</div>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-                            <a href="platform.html?gid=${athlete.platformGid}" style="display: inline-block; background: rgba(6,182,212,0.2); border: 1px solid rgba(6,182,212,0.6); color: #06b6d4; font-size: 1rem; font-weight: 700; padding: 5px 14px; border-radius: 12px; text-decoration: none; white-space: nowrap;">${athlete.platformName}</a>
+                            <a href="platform.html?gid=${athlete.platformGid}" onclick="event.stopPropagation();" style="display: inline-block; background: rgba(6,182,212,0.2); border: 1px solid rgba(6,182,212,0.6); color: #06b6d4; font-size: 1rem; font-weight: 700; padding: 5px 14px; border-radius: 12px; text-decoration: none; white-space: nowrap;">${athlete.platformName}</a>
                             ${athlete.hasPending && overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
                             ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
+                            <div style="color:rgba(255,255,255,0.4); font-size:1rem;">▼</div>
                         </div>
+                    </div>
+                    <div class="athlete-details" id="${detailId}">
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-bottom:4px;">Squat</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">
+                                    ${renderAttempt(athlete.squat1)}${renderAttempt(athlete.squat2)}${renderAttempt(athlete.squat3)}
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-bottom:4px;">Bench</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">
+                                    ${renderAttempt(athlete.bench1)}${renderAttempt(athlete.bench2)}${renderAttempt(athlete.bench3)}
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:0.7rem; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-bottom:4px;">Deadlift</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">
+                                    ${renderAttempt(athlete.dead1)}${renderAttempt(athlete.dead2)}${renderAttempt(athlete.dead3)}
+                                </div>
+                            </div>
+                        </div>
+                        ${athlete.total ? `<div style="text-align:center; background:linear-gradient(135deg,#60a5fa,#a78bfa); border-radius:6px; padding:5px; font-weight:800; font-size:0.95rem;">Total: ${athlete.total} lbs</div>` : ''}
                     </div>
                 `;
             });
 
             section.innerHTML = html;
             container.appendChild(section);
+        }
+
+        function toggleDetail(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('open');
+            const row = el.previousElementSibling;
+            const arrow = row.querySelector('div[style*="▼"]');
+            if (arrow) arrow.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : '';
         }
     </script>
 </body>
