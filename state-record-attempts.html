@@ -191,9 +191,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="state-records-data.js"></script>
     <script>
-    // ─── Built-in Men's Varsity records (from Varsity Mens State Records 2025.xlsx) ──
-    const BUILTIN_M_RECORDS = {
+    // Built-in records are now loaded from state-records-data.js
+    const BUILTIN_M_RECORDS_UNUSED = {
         "114": {
             sq:    { weight: 315, name: "Diondre Blake",    school: "Kalkaska" },
             bp:    { weight: 215, name: "Diondre Blake",    school: "Kalkaska" },
@@ -905,17 +906,7 @@
         renderAttempts();
     }
 
-    // Ensure built-in records are always in localStorage so other pages can read them
-    function initRecordsStorage() {
-        if (!localStorage.getItem(getStorageKey('M'))) {
-            localStorage.setItem(getStorageKey('M'), JSON.stringify(JSON.parse(JSON.stringify(BUILTIN_M_RECORDS))));
-        }
-        if (!localStorage.getItem(getStorageKey('W'))) {
-            localStorage.setItem(getStorageKey('W'), JSON.stringify(JSON.parse(JSON.stringify(BUILTIN_W_RECORDS))));
-        }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => { initRecordsStorage(); refreshData(); });
+    window.addEventListener('DOMContentLoaded', () => { initStateRecordsStorage(); refreshData(); });
     </script>
 </body>
 </html>
