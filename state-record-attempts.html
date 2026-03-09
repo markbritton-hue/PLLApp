@@ -905,7 +905,17 @@
         renderAttempts();
     }
 
-    window.addEventListener('DOMContentLoaded', refreshData);
+    // Ensure built-in records are always in localStorage so other pages can read them
+    function initRecordsStorage() {
+        if (!localStorage.getItem(getStorageKey('M'))) {
+            localStorage.setItem(getStorageKey('M'), JSON.stringify(JSON.parse(JSON.stringify(BUILTIN_M_RECORDS))));
+        }
+        if (!localStorage.getItem(getStorageKey('W'))) {
+            localStorage.setItem(getStorageKey('W'), JSON.stringify(JSON.parse(JSON.stringify(BUILTIN_W_RECORDS))));
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { initRecordsStorage(); refreshData(); });
     </script>
 </body>
 </html>

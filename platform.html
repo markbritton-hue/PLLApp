@@ -300,7 +300,11 @@
         function loadStateRecords() {
             const raw = localStorage.getItem(`trplStateRecords2_${platformGender}`);
             if (!raw) return null;
-            try { return JSON.parse(raw); } catch { return null; }
+            try { return JSON.parse(raw); } catch (e) { return null; }
+        }
+
+        function refreshStateRecords() {
+            platformStateRecords = loadStateRecords();
         }
 
         function isStateRecordAttempt(weight, liftKey, weightClass, records) {
@@ -401,6 +405,8 @@
                 });
 
                 // Detect gender from spreadsheet title for state record lookup
+                // Load M records immediately as default; re-render after gender confirmed
+                refreshStateRecords();
                 fetch(`https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/htmlview`)
                     .then(r => r.text())
                     .then(html => {
@@ -409,9 +415,11 @@
                             const t = m[1].toLowerCase();
                             platformGender = t.includes('women') || t.includes('female') || t.includes('girls') ? 'W' : 'M';
                         }
-                        platformStateRecords = loadStateRecords();
+                        refreshStateRecords();
+                        // Re-render if a platform is already showing
+                        if (currentPlatformGid) renderAthletes(window._lastAthletes || []);
                     })
-                    .catch(() => { platformStateRecords = loadStateRecords(); });
+                    .catch(() => { refreshStateRecords(); });
 
                 // Load weight classes for all platforms in background
                 loadAllPlatformWeightClasses(config.spreadsheetId, platforms);
@@ -557,6 +565,8 @@
                 }
 
                 console.log(`🔄 Rendering ${athletes.length} athletes with latest data`);
+                window._lastAthletes = athletes;
+                refreshStateRecords();
                 renderAthletes(athletes);
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString();
