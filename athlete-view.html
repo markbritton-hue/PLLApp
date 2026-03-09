@@ -698,8 +698,10 @@
                     const diffBench  = athlete.bench - leaderBench;
                     const diffDead   = athlete.deadlift - leaderDead;
                     const diffTotal  = athlete.total - leaderTotal;
-                    const diffTo3rd  = thirdTotal  !== null ? athlete.total - thirdTotal  : null;
-                    const diffTo10th = tenthTotal  !== null ? athlete.total - tenthTotal  : null;
+                    const diffTo3rd   = thirdTotal  !== null ? athlete.total - thirdTotal  : null;
+                    const diffTo10th  = tenthTotal  !== null ? athlete.total - tenthTotal  : null;
+                    const aboveTotal  = idx > 0 ? athletes[idx - 1].total : null;
+                    const diffToNext  = aboveTotal  !== null ? athlete.total - aboveTotal  : null;
 
                     function diffHtml(best, diff) {
                         const bestStr = best ? `<span style="color:#60a5fa; font-weight:800;">${best} lbs</span>` : '';
@@ -773,6 +775,7 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; justify-content:space-around; width:100%; border-top:1px solid rgba(255,255,255,0.15); padding-top:8px;">
+                                    ${gapChip('Up 1', diffToNext, rank === 1)}
                                     ${gapChip('To 3rd', diffTo3rd, rank <= 3)}
                                     ${gapChip('To 10th', diffTo10th, rank <= 10)}
                                 </div>
