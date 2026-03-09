@@ -391,7 +391,7 @@
                     for (const line of lines) {
                         const cells = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
                         const name = cells[nameCol];
-                        if (name) newMap[name.toLowerCase()] = platform.name;
+                        if (name) newMap[name.toLowerCase()] = { name: platform.name, gid: platform.gid };
                     }
                 } catch (e) {
                     console.error(`Error loading platform ${platform.name}:`, e);
@@ -872,7 +872,7 @@
                                 <div class="athlete-card" style="background: rgba(249, 115, 22, 0.18); border-color: rgba(249, 115, 22, 0.7);">
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                                         <div class="athlete-name" style="margin-bottom: 0;">${athlete.name}</div>
-                                        ${platformMap[athlete.name.toLowerCase()] ? `<div style="background: #06b6d4; color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">${platformMap[athlete.name.toLowerCase()]}</div>` : ''}
+                                        ${platformMap[athlete.name.toLowerCase()] ? `<a href="platform.html?gid=${platformMap[athlete.name.toLowerCase()].gid}" style="background: #06b6d4; color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"><i class="fas fa-layer-group"></i> ${platformMap[athlete.name.toLowerCase()].name}</a>` : ''}
                                     </div>
                                     <span class="designation-badge ${athlete.designation === 'V' ? 'varsity' : 'jv'}">
                                         ${athlete.designation === 'V' ? 'Varsity' : 'JV'}
