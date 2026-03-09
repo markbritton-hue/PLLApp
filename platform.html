@@ -1047,6 +1047,19 @@
                 lastLiftingColumn = currentColumn;
             }
 
+            // Compute rank within each weight class by total (descending)
+            const rankMap = {};
+            const byWc = {};
+            athletes.forEach(a => {
+                const wc = a.weightClass || '';
+                if (!byWc[wc]) byWc[wc] = [];
+                byWc[wc].push(a);
+            });
+            Object.values(byWc).forEach(group => {
+                const sorted = [...group].sort((a, b) => (b.total || 0) - (a.total || 0));
+                sorted.forEach((a, i) => { rankMap[a.name] = i + 1; });
+            });
+
             // Create grid layout
             const row = document.createElement('div');
             row.className = 'row g-4';
@@ -1060,7 +1073,7 @@
                     jfSchool.toLowerCase().includes(configuredSchool.toLowerCase());
                 const jfCardBg = jfIsMySchool ? 'rgba(249, 115, 22, 0.18)' : 'rgba(30, 41, 59, 0.9)';
                 const jfCardBorder = jfIsMySchool ? 'rgba(249, 115, 22, 0.7)' : 'rgba(167, 139, 250, 0.5)';
-                jfCol.innerHTML = buildAthleteCard(justFinishedAthlete, 'JUST FINISHED', '#a78bfa', null, jfCardBg, jfCardBorder);
+                jfCol.innerHTML = buildAthleteCard(justFinishedAthlete, 'JUST FINISHED', '#a78bfa', null, jfCardBg, jfCardBorder, rankMap[justFinishedAthlete.name] || null);
                 row.appendChild(jfCol);
             }
 
@@ -1085,8 +1098,9 @@
                     athlete.school.toLowerCase().includes(configuredSchool.toLowerCase());
                 const cardBgColor = isMySchool ? 'rgba(249, 115, 22, 0.18)' : 'rgba(30, 41, 59, 0.9)';
                 const cardBorderColor = isMySchool ? 'rgba(249, 115, 22, 0.7)' : 'rgba(96, 165, 250, 0.2)';
+                const wcRank = rankMap[athlete.name] || null;
 
-                col.innerHTML = buildAthleteCard(athlete, statusLabel, statusColor, overallPosition > 2 ? overallPosition : null, cardBgColor, cardBorderColor);
+                col.innerHTML = buildAthleteCard(athlete, statusLabel, statusColor, overallPosition > 2 ? overallPosition : null, cardBgColor, cardBorderColor, wcRank);
 
                 row.appendChild(col);
             });
@@ -1094,14 +1108,15 @@
             container.appendChild(row);
         }
 
-        function buildAthleteCard(athlete, statusLabel, statusColor, positionNum, cardBgColor, cardBorderColor) {
+        function buildAthleteCard(athlete, statusLabel, statusColor, positionNum, cardBgColor, cardBorderColor, wcRank) {
             return `
                     <div class="athlete-card" style="background: ${cardBgColor}; border-color: ${cardBorderColor};">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                             <div class="athlete-name">${athlete.name}</div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                ${positionNum ? `<div style="color: #60a5fa; font-size: 1.1rem; font-weight: 800; white-space: nowrap;">Position ${positionNum}</div>` : ''}
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
                                 ${statusLabel ? `<div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">${statusLabel}</div>` : ''}
+                                ${positionNum ? `<div style="color: #60a5fa; font-size: 1rem; font-weight: 800; white-space: nowrap;">Position ${positionNum}</div>` : ''}
+                                ${wcRank ? `<div style="color: rgba(255,255,255,0.55); font-size: 0.8rem; font-weight: 700; white-space: nowrap;">Rank #${wcRank} in class</div>` : ''}
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
