@@ -587,12 +587,6 @@
             });
         });
 
-        // Total
-        const totalRec = rec.total;
-        if (totalRec && totalRec.weight > 0 && athlete.total > 0 && athlete.total > totalRec.weight) {
-            hits.push({ lift: 'Total', attemptNum: null, weight: athlete.total, record: totalRec });
-        }
-
         return hits;
     }
 
