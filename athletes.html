@@ -303,9 +303,39 @@
             transition: transform 0.2s;
             flex-shrink: 0;
         }
+
+        #platformToast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(6, 182, 212, 0.95);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #platformToast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
+<div id="platformToast">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Updating platform badges…</span>
+</div>
     <div class="container-fluid">
         <div class="container">
             <!-- Navigation -->
@@ -393,6 +423,9 @@
             const platforms = (config.sheets || []).filter(s => s.name.toLowerCase().startsWith('platform'));
             if (platforms.length === 0) return;
 
+            const toast = document.getElementById('platformToast');
+            toast.classList.add('show');
+
             const newMap = {};
             for (const platform of platforms) {
                 try {
@@ -425,6 +458,7 @@
             }
             platformMap = newMap;
             renderAthletes(); // re-render with platform badges
+            toast.classList.remove('show');
         }
 
         function toggleManualLoad() {
