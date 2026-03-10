@@ -117,17 +117,17 @@
 </head>
 <body>
     <div class="container">
-        <div style="margin: 0 0 30px 0; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <a href="index.html" class="btn-home">
+        <div style="margin: 0 0 30px 0; display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; align-items: center;">
+            <a href="index.html" class="btn-home" style="white-space: nowrap; flex-shrink: 0;">
                 <i class="fas fa-home me-2"></i>Home
             </a>
-            <a href="results.html" class="btn-home">
+            <a href="results.html" class="btn-home" style="white-space: nowrap; flex-shrink: 0;">
                 <i class="fas fa-trophy me-2"></i>Varsity Results
             </a>
-            <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
+            <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
                 <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
             </button>
-            <span id="cacheStatusBadge" style="font-size: 0.75rem; font-family: monospace; padding: 3px 10px; border-radius: 20px; display: none; align-self: center;"></span>
+            <span id="cacheStatusBadge" style="font-size: 0.75rem; font-family: monospace; padding: 3px 10px; border-radius: 20px; display: none; align-self: center; flex-shrink: 0; white-space: nowrap;"></span>
         </div>
 
         <header>
@@ -168,7 +168,7 @@
                 const cfg = JSON.parse(localStorage.getItem('trplConfig') || '{}');
                 const intervalMs = (cfg.autoRefreshSeconds || 20) * 1000;
                 autoRefreshInterval = setInterval(loadResults, intervalMs);
-                btn.innerHTML = `<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON (${cfg.autoRefreshSeconds || 20}s)`;
+                btn.innerHTML = '<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON';
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
                 localStorage.setItem('jvResultsAutoRefresh', 'on');
                 loadResults();
