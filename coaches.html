@@ -31,52 +31,40 @@
             font-weight: 700;
         }
 
-        .athlete-card-wrap {
-            border-radius: 10px;
-            border-left: 4px solid;
+        .athlete-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
             margin-bottom: 10px;
             overflow: hidden;
-            transition: box-shadow 0.2s;
         }
 
-        .athlete-card-wrap.lifting {
-            border-left-color: #ef4444;
-            box-shadow: 0 0 12px rgba(239,68,68,0.25);
+        .athlete-card.lifting {
+            border-color: rgba(239, 68, 68, 0.6);
+            box-shadow: 0 4px 16px rgba(239,68,68,0.15);
         }
 
-        .athlete-card-wrap.on-deck {
-            border-left-color: #10b981;
-            box-shadow: 0 0 10px rgba(16,185,129,0.2);
+        .athlete-card.on-deck {
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: 0 4px 16px rgba(16,185,129,0.15);
         }
 
-        .athlete-card-wrap.done {
-            border-left-color: rgba(96,165,250,0.25);
-        }
-
-        .athlete-card-wrap.default {
-            border-left-color: rgba(96,165,250,0.3);
+        .athlete-card.done {
+            border-color: rgba(96, 165, 250, 0.1);
+            opacity: 0.75;
         }
 
         .athlete-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 15px;
-            background: rgba(15, 23, 42, 0.8);
-            transition: background 0.2s;
+            padding: 12px 16px;
             cursor: pointer;
-        }
-
-        .athlete-card-wrap.lifting .athlete-row {
-            background: linear-gradient(90deg, rgba(239,68,68,0.15) 0%, rgba(15,23,42,0.8) 100%);
-        }
-
-        .athlete-card-wrap.on-deck .athlete-row {
-            background: linear-gradient(90deg, rgba(16,185,129,0.15) 0%, rgba(15,23,42,0.8) 100%);
+            user-select: none;
         }
 
         .athlete-row:hover {
-            background: rgba(96,165,250,0.08);
+            background: rgba(255,255,255,0.03);
         }
 
         .athlete-name {
@@ -138,9 +126,9 @@
 
         .athlete-details {
             display: none;
-            padding: 12px 15px;
-            background: rgba(10, 17, 35, 0.7);
+            padding: 14px 16px;
             border-top: 1px solid rgba(96, 165, 250, 0.15);
+            background: rgba(5, 10, 25, 0.6);
         }
 
         .athlete-details.open {
@@ -340,7 +328,7 @@
                         const name = nameEl?.textContent.trim().split('\n')[0].trim();
                         if (name && expandedNames.has(name)) {
                             el.classList.add('open');
-                            const arrow = el.previousElementSibling.querySelector('div[style*="▼"]');
+                            const arrow = document.getElementById('arrow-' + el.id);
                             if (arrow) arrow.style.transform = 'rotate(180deg)';
                         }
                     });
@@ -615,7 +603,7 @@
                 const detailId = `detail-${idx}`;
 
                 html += `
-                    <div class="athlete-card-wrap ${rowClass}">
+                    <div class="athlete-card ${rowClass}">
                         <div class="athlete-row" onclick="toggleDetail('${detailId}')">
                             <div class="athlete-name">
                                 ${athlete.name}
@@ -626,7 +614,7 @@
                                 <a href="platform.html?gid=${athlete.platformGid}" onclick="event.stopPropagation();" style="display: inline-block; background: rgba(6,182,212,0.2); border: 1px solid rgba(6,182,212,0.6); color: #06b6d4; font-size: 1rem; font-weight: 700; padding: 5px 14px; border-radius: 12px; text-decoration: none; white-space: nowrap;">${athlete.platformName}</a>
                                 ${athlete.hasPending && overallPosition > 2 ? `<div style="color: #60a5fa; font-size: 1.2rem; font-weight: 800; white-space: nowrap;">Position ${overallPosition}</div>` : ''}
                                 ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
-                                <div style="color:rgba(255,255,255,0.4); font-size:1rem;">▼</div>
+                                <div style="color:rgba(255,255,255,0.4); font-size:1rem; transition:transform 0.2s;" id="arrow-${detailId}">▼</div>
                             </div>
                         </div>
                         <div class="athlete-details" id="${detailId}">
@@ -647,7 +635,7 @@
                             </div>
                             ${athlete.total ? `<div style="width:1px; background:rgba(96,165,250,0.2);"></div><div style="flex:2; text-align:center; display:flex; align-items:center; justify-content:center;"><div style="background:linear-gradient(135deg,#60a5fa,#a78bfa); border-radius:6px; padding:6px 8px; font-weight:800; font-size:0.85rem; width:100%;">Total<br>${athlete.total}</div></div>` : ''}
                         </div>
-                    </div><!-- /.athlete-card-wrap -->
+                    </div><!-- /.athlete-card -->
                 `;
             });
 
@@ -658,8 +646,7 @@
         function toggleDetail(id) {
             const el = document.getElementById(id);
             el.classList.toggle('open');
-            const row = el.previousElementSibling;
-            const arrow = row.querySelector('div[style*="▼"]');
+            const arrow = document.getElementById('arrow-' + id);
             if (arrow) arrow.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : '';
         }
     </script>
