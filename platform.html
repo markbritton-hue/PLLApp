@@ -465,6 +465,15 @@
         let removeCardTimer = null;
         let platformGender = 'M'; // default Men's
         let platformStateRecords = null;
+        let platformLastAnnouncedStatus = null;
+
+        function speakAnnouncement(text) {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0;
+            window.speechSynthesis.speak(u);
+        }
 
         function loadStateRecords() {
             initStateRecordsStorage(); // ensure built-ins are seeded
@@ -1015,13 +1024,15 @@
             const container = document.getElementById('athletesContainer');
             container.innerHTML = '';
 
-            // Get configured school name
+            // Get configured school name + athlete announcements
             const configStr = localStorage.getItem('trplConfig');
-            let configuredSchool = '';
+            let configuredSchool = '', announcementName = '', announcementsOn = false;
             if (configStr) {
                 try {
                     const config = JSON.parse(configStr);
                     configuredSchool = config.schoolName || '';
+                    announcementName = (config.athleteName || '').toLowerCase().trim();
+                    announcementsOn = !!config.announcementsEnabled;
                 } catch (e) {
                     console.error('Error parsing config:', e);
                 }
@@ -1088,12 +1099,39 @@
                             showFailedAttemptBanner(lastAthlete.name, liftName, liftWeight);
                             justFinishedResult = 'failed';
                         }
+
+                        // Announce if this is the configured athlete
+                        if (announcementsOn && announcementName && lastAthlete.name.toLowerCase().trim() === announcementName) {
+                            const displayName = lastAthlete.name;
+                            let text;
+                            if (justFinishedResult === 'record') text = `${displayName} has finished with a new state record!`;
+                            else if (justFinishedResult === 'good') text = `${displayName} is done. Good lift!`;
+                            else if (justFinishedResult === 'failed') text = `${displayName} is done. Failed attempt.`;
+                            else text = `${displayName} has finished their lift!`;
+                            platformLastAnnouncedStatus = 'done';
+                            speakAnnouncement(text);
+                        }
                     }
                 }
             }
             if (currentLifter) {
                 lastLiftingName = currentLifter.name;
                 lastLiftingColumn = currentColumn;
+            }
+
+            // Announce lifting / on deck for configured athlete
+            if (announcementsOn && announcementName && platformLastAnnouncedStatus !== 'done') {
+                const pending = sortedAthletes.filter(a => hasPendingInColumn(a, currentColumn));
+                const idx = pending.findIndex(a => a.name.toLowerCase().trim() === announcementName);
+                let newStatus = idx === 0 ? 'lifting' : idx === 1 ? 'on-deck' : null;
+                if (newStatus && newStatus !== platformLastAnnouncedStatus) {
+                    platformLastAnnouncedStatus = newStatus;
+                    const displayName = pending[idx].name;
+                    const text = newStatus === 'lifting'
+                        ? `${displayName} is now lifting!`
+                        : `${displayName} is on deck! Get ready!`;
+                    speakAnnouncement(text);
+                }
             }
 
             // Compute rank within each weight class by total (descending)
