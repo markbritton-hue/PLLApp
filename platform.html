@@ -280,6 +280,12 @@
             opacity: 0.9;
         }
 
+        .card-fade-out {
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            opacity: 0 !important;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
         #failedAttemptBanner {
             display: none;
             position: fixed;
@@ -453,6 +459,7 @@
         let lastLiftingColumn = null;
         let justFinishedAthlete = null;
         let lastJustFinishedName = null;
+        let removeCardTimer = null;
         let platformGender = 'M'; // default Men's
         let platformStateRecords = null;
 
@@ -1072,8 +1079,10 @@
                                 showGoodLiftBanner(lastAthlete.name, liftName, liftWeight);
                             }
                             fireConfetti();
+                            scheduleCardRemoval();
                         } else if (lastVal && lastVal.toLowerCase().includes('x')) {
                             showFailedAttemptBanner(lastAthlete.name, liftName, liftWeight);
+                            scheduleCardRemoval();
                         }
                     }
                 }
@@ -1104,6 +1113,7 @@
             if (justFinishedAthlete) {
                 const jfCol = document.createElement('div');
                 jfCol.className = 'col-lg-4 col-md-6';
+                jfCol.id = 'justFinishedCard';
                 const jfSchool = justFinishedAthlete.school;
                 const jfIsMySchool = configuredSchool && jfSchool &&
                     jfSchool.toLowerCase().includes(configuredSchool.toLowerCase());
@@ -1270,6 +1280,20 @@
                     </div>
                 </div>
             `;
+        }
+
+        function scheduleCardRemoval() {
+            if (removeCardTimer) clearTimeout(removeCardTimer);
+            removeCardTimer = setTimeout(() => {
+                const card = document.getElementById('justFinishedCard');
+                if (card) {
+                    card.classList.add('card-fade-out');
+                    setTimeout(() => card.remove(), 650);
+                }
+                justFinishedAthlete = null;
+                lastLiftingName = null;
+                removeCardTimer = null;
+            }, 10000);
         }
 
         function updateCacheBadge(cacheHit, cacheAge) {
