@@ -161,6 +161,14 @@ const BUILTIN_W_RECORDS = {
     }
 };
 
+// Returns true if the given weight beats the state record for the lift/weight class
+function isStateRecordAttempt(weight, liftKey, weightClass, records) {
+    if (!records || !weightClass || !liftKey || !weight) return false;
+    const rec = records[String(weightClass)];
+    if (!rec || !rec[liftKey]) return false;
+    return weight > rec[liftKey].weight;
+}
+
 // Call this on app start to ensure records are always available in localStorage
 function initStateRecordsStorage() {
     if (!localStorage.getItem('trplStateRecords2_M')) {
