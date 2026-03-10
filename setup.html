@@ -512,15 +512,6 @@
                             value="">
                         <p class="help-text" id="schoolNameHelp">Complete Step 2 (Auto-Detect) to populate the school dropdown</p>
                     </div>
-                    <div class="form-group" style="margin-top: 12px; margin-bottom: 0;">
-                        <label for="athleteName">Your Athlete's Name (optional):</label>
-                        <input
-                            type="text"
-                            id="athleteName"
-                            placeholder="e.g. John Smith"
-                            value="">
-                        <p class="help-text">Used to highlight your athlete across the app.</p>
-                    </div>
                 </li>
                 <li style="margin-bottom: 20px;">
                     <strong>Step 4:</strong> Save your configuration
@@ -563,6 +554,31 @@
                     </div>
                 </li>
             </ol>
+        </div>
+
+        <!-- My Athlete -->
+        <div class="setup-section" style="border-color: rgba(236, 72, 153, 0.4); box-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);">
+            <h2 style="color: #ec4899;"><i class="fas fa-person-running me-2"></i>My Athlete</h2>
+            <div class="form-group">
+                <label for="athleteName">Athlete Name:</label>
+                <input
+                    type="text"
+                    id="athleteName"
+                    placeholder="e.g. John Smith"
+                    value="">
+                <p class="help-text">Used to highlight your athlete across the app.</p>
+            </div>
+            <div style="margin-top: 18px; display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 18px;">
+                <div>
+                    <div style="color: white; font-weight: 700; font-size: 1rem;">Announcements</div>
+                    <div style="color: rgba(255,255,255,0.55); font-size: 0.85rem; margin-top: 2px;">Get visual alerts when your athlete is lifting or on deck</div>
+                </div>
+                <label style="position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; margin-left: 16px;">
+                    <input type="checkbox" id="announcementsEnabled" style="opacity:0; width:0; height:0; position:absolute;">
+                    <span onclick="document.getElementById('announcementsEnabled').click()" style="position:absolute; cursor:pointer; inset:0; background:#374151; border-radius:28px; transition:background 0.2s;" id="announcementsTrack"></span>
+                    <span onclick="document.getElementById('announcementsEnabled').click()" style="position:absolute; left:3px; top:3px; width:22px; height:22px; background:white; border-radius:50%; transition:transform 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.4);" id="announcementsThumb"></span>
+                </label>
+            </div>
         </div>
 
         <!-- Auto-Refresh -->
@@ -622,6 +638,15 @@
 
     <script>
         let sheetCounter = 0;
+
+        function updateAnnouncementsToggle() {
+            const checked = document.getElementById('announcementsEnabled').checked;
+            document.getElementById('announcementsTrack').style.background = checked ? '#ec4899' : '#374151';
+            document.getElementById('announcementsThumb').style.transform = checked ? 'translateX(24px)' : 'translateX(0)';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('announcementsEnabled').addEventListener('change', updateAnnouncementsToggle);
+        });
 
         // Load configuration on page load
         window.addEventListener('DOMContentLoaded', () => {
@@ -926,6 +951,7 @@
         function saveConfiguration() {
             const schoolName = document.getElementById('schoolName').value.trim();
             const athleteName = document.getElementById('athleteName').value.trim();
+            const announcementsEnabled = document.getElementById('announcementsEnabled').checked;
             const autoRefreshSeconds = parseInt(document.getElementById('autoRefreshSeconds').value) || 20;
             const spreadsheetUrl = document.getElementById('spreadsheetUrl').value.trim();
 
@@ -965,6 +991,7 @@
             const config = {
                 schoolName,
                 athleteName,
+                announcementsEnabled,
                 autoRefreshSeconds,
                 spreadsheetId,
                 spreadsheetUrl,
@@ -1009,6 +1036,8 @@
                 // Load school configuration and spreadsheet URL
                 document.getElementById('schoolName').value = config.schoolName || 'Three Rivers';
                 document.getElementById('athleteName').value = config.athleteName || '';
+                document.getElementById('announcementsEnabled').checked = config.announcementsEnabled || false;
+                updateAnnouncementsToggle();
                 document.getElementById('autoRefreshSeconds').value = config.autoRefreshSeconds || 20;
                 document.getElementById('spreadsheetUrl').value = config.spreadsheetUrl || '';
 
