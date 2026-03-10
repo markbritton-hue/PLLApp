@@ -180,9 +180,12 @@
         </a>
     </div>
 
+    <script src="state-records-data.js"></script>
     <script>
         let autoRefreshInterval = null;
         let schoolName = '';
+        let coachGender = 'M';
+        let coachStateRecords = {};
 
         function toggleAutoRefresh() {
             const btn = document.getElementById('refreshToggle');
@@ -226,6 +229,20 @@
             try {
                 const config = JSON.parse(configStr);
                 schoolName = config.schoolName || '';
+
+                // Init state records and detect gender from sheet title
+                initStateRecordsStorage();
+                coachStateRecords = JSON.parse(localStorage.getItem('trplStateRecords2_M') || '{}');
+                fetch(`https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/htmlview`)
+                    .then(r => r.text()).then(html => {
+                        const m = html.match(/<title>([^<]+)<\/title>/);
+                        if (m) {
+                            const t = m[1].toLowerCase();
+                            coachGender = (t.includes('women') || t.includes('girl') || t.includes('female')) ? 'W' : 'M';
+                        }
+                        const key = `trplStateRecords2_${coachGender}`;
+                        coachStateRecords = JSON.parse(localStorage.getItem(key) || '{}');
+                    }).catch(() => {});
 
                 const platforms = config.sheets.filter(s => s.name.toLowerCase().startsWith('platform'));
 
@@ -520,7 +537,7 @@
             });
         }
 
-        function renderAttempt(val) {
+        function renderAttempt(val, liftKey, weightClass) {
             if (!val) return `<div class="attempt-cell" style="background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3);">—</div>`;
             const failed = val.toLowerCase().includes('x');
             const good = val.toLowerCase().includes('g');
@@ -529,7 +546,9 @@
             const border = failed ? '#dc2626' : good ? '#10b981' : 'rgba(96,165,250,0.2)';
             const color = failed ? 'white' : good ? '#10b981' : 'white';
             const icon = failed ? ' ✗' : good ? ' ✓' : '';
-            return `<div class="attempt-cell" style="background:${bg}; border:1px solid ${border}; color:${color};">${num}${icon}</div>`;
+            const isRecord = !failed && liftKey && weightClass && isStateRecordAttempt(parseFloat(num), liftKey, weightClass, coachStateRecords);
+            const star = isRecord ? `<i class="fas fa-star" style="color:#ef4444; font-size:0.7rem; margin-left:2px;" title="State record attempt"></i>` : '';
+            return `<div class="attempt-cell" style="background:${bg}; border:1px solid ${border}; color:${color};">${num}${icon}${star}</div>`;
         }
 
         function renderAllAthletes(athletes) {
@@ -577,17 +596,17 @@
                         <div style="display:flex; gap:12px; align-items:stretch;">
                             <div style="flex:3;">
                                 <div style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Squat</div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.squat1)}${renderAttempt(athlete.squat2)}${renderAttempt(athlete.squat3)}</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.squat1,'sq',athlete.weightClass)}${renderAttempt(athlete.squat2,'sq',athlete.weightClass)}${renderAttempt(athlete.squat3,'sq',athlete.weightClass)}</div>
                             </div>
                             <div style="width:1px; background:rgba(96,165,250,0.2);"></div>
                             <div style="flex:3;">
                                 <div style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Bench</div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.bench1)}${renderAttempt(athlete.bench2)}${renderAttempt(athlete.bench3)}</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.bench1,'bp',athlete.weightClass)}${renderAttempt(athlete.bench2,'bp',athlete.weightClass)}${renderAttempt(athlete.bench3,'bp',athlete.weightClass)}</div>
                             </div>
                             <div style="width:1px; background:rgba(96,165,250,0.2);"></div>
                             <div style="flex:3;">
                                 <div style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Deadlift</div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.dead1)}${renderAttempt(athlete.dead2)}${renderAttempt(athlete.dead3)}</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.dead1,'dl',athlete.weightClass)}${renderAttempt(athlete.dead2,'dl',athlete.weightClass)}${renderAttempt(athlete.dead3,'dl',athlete.weightClass)}</div>
                             </div>
                             ${athlete.total ? `<div style="width:1px; background:rgba(96,165,250,0.2);"></div><div style="flex:2; text-align:center; display:flex; align-items:center; justify-content:center;"><div style="background:linear-gradient(135deg,#60a5fa,#a78bfa); border-radius:6px; padding:6px 8px; font-weight:800; font-size:0.85rem; width:100%;">Total<br>${athlete.total}</div></div>` : ''}
                         </div>
