@@ -483,7 +483,7 @@
                                 </button>
                             </div>
                             <div style="display: flex; gap: 10px;">
-                                <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1mEubp4_lKmxKgJVc_wEcrDaFJNGL22RUdvRgruqKbQw/edit?usp=sharing'; document.getElementById('schoolName').value='Three Rivers'; onQRScanned(document.getElementById('spreadsheetUrl').value);" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
+                                <button class="btn-qr" onclick="document.getElementById('spreadsheetUrl').value='https://docs.google.com/spreadsheets/d/1UIWm24ynHDIM2mqByawXotcsDKvszGwVq22vWj_2w7o/edit?usp=sharing'; onQRScanned(document.getElementById('spreadsheetUrl').value); autoDetectSheets();" title="Load Sample Sheet" style="margin: 0; background: #8b5cf6;">
                                     📋 Sample Sheet
                                 </button>
                             </div>
@@ -985,33 +985,10 @@
 
             if (!configStr) {
                 // Load default configuration
-                const sampleUrl = 'https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit?usp=sharing';
+                const sampleUrl = 'https://docs.google.com/spreadsheets/d/1UIWm24ynHDIM2mqByawXotcsDKvszGwVq22vWj_2w7o/edit?usp=sharing';
                 document.getElementById('spreadsheetUrl').value = sampleUrl;
                 onQRScanned(sampleUrl);
-
-                // Pre-populate with actual sheets from the Google Sheet (with real GIDs)
-                const defaultSheets = [
-                    { name: 'Mens Varsity Results', gid: '1621470558' },
-                    { name: 'Mens JV Results', gid: '1003308815' },
-                    { name: 'Platform 1', gid: '1555475534' },
-                    { name: 'Platform 2', gid: '1810642262' },
-                    { name: 'Platform 3', gid: '1030574309' },
-                    { name: 'Platform 3B', gid: '109247638' },
-                    { name: 'Platform 4', gid: '1453770688' },
-                    { name: 'Platform 5', gid: '865457569' },
-                    { name: 'Platform 6', gid: '1262716783' },
-                    { name: 'Platform 7', gid: '280175070' },
-                    { name: 'Platform 8_', gid: '647971897' },
-                    { name: 'Mens JV Team', gid: '629789763' },
-                    { name: 'Mens Varsity Team', gid: '847893000' }
-                ];
-
-                defaultSheets.forEach(sheet => {
-                    const url = `https://docs.google.com/spreadsheets/d/1lhtEnYhWiTilrd8SBVDDuD7l_e_J-g4O8SZwHT1Nzdc/edit#gid=${sheet.gid}`;
-                    addSheetField(sheet.name, sheet.gid, url);
-                });
-
-                showStatus('✓ Loaded 13 sheets with GIDs! Review and save configuration.', 'success');
+                autoDetectSheets();
                 return;
             }
 
