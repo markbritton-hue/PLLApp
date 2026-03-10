@@ -636,7 +636,7 @@
                                 <div style="font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Deadlift</div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px;">${renderAttempt(athlete.dead1,'dl',athlete.weightClass)}${renderAttempt(athlete.dead2,'dl',athlete.weightClass)}${renderAttempt(athlete.dead3,'dl',athlete.weightClass)}</div>
                             </div>
-                            ${athlete.total ? `<div style="width:1px; background:rgba(96,165,250,0.2);"></div><div style="flex:2; text-align:center; display:flex; align-items:center; justify-content:center;"><div style="background:linear-gradient(135deg,#60a5fa,#a78bfa); border-radius:6px; padding:6px 8px; font-weight:800; font-size:0.85rem; width:100%;">Total<br>${athlete.total}</div></div>` : ''}
+                            ${athlete.total ? `<div style="width:1px; background:rgba(96,165,250,0.2);"></div><div style="flex:2; text-align:center; display:flex; align-items:center; justify-content:center;"><div style="background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.5); border-radius:6px; padding:6px 8px; font-weight:800; font-size:0.85rem; width:100%;">Total<br>${athlete.total}</div></div>` : ''}
                         </div>
                     </div><!-- /.athlete-card -->
                 `;
