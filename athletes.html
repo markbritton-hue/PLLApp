@@ -432,15 +432,9 @@
             const newMap = {};
             for (const platform of platforms) {
                 try {
-                    const timestamp = new Date().getTime();
-                    const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${platform.gid}&t=${timestamp}`;
-                    let response;
-                    try {
-                        response = await fetch(csvUrl, { cache: 'no-store' });
-                        if (!response.ok) throw new Error('direct failed');
-                    } catch {
-                        response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
-                    }
+                    const csvUrl = `proxy.php?id=${config.spreadsheetId}&gid=${platform.gid}`;
+                    const response = await fetch(csvUrl);
+                    if (!response.ok) throw new Error(`Failed to fetch platform data: ${response.status}`);
                     const text = await response.text();
                     const lines = text.split('\n');
                     let nameCol = -1;
@@ -533,20 +527,11 @@
 
         // Load a single sheet by GID and return athletes
         async function loadSheetByGid(spreadsheetId, gid, designation = '') {
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
+            const csvUrl = `proxy.php?id=${spreadsheetId}&gid=${gid}`;
 
-            let response;
-            try {
-                response = await fetch(csvUrl);
-                if (!response.ok) {
-                    throw new Error('Direct fetch returned error status');
-                }
-            } catch (directError) {
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
-                response = await fetch(proxyUrl);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch sheet (gid=${gid}): ${response.status}`);
-                }
+            const response = await fetch(csvUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch sheet (gid=${gid}): ${response.status}`);
             }
 
             const csvText = await response.text();

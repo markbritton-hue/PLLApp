@@ -296,17 +296,10 @@
         }
 
         async function loadPlatformData(spreadsheetId, gid) {
-            const timestamp = new Date().getTime();
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}&t=${timestamp}`;
+            const csvUrl = `proxy.php?id=${spreadsheetId}&gid=${gid}`;
 
-            let response;
-            try {
-                response = await fetch(csvUrl, { cache: 'no-store' });
-                if (!response.ok) throw new Error('Direct fetch failed');
-            } catch (directError) {
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(csvUrl)}`;
-                response = await fetch(proxyUrl, { cache: 'no-store' });
-            }
+            const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error(`Failed to fetch platform data: ${response.status}`);
 
             const csvText = await response.text();
             const csvData = parseCSV(csvText);

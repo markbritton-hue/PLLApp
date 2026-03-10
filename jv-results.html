@@ -238,15 +238,9 @@
             document.getElementById('pageTitle').innerHTML = `<i class="fas fa-trophy me-2"></i>${sheet.name}`;
 
             try {
-                const timestamp = new Date().getTime();
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${config.spreadsheetId}/export?format=csv&gid=${sheet.gid}&t=${timestamp}`;
-                let response;
-                try {
-                    response = await fetch(csvUrl, { cache: 'no-store' });
-                    if (!response.ok) throw new Error('direct failed');
-                } catch {
-                    response = await fetch(`https://corsproxy.io/?${encodeURIComponent(csvUrl)}`, { cache: 'no-store' });
-                }
+                const csvUrl = `proxy.php?id=${config.spreadsheetId}&gid=${sheet.gid}`;
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error(`Failed to fetch sheet data: ${response.status}`);
 
                 const csvData = parseCSV(await response.text());
 
