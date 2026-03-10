@@ -374,16 +374,7 @@
             <button id="refreshToggle" onclick="toggleAutoRefresh()" class="btn-home" style="background: rgba(96, 165, 250, 0.8); border: none; cursor: pointer;">
                 <i class="fas fa-sync-alt me-2"></i>Auto-Refresh: OFF
             </button>
-            <a href="share.html" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(167, 139, 250, 0.8); color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(167,139,250,0.3);">
-                <i class="fas fa-share-alt"></i> Share
-            </a>
-            <a href="https://venmo.com/u/Mark-Britton-18" target="_blank" rel="noopener noreferrer"
-               style="display: inline-flex; align-items: center; gap: 8px; background: #008CFF; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,140,255,0.4);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 111 111" fill="white">
-                    <path d="M90.5 8.5c3.9 6.4 5.7 13 5.7 21.4 0 26.7-22.8 61.4-41.3 85.8H15.7L1 10.9l38-3.6 7.9 63.7C55.1 55.4 64 30.1 64 16.1c0-8.1-1.4-13.6-3.6-18.1L90.5 8.5z"/>
-                </svg>
-                Donate
-            </a>
+            <span id="cacheStatusBadge" style="font-size: 0.75rem; font-family: monospace; padding: 3px 10px; border-radius: 20px; display: none; align-self: center;"></span>
         </div>
 
         <!-- Page Header -->
@@ -411,11 +402,6 @@
         <div id="athletesContainer"></div>
 
         <div id="statusMessage" style="display: none;"></div>
-
-        <!-- Cache Status -->
-        <div id="cacheStatus" style="display: none; text-align: center; margin-top: 16px; margin-bottom: 8px;">
-            <span id="cacheStatusBadge" style="font-size: 0.75rem; font-family: monospace; padding: 3px 10px; border-radius: 20px;"></span>
-        </div>
 
         <!-- Donation Card -->
         <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(96, 165, 250, 0.4); border-radius: 15px; padding: 25px 30px; text-align: center; margin-top: 40px; box-shadow: 0 8px 20px rgba(0,0,0,0.5);">
@@ -753,28 +739,7 @@
                     throw new Error(`Failed to fetch platform data: ${response.status}`);
                 }
 
-                const cacheHit   = response.headers.get('X-Cache') || 'MISS';
-                const cacheAge   = response.headers.get('X-Cache-Age');
-                const badge      = document.getElementById('cacheStatusBadge');
-                const statusWrap = document.getElementById('cacheStatus');
-                const ageStr     = cacheAge ? ` · ${cacheAge} old` : '';
-                if (cacheHit === 'HIT') {
-                    badge.style.background = 'rgba(34,197,94,0.15)';
-                    badge.style.color = '#4ade80';
-                    badge.style.border = '1px solid rgba(34,197,94,0.3)';
-                    badge.textContent = `cache HIT${ageStr}`;
-                } else if (cacheHit === 'STALE') {
-                    badge.style.background = 'rgba(234,179,8,0.15)';
-                    badge.style.color = '#facc15';
-                    badge.style.border = '1px solid rgba(234,179,8,0.3)';
-                    badge.textContent = `cache STALE${ageStr}`;
-                } else {
-                    badge.style.background = 'rgba(96,165,250,0.15)';
-                    badge.style.color = '#60a5fa';
-                    badge.style.border = '1px solid rgba(96,165,250,0.3)';
-                    badge.textContent = 'cache MISS · fetched from Google';
-                }
-                statusWrap.style.display = 'block';
+                updateCacheBadge(response.headers.get('X-Cache') || 'MISS', response.headers.get('X-Cache-Age'));
 
                 const csvText = await response.text();
                 const csvData = parseCSV(csvText);
@@ -1305,6 +1270,29 @@
                     </div>
                 </div>
             `;
+        }
+
+        function updateCacheBadge(cacheHit, cacheAge) {
+            const badge = document.getElementById('cacheStatusBadge');
+            if (!badge) return;
+            const ageStr = cacheAge ? ` · ${cacheAge} old` : '';
+            if (cacheHit === 'HIT') {
+                badge.style.background = 'rgba(34,197,94,0.15)';
+                badge.style.color = '#4ade80';
+                badge.style.border = '1px solid rgba(34,197,94,0.3)';
+                badge.textContent = `cache HIT${ageStr}`;
+            } else if (cacheHit === 'STALE') {
+                badge.style.background = 'rgba(234,179,8,0.15)';
+                badge.style.color = '#facc15';
+                badge.style.border = '1px solid rgba(234,179,8,0.3)';
+                badge.textContent = `cache STALE${ageStr}`;
+            } else {
+                badge.style.background = 'rgba(96,165,250,0.15)';
+                badge.style.color = '#60a5fa';
+                badge.style.border = '1px solid rgba(96,165,250,0.3)';
+                badge.textContent = 'cache MISS · fetched from Google';
+            }
+            badge.style.display = 'inline-block';
         }
 
         // Show status message
