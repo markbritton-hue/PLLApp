@@ -1079,10 +1079,8 @@
                                 showGoodLiftBanner(lastAthlete.name, liftName, liftWeight);
                             }
                             fireConfetti();
-                            scheduleCardRemoval();
                         } else if (lastVal && lastVal.toLowerCase().includes('x')) {
                             showFailedAttemptBanner(lastAthlete.name, liftName, liftWeight);
-                            scheduleCardRemoval();
                         }
                     }
                 }
@@ -1121,9 +1119,16 @@
                 const jfCardBorder = jfIsMySchool ? 'rgba(249, 115, 22, 0.7)' : 'rgba(167, 139, 250, 0.5)';
                 jfCol.innerHTML = buildAthleteCard(justFinishedAthlete, 'JUST FINISHED', '#a78bfa', null, jfCardBg, jfCardBorder, rankMap[justFinishedAthlete.name] || null);
                 row.appendChild(jfCol);
+                // Reset 10s removal timer on every render so card always shows a full 10s
+                scheduleCardRemoval();
             }
 
-            sortedAthletes.forEach((athlete, index) => {
+            // Exclude just-finished athlete from sorted list — already shown pinned above
+            const displayAthletes = justFinishedAthlete
+                ? sortedAthletes.filter(a => a.name !== justFinishedAthlete.name)
+                : sortedAthletes;
+
+            displayAthletes.forEach((athlete, index) => {
                 const col = document.createElement('div');
                 col.className = 'col-lg-4 col-md-6';
 
