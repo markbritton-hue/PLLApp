@@ -603,7 +603,7 @@
                     <div class="athlete-row ${rowClass}" onclick="toggleDetail('${detailId}')" style="cursor:pointer;">
                         <div class="athlete-name">
                             ${athlete.name}
-                            ${athlete.weightClass ? `<span style="font-size:0.8rem; color:rgba(255,255,255,0.5); font-weight:500; margin-left:6px;">${athlete.designation === 'JV' ? 'JV ' : ''}${athlete.weightClass} lbs</span>` : ''}
+                            ${athlete.weightClass ? `<span style="font-size:1rem; color:rgba(255,255,255,0.75); font-weight:700; margin-left:8px;">${athlete.designation === 'JV' ? 'JV ' : ''}${athlete.weightClass} lbs</span>` : ''}
                             ${attemptWeight ? `<div style="font-size: 0.85rem; font-weight: 600; color: #60a5fa; margin-top: 2px;">Attempting ${attemptWeight}</div>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
