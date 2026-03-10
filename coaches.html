@@ -393,6 +393,7 @@
                 btn.innerHTML = `<i class="fas fa-sync-alt fa-spin me-2"></i>Auto-Refresh: ON`;
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
                 localStorage.setItem('coachesAutoRefresh', 'on');
+                lastAnnouncedStatus = null; // Reset so current status re-announces
                 loadDisplay();
             }
         }
@@ -403,6 +404,13 @@
                 toggleAutoRefresh();
             } else {
                 loadDisplay();
+            }
+        });
+
+        // Re-announce current status when user returns to this tab
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                lastAnnouncedStatus = null;
             }
         });
 
