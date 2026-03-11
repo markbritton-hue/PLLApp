@@ -244,14 +244,18 @@
         let lastAnnouncedStatus = null;
         let speechUnlocked = false;
         let pendingAnnouncementText = null;
+        let pendingAnnouncementStatus = null;
 
         // Unlock speech on first user gesture and replay any pending announcement
         document.addEventListener('click', function unlockOnce() {
             if (!speechUnlocked && window.speechSynthesis) {
                 speechUnlocked = true;
                 const pending = pendingAnnouncementText;
+                const pendingStatus = pendingAnnouncementStatus;
                 pendingAnnouncementText = null;
+                pendingAnnouncementStatus = null;
                 if (pending) {
+                    lastAnnouncedStatus = pendingStatus; // mark as announced now
                     doSpeak(pending); // must be synchronous inside event handler for iOS
                 }
             }
@@ -361,9 +365,23 @@
                 }
             }
 
-            lastAnnouncedStatus = currentStatus;
+            if (!text) {
+                // No speech needed for this status — just track it silently
+                lastAnnouncedStatus = currentStatus;
+                return;
+            }
 
-            if (text) speakAnnouncement(text);
+            if (!speechUnlocked) {
+                // Save pending text but do NOT update lastAnnouncedStatus so we retry next refresh
+                showAnnouncementToast(text);
+                pendingAnnouncementText = text;
+                pendingAnnouncementStatus = currentStatus;
+                return;
+            }
+
+            lastAnnouncedStatus = currentStatus;
+            showAnnouncementToast(text);
+            doSpeak(text);
         }
 
         function testVoice() {
