@@ -35,12 +35,12 @@
             background: rgba(16, 185, 129, 0.18);
             border: 1px solid rgba(16, 185, 129, 0.7);
             border-left: 4px solid #60a5fa;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
             overflow: hidden;
-            padding: 14px 16px;
+            padding: 6px 10px;
         }
 
         .athlete-card:hover {
@@ -69,16 +69,16 @@
         .athlete-summary {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 2px;
             cursor: pointer;
             user-select: none;
         }
 
         .designation-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 1px 7px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
             font-weight: 600;
         }
 
@@ -129,11 +129,11 @@
         }
 
         .status-badge {
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-size: 1rem;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
             font-weight: 800;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: white;
         }
 
@@ -800,22 +800,22 @@
                 html += `
                     <div class="athlete-card ${rowClass}">
                         <div class="athlete-summary" onclick="toggleDetail('${detailId}')">
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                                <div style="font-size:1.2rem; font-weight:700; color:white; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${athlete.name}</div>
-                                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        ${athlete.hasPending && overallPosition > 2 ? `<span style="color:white; font-size:1.1rem; font-weight:800; white-space:nowrap;">Position ${overallPosition}</span>` : ''}
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                                <div style="font-size:1rem; font-weight:700; color:white; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${athlete.name}</div>
+                                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex-shrink:0;">
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        ${athlete.hasPending && overallPosition > 2 ? `<span style="color:white; font-size:0.85rem; font-weight:800; white-space:nowrap;">Pos ${overallPosition}</span>` : ''}
                                         ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
                                         <i class="fas fa-chevron-down expand-arrow" id="arrow-${detailId}"></i>
                                     </div>
-                                    <a href="platform.html?gid=${athlete.platformGid}" onclick="event.stopPropagation();" style="background:#06b6d4; color:white; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;"><i class="fas fa-layer-group"></i> ${athlete.platformName}</a>
+                                    <a href="platform.html?gid=${athlete.platformGid}" onclick="event.stopPropagation();" style="background:#06b6d4; color:white; padding:1px 6px; border-radius:5px; font-size:0.7rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:3px; white-space:nowrap;"><i class="fas fa-layer-group"></i> ${athlete.platformName}</a>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                                 <span class="designation-badge ${athlete.designation === 'JV' ? 'jv' : 'varsity'}">${athlete.designation === 'JV' ? 'JV' : 'Varsity'}</span>
-                                ${athlete.weightClass ? `<span style="color:rgba(255,255,255,0.7); font-size:0.85rem; font-weight:700; white-space:nowrap;">${athlete.weightClass} lbs</span>` : ''}
-                                ${athlete.bodyWeight ? `<span style="color:rgba(255,255,255,0.5); font-size:0.8rem; font-weight:600; white-space:nowrap;">(${athlete.bodyWeight} lbs BW)</span>` : ''}
-                                ${attemptWeight ? `<span style="color:#60a5fa; font-size:0.85rem; font-weight:700; white-space:nowrap;">Attempting ${attemptWeight}</span>` : ''}
+                                ${athlete.weightClass ? `<span style="color:rgba(255,255,255,0.7); font-size:0.78rem; font-weight:700; white-space:nowrap;">${athlete.weightClass} lbs</span>` : ''}
+                                ${athlete.bodyWeight ? `<span style="color:rgba(255,255,255,0.5); font-size:0.75rem; font-weight:600; white-space:nowrap;">(${athlete.bodyWeight} lbs BW)</span>` : ''}
+                                ${attemptWeight ? `<span style="color:#60a5fa; font-size:0.78rem; font-weight:700; white-space:nowrap;">Attempting ${attemptWeight}</span>` : ''}
                             </div>
                         </div>
                         <div class="athlete-details" id="${detailId}">
