@@ -471,6 +471,8 @@
         let platformGender = 'M'; // default Men's
         let platformStateRecords = null;
         let platformLastAnnouncedStatus = null;
+        let platformSpeechPrimed = false;
+        let platformPendingAnnouncement = null; // { text, rollbackStatus }
 
         function hidePrimeBanner() {
             const b = document.getElementById('voicePrimeBanner');
@@ -478,8 +480,19 @@
         }
 
         function tapToEnableVoice() {
+            platformSpeechPrimed = true;
             hidePrimeBanner();
-            if (window.speechSynthesis) {
+            if (!window.speechSynthesis) return;
+            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            // Speak any announcement that built up before the tap
+            if (platformPendingAnnouncement) {
+                const { text } = platformPendingAnnouncement;
+                platformPendingAnnouncement = null;
+                const u = new SpeechSynthesisUtterance(text);
+                u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0;
+                window.speechSynthesis.speak(u);
+            } else {
                 const primer = new SpeechSynthesisUtterance('');
                 primer.volume = 0;
                 window.speechSynthesis.speak(primer);
@@ -488,6 +501,10 @@
 
         function speakAnnouncement(text, rollbackStatus) {
             if (!window.speechSynthesis) return;
+            // Save as pending so tap-to-enable can replay it
+            platformPendingAnnouncement = { text, rollbackStatus };
+            if (!platformSpeechPrimed) return; // wait for user tap
+            platformPendingAnnouncement = null;
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
@@ -613,7 +630,7 @@
                 if (window.speechSynthesis && cfg.announcementsEnabled) {
                     const primer = new SpeechSynthesisUtterance('');
                     primer.volume = 0;
-                    primer.onstart = function() { hidePrimeBanner(); };
+                    primer.onstart = function() { platformSpeechPrimed = true; hidePrimeBanner(); };
                     window.speechSynthesis.speak(primer);
                 }
                 loadPlatformData();
