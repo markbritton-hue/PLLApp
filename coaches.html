@@ -802,15 +802,17 @@
                         <div class="athlete-summary" onclick="toggleDetail('${detailId}')">
                             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                 <div style="font-size:1.2rem; font-weight:700; color:white; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">${athlete.name}</div>
-                                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                                    ${athlete.hasPending && overallPosition > 2 ? `<span style="color:white; font-size:1.1rem; font-weight:800; white-space:nowrap;">Position ${overallPosition}</span>` : ''}
-                                    ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
-                                    <i class="fas fa-chevron-down expand-arrow" id="arrow-${detailId}"></i>
+                                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        ${athlete.hasPending && overallPosition > 2 ? `<span style="color:white; font-size:1.1rem; font-weight:800; white-space:nowrap;">Position ${overallPosition}</span>` : ''}
+                                        ${status ? `<div class="status-badge ${statusClass}">${status}</div>` : ''}
+                                        <i class="fas fa-chevron-down expand-arrow" id="arrow-${detailId}"></i>
+                                    </div>
+                                    <a href="platform.html?gid=${athlete.platformGid}" onclick="event.stopPropagation();" style="background:#06b6d4; color:white; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;"><i class="fas fa-layer-group"></i> ${athlete.platformName}</a>
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                 <span class="designation-badge ${athlete.designation === 'JV' ? 'jv' : 'varsity'}">${athlete.designation === 'JV' ? 'JV' : 'Varsity'}</span>
-                                <a href="platform.html?gid=${athlete.platformGid}" onclick="event.stopPropagation();" style="background:#06b6d4; color:white; padding:3px 10px; border-radius:6px; font-size:0.8rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;"><i class="fas fa-layer-group"></i> ${athlete.platformName}</a>
                                 ${athlete.weightClass ? `<span style="color:rgba(255,255,255,0.7); font-size:0.85rem; font-weight:700; white-space:nowrap;">${athlete.weightClass} lbs</span>` : ''}
                                 ${athlete.bodyWeight ? `<span style="color:rgba(255,255,255,0.5); font-size:0.8rem; font-weight:600; white-space:nowrap;">(${athlete.bodyWeight} lbs BW)</span>` : ''}
                                 ${attemptWeight ? `<span style="color:#60a5fa; font-size:0.85rem; font-weight:700; white-space:nowrap;">Attempting ${attemptWeight}</span>` : ''}
