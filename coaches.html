@@ -375,6 +375,13 @@
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
                 localStorage.setItem('coachesAutoRefresh', 'on');
                 lastAnnouncedStatus = null; // Reset so current status re-announces
+                // Prime speech synthesis now while we're inside a user gesture,
+                // so timer-based announcements will work without needing another click
+                if (window.speechSynthesis && cfg.announcementsEnabled) {
+                    const primer = new SpeechSynthesisUtterance('');
+                    primer.volume = 0;
+                    window.speechSynthesis.speak(primer);
+                }
                 loadDisplay();
             }
         }
