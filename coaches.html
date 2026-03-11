@@ -397,8 +397,8 @@
                 if (window.speechSynthesis && cfg.announcementsEnabled) {
                     const primer = new SpeechSynthesisUtterance('');
                     primer.volume = 0;
+                    primer.onstart = function() { hidePrimeBanner(); };
                     window.speechSynthesis.speak(primer);
-                    hidePrimeBanner();
                 }
                 loadDisplay();
             }
