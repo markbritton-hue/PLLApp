@@ -216,6 +216,10 @@
 
     <div id="announcementToast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(236,72,153,0.95); color:white; padding:12px 22px; border-radius:30px; font-size:0.95rem; font-weight:700; box-shadow:0 6px 20px rgba(0,0,0,0.5); z-index:9999; opacity:0; transition:opacity 0.3s, transform 0.3s; pointer-events:none; white-space:nowrap; max-width:90vw; text-align:center;"></div>
 
+    <div id="voicePrimeBanner" onclick="tapToEnableVoice()" style="display:none; background:rgba(236,72,153,0.15); border:1px solid rgba(236,72,153,0.6); border-radius:10px; color:white; text-align:center; padding:12px 16px; margin-bottom:14px; cursor:pointer; font-weight:600;">
+        <i class="fas fa-volume-up me-2" style="color:#ec4899;"></i>Tap here to enable voice announcements
+    </div>
+
     <div style="text-align: center; margin-bottom: 16px;">
         <h1 style="font-size: 1.3rem; font-weight: 900; color: white; margin: 0;">
             <i class="fas fa-clipboard-user" style="color: #ec4899; margin-right: 8px;"></i>Coaches View
@@ -243,15 +247,29 @@
         let coachStateRecords = {};
         let lastAnnouncedStatus = null;
 
+        function hidePrimeBanner() {
+            const b = document.getElementById('voicePrimeBanner');
+            if (b) b.style.display = 'none';
+        }
+
+        function tapToEnableVoice() {
+            hidePrimeBanner();
+            if (window.speechSynthesis) {
+                const primer = new SpeechSynthesisUtterance('');
+                primer.volume = 0;
+                window.speechSynthesis.speak(primer);
+            }
+        }
+
         function doSpeak(text, rollbackStatus) {
             if (!window.speechSynthesis) return;
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
             if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0;
+            u.onstart = function() { hidePrimeBanner(); };
             u.onerror = function(e) {
                 console.log('[Speech] blocked/error:', e.error, '— will retry next refresh');
-                // Roll back so next refresh retries (browser needs a user gesture first)
                 lastAnnouncedStatus = rollbackStatus !== undefined ? rollbackStatus : null;
             };
             window.speechSynthesis.speak(u);
@@ -375,18 +393,23 @@
                 btn.style.background = 'rgba(16, 185, 129, 0.8)';
                 localStorage.setItem('coachesAutoRefresh', 'on');
                 lastAnnouncedStatus = null; // Reset so current status re-announces
-                // Prime speech synthesis now while we're inside a user gesture,
-                // so timer-based announcements will work without needing another click
+                // Prime speech synthesis inside user gesture so timer-based announcements work
                 if (window.speechSynthesis && cfg.announcementsEnabled) {
                     const primer = new SpeechSynthesisUtterance('');
                     primer.volume = 0;
                     window.speechSynthesis.speak(primer);
+                    hidePrimeBanner();
                 }
                 loadDisplay();
             }
         }
 
         window.addEventListener('DOMContentLoaded', function() {
+            // Show voice primer banner if announcements are enabled
+            const cfg = JSON.parse(localStorage.getItem('trplConfig') || '{}');
+            if (cfg.announcementsEnabled) {
+                document.getElementById('voicePrimeBanner').style.display = 'block';
+            }
             // Restore auto-refresh state (toggleAutoRefresh calls loadDisplay internally)
             if (localStorage.getItem('coachesAutoRefresh') === 'on') {
                 toggleAutoRefresh();
