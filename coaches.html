@@ -317,7 +317,7 @@
                 currentStatus = `position-${athlete.platformPosition}`;
             }
 
-            console.log('[Announce] athlete found, status:', currentStatus, '| last:', lastAnnouncedStatus, '| unlocked:', speechUnlocked);
+            console.log('[Announce] athlete found, status:', currentStatus, '| last:', lastAnnouncedStatus);
             if (currentStatus === lastAnnouncedStatus) return;
 
             let text = null;
