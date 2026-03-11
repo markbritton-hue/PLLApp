@@ -243,18 +243,23 @@
         let coachStateRecords = {};
         let lastAnnouncedStatus = null;
 
-        function doSpeak(text) {
+        function doSpeak(text, rollbackStatus) {
             if (!window.speechSynthesis) return;
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
             if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0;
+            u.onerror = function(e) {
+                console.log('[Speech] blocked/error:', e.error, '— will retry next refresh');
+                // Roll back so next refresh retries (browser needs a user gesture first)
+                lastAnnouncedStatus = rollbackStatus !== undefined ? rollbackStatus : null;
+            };
             window.speechSynthesis.speak(u);
         }
 
-        function speakAnnouncement(text) {
+        function speakAnnouncement(text, rollbackStatus) {
             showAnnouncementToast(text);
-            doSpeak(text);
+            doSpeak(text, rollbackStatus);
         }
 
         function showAnnouncementToast(text) {
@@ -341,8 +346,9 @@
                 }
             }
 
+            const prevStatus = lastAnnouncedStatus;
             lastAnnouncedStatus = currentStatus;
-            if (text) speakAnnouncement(text);
+            if (text) speakAnnouncement(text, prevStatus);
         }
 
         function testVoice() {

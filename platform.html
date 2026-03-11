@@ -473,11 +473,16 @@
         let platformStateRecords = null;
         let platformLastAnnouncedStatus = null;
 
-        function speakAnnouncement(text) {
+        function speakAnnouncement(text, rollbackStatus) {
             if (!window.speechSynthesis) return;
+            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0;
+            u.onerror = function(e) {
+                console.log('[Speech] blocked/error:', e.error, '— will retry next refresh');
+                platformLastAnnouncedStatus = rollbackStatus !== undefined ? rollbackStatus : null;
+            };
             window.speechSynthesis.speak(u);
         }
 
@@ -1127,8 +1132,9 @@
                             else if (justFinishedResult === 'good') text = `${displayName} is done. Good lift!`;
                             else if (justFinishedResult === 'failed') text = `${displayName} is done. Failed attempt.`;
                             else text = `${displayName} has finished their lift!`;
+                            const prevStatusDone = platformLastAnnouncedStatus;
                             platformLastAnnouncedStatus = 'done';
-                            speakAnnouncement(text);
+                            speakAnnouncement(text, prevStatusDone);
                         }
                     }
                 }
@@ -1144,12 +1150,13 @@
                 const idx = pending.findIndex(a => a.name.toLowerCase().trim() === announcementName);
                 let newStatus = idx === 0 ? 'lifting' : idx === 1 ? 'on-deck' : null;
                 if (newStatus && newStatus !== platformLastAnnouncedStatus) {
+                    const prevStatusLift = platformLastAnnouncedStatus;
                     platformLastAnnouncedStatus = newStatus;
                     const displayName = pending[idx].name;
                     const text = newStatus === 'lifting'
                         ? `${displayName} is now lifting!`
                         : `${displayName} is on deck! Get ready!`;
-                    speakAnnouncement(text);
+                    speakAnnouncement(text, prevStatusLift);
                 }
             }
 
