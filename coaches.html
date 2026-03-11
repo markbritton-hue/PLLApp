@@ -242,29 +242,9 @@
         let coachGender = 'M';
         let coachStateRecords = {};
         let lastAnnouncedStatus = null;
-        let speechUnlocked = false;
-        let pendingAnnouncementText = null;
-        let pendingAnnouncementStatus = null;
-
-        // Unlock speech on first user gesture and replay any pending announcement
-        document.addEventListener('click', function unlockOnce() {
-            if (!speechUnlocked && window.speechSynthesis) {
-                speechUnlocked = true;
-                const pending = pendingAnnouncementText;
-                const pendingStatus = pendingAnnouncementStatus;
-                pendingAnnouncementText = null;
-                pendingAnnouncementStatus = null;
-                if (pending) {
-                    lastAnnouncedStatus = pendingStatus; // mark as announced now
-                    doSpeak(pending); // must be synchronous inside event handler for iOS
-                }
-            }
-            document.removeEventListener('click', unlockOnce);
-        });
 
         function doSpeak(text) {
             if (!window.speechSynthesis) return;
-            // Resume if paused (iOS bug after screen lock / background)
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
             if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
@@ -274,10 +254,6 @@
 
         function speakAnnouncement(text) {
             showAnnouncementToast(text);
-            if (!speechUnlocked) {
-                pendingAnnouncementText = text; // replay on first tap
-                return;
-            }
             doSpeak(text);
         }
 
@@ -365,23 +341,8 @@
                 }
             }
 
-            if (!text) {
-                // No speech needed for this status — just track it silently
-                lastAnnouncedStatus = currentStatus;
-                return;
-            }
-
-            if (!speechUnlocked) {
-                // Save pending text but do NOT update lastAnnouncedStatus so we retry next refresh
-                showAnnouncementToast(text);
-                pendingAnnouncementText = text;
-                pendingAnnouncementStatus = currentStatus;
-                return;
-            }
-
             lastAnnouncedStatus = currentStatus;
-            showAnnouncementToast(text);
-            doSpeak(text);
+            if (text) speakAnnouncement(text);
         }
 
         function testVoice() {
